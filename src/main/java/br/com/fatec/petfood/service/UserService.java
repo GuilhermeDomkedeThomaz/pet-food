@@ -1,12 +1,12 @@
 package br.com.fatec.petfood.service;
 
-import br.com.fatec.petfood.model.dto.UserDTO;
+import org.springframework.http.ResponseEntity;
 
 public interface UserService {
 
-    void createUser(String name, String email, String password) throws Exception;
+    ResponseEntity<?> createUser(String name, String email, String password);
 
-    UserDTO getUser(String name) throws Exception;
+    ResponseEntity<?> getUser(String name) throws Exception;
 
-    Boolean login(String email, String password) throws Exception;
+    ResponseEntity<?> login(String email, String password);
 }

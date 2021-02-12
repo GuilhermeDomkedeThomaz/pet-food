@@ -6,6 +6,8 @@ import br.com.fatec.petfood.repository.mongo.UserRepository;
 import br.com.fatec.petfood.service.UserService;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.util.Objects;
 import java.util.Optional;
@@ -21,23 +23,36 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void createUser(String name, String email, String password) throws Exception {
-        byte[] passwordEncrypted = this.validateUser(name, email, password);
+    public ResponseEntity<?> createUser(String name, String email, String password) {
+        byte[] passwordEncrypted;
+
+        try {
+            this.validateUser(name, email);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            passwordEncrypted = Base64.encodeBase64(password.getBytes());
+        } catch (Exception e) {
+            return new ResponseEntity<>("Erro ao gerar senha criptografada: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
         if (Objects.nonNull(passwordEncrypted)) {
             UserEntity user = new UserEntity(name, email, passwordEncrypted);
 
             try {
                 userRepository.save(user);
+                return new ResponseEntity<>("Usuário cadastrado com sucesso.", HttpStatus.OK);
             } catch (Exception e) {
-                throw new Exception("Erro ao gravar usuário na base de dados: " + e);
+                return new ResponseEntity<>("Erro ao gravar usuário na base de dados: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else
-            throw new Exception("Erro ao gerar senha criptografada.");
+            return new ResponseEntity<>("Erro ao gerar senha criptografada.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override
-    public UserDTO getUser(String name) throws Exception {
+    public ResponseEntity<?> getUser(String name) {
         Optional<UserEntity> user = userRepository.findByName(name);
 
         if (user.isPresent()) {
@@ -50,48 +65,38 @@ public class UserServiceImpl implements UserService {
             try {
                 userDTO.setPassword(new String(Base64.decodeBase64(userEntity.getPassword())));
             } catch (Exception e) {
-                throw new Exception("Erro ao descriptografar senha do usuário.");
+                return new ResponseEntity<>("Erro ao descriptografar senha do usuário: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            return userDTO;
+            return new ResponseEntity<>(userDTO, HttpStatus.CREATED);
         } else {
-            throw new Exception("Usuário não encontrado.");
+            return new ResponseEntity<>("Usuário não encontrado.", HttpStatus.BAD_REQUEST);
         }
     }
 
     @Override
-    public Boolean login(String email, String password) throws Exception {
+    public ResponseEntity<?> login(String email, String password) {
         Optional<UserEntity> user = userRepository.findByEmail(email);
 
         if (user.isPresent()) {
             try {
-                if (password.equals(new String(Base64.decodeBase64(user.get().getPassword()))))
-                    return Boolean.TRUE;
+                if (!password.equals(new String(Base64.decodeBase64(user.get().getPassword()))))
+                    return new ResponseEntity<>("Login inválido.", HttpStatus.BAD_REQUEST);
                 else
-                    return Boolean.FALSE;
+                    return new ResponseEntity<>("Login realizado com sucesso.", HttpStatus.OK);
             } catch (Exception e) {
-                return false;
+                return new ResponseEntity<>("Login inválido: " + e.getMessage(), HttpStatus.BAD_REQUEST);
             }
         } else {
-            throw new Exception("Usuário não encontrado.");
+            return new ResponseEntity<>("Usuário não encontrado.", HttpStatus.BAD_REQUEST);
         }
     }
 
-    private byte[] validateUser(String name, String email, String password) throws Exception {
-        byte[] passwordEncrypted;
-
+    private void validateUser(String name, String email) throws Exception {
         if (userRepository.findByName(name).isPresent())
             throw new Exception("Usuário já existe com o nome passado.");
 
         if (userRepository.findByEmail(email).isPresent())
             throw new Exception("Usuário já existe com o email passado.");
-
-        try {
-            passwordEncrypted = Base64.encodeBase64(password.getBytes());
-        } catch (Exception e) {
-            throw new Exception("Erro ao gerar senha criptografada: " + e);
-        }
-
-        return passwordEncrypted;
     }
 }
