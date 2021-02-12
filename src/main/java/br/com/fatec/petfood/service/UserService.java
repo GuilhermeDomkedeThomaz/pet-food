@@ -8,5 +8,5 @@ public interface UserService {
 
     UserDTO getUser(String name) throws Exception;
 
-    /*Boolean login(String email, String password);*/
+    Boolean login(String email, String password) throws Exception;
 }

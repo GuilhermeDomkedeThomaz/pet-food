@@ -40,4 +40,14 @@ public class UserResource {
     public UserDTO findUser(@RequestParam(value = "name") String name) throws Exception {
         return this.userService.getUser(name);
     }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Boolean login(
+            @RequestParam(value = "email") String email,
+            @RequestParam(value = "password") String password
+    ) throws Exception {
+        return this.userService.login(email, password);
+    }
 }
