@@ -1,37 +1,30 @@
 package br.com.fatec.petfood.resource;
 
+import br.com.fatec.petfood.model.dto.UserDTO;
+import br.com.fatec.petfood.model.enums.CityZone;
+import br.com.fatec.petfood.model.enums.Pets;
 import br.com.fatec.petfood.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(value = "/user")
 public class UserResource {
 
     private final UserService userService;
 
-    @Autowired
-    public UserResource(UserService userService) {
-        this.userService = userService;
-    }
-
     @ResponseStatus(HttpStatus.OK)
-    @PostMapping(value = "/create")
+    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createUser(
-            @RequestParam(value = "name") String name,
-            @RequestParam(value = "email") String email,
-            @RequestParam(value = "password") String password
+            @RequestBody UserDTO userDTO,
+            @RequestParam(value = "pets") Pets pets,
+            @RequestParam(value = "cityZone") CityZone cityZone
     ) {
-        return this.userService.createUser(name, email, password);
+        return this.userService.createUser(userDTO, pets, cityZone);
     }
 
     @ResponseBody

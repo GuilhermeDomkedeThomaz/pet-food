@@ -1,11 +1,16 @@
 package br.com.fatec.petfood.service.impl;
 
 import br.com.fatec.petfood.model.dto.UserDTO;
+import br.com.fatec.petfood.model.dto.UserReturnDTO;
 import br.com.fatec.petfood.model.entity.mongo.UserEntity;
+import br.com.fatec.petfood.model.enums.CityZone;
+import br.com.fatec.petfood.model.enums.Pets;
+import br.com.fatec.petfood.model.mapper.UserMapper;
 import br.com.fatec.petfood.repository.mongo.UserRepository;
 import br.com.fatec.petfood.service.UserService;
+import br.com.fatec.petfood.utils.ValidateUtils;
+import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.codec.binary.Base64;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,39 +18,41 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private final UserMapper userMapper;
+    private final ValidateUtils validateUtils;
     private final UserRepository userRepository;
 
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
     @Override
-    public ResponseEntity<?> createUser(String name, String email, String password) {
+    public ResponseEntity<?> createUser(UserDTO userDTO, Pets pets, CityZone cityZone) {
         byte[] passwordEncrypted;
 
         try {
-            this.validateUser(name, email);
+            this.validateUser(userDTO);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
         try {
-            passwordEncrypted = Base64.encodeBase64(password.getBytes());
+            passwordEncrypted = Base64.encodeBase64(userDTO.getPassword().getBytes());
         } catch (Exception e) {
             return new ResponseEntity<>("Erro ao gerar senha criptografada: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         if (Objects.nonNull(passwordEncrypted)) {
-            UserEntity user = new UserEntity(name, email, passwordEncrypted);
-
             try {
-                userRepository.save(user);
-                return new ResponseEntity<>("Usuário cadastrado com sucesso.", HttpStatus.OK);
+                UserEntity user = userMapper.toEntity(userDTO, passwordEncrypted, pets, cityZone);
+
+                try {
+                    userRepository.save(user);
+                    return new ResponseEntity<>("Usuário cadastrado com sucesso.", HttpStatus.CREATED);
+                } catch (Exception e) {
+                    return new ResponseEntity<>("Erro ao gravar usuário na base de dados: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }
             } catch (Exception e) {
-                return new ResponseEntity<>("Erro ao gravar usuário na base de dados: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>("Erro no mapeamento para criação do usuário: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else
             return new ResponseEntity<>("Erro ao gerar senha criptografada.", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -57,18 +64,9 @@ public class UserServiceImpl implements UserService {
 
         if (user.isPresent()) {
             UserEntity userEntity = user.get();
-            UserDTO userDTO = new UserDTO();
+            UserReturnDTO userReturnDTO = userMapper.toReturnDTO(userEntity);
 
-            userDTO.setName(userEntity.getName());
-            userDTO.setEmail(userEntity.getEmail());
-
-            try {
-                userDTO.setPassword(new String(Base64.decodeBase64(userEntity.getPassword())));
-            } catch (Exception e) {
-                return new ResponseEntity<>("Erro ao descriptografar senha do usuário: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-
-            return new ResponseEntity<>(userDTO, HttpStatus.CREATED);
+            return new ResponseEntity<>(userReturnDTO, HttpStatus.OK);
         } else {
             return new ResponseEntity<>("Usuário não encontrado.", HttpStatus.BAD_REQUEST);
         }
@@ -92,11 +90,38 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void validateUser(String name, String email) throws Exception {
-        if (userRepository.findByName(name).isPresent())
+    private void validateUser(UserDTO userDTO) throws Exception {
+        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getName()))
+            throw new Exception("Nome passado inválido(vazio ou nulo).");
+
+        if (userRepository.findByName(userDTO.getName()).isPresent())
             throw new Exception("Usuário já existe com o nome passado.");
 
-        if (userRepository.findByEmail(email).isPresent())
+        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getEmail()))
+            throw new Exception("Email passado inválido(vazio ou nulo).");
+
+        if (userRepository.findByEmail(userDTO.getEmail()).isPresent())
             throw new Exception("Usuário já existe com o email passado.");
+
+        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getPassword()))
+            throw new Exception("Senha passada inválida(vazia ou nula).");
+
+        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getDocument()))
+            throw new Exception("CPF passado inválido(vazio ou nulo).");
+
+        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getCellPhone()))
+            throw new Exception("Celular passado inválido(vazio ou nulo).");
+
+        if (Objects.isNull(userDTO.getBirthdayDate()))
+            throw new Exception("Data de Nascimento passada inválida(vazia ou nula).");
+
+        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getAddress()))
+            throw new Exception("Endereço passado inválido(vazio ou nulo).");
+
+        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getCep()))
+            throw new Exception("Cep passado inválido(vazio ou nulo).");
+
+        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getCity()))
+            throw new Exception("Cidade passada inválida(vazia ou nula).");
     }
 }

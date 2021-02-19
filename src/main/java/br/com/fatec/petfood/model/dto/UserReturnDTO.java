@@ -1,19 +1,20 @@
 package br.com.fatec.petfood.model.dto;
 
+import br.com.fatec.petfood.model.enums.CityZone;
+import br.com.fatec.petfood.model.enums.Pets;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
 import java.util.Date;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class UserDTO extends UserLoginDTO {
+public class UserReturnDTO {
 
     private String name;
+
+    private String email;
 
     private String document;
 
@@ -26,4 +27,10 @@ public class UserDTO extends UserLoginDTO {
     private String cep;
 
     private String city;
+
+    private CityZone cityZone;
+
+    private Pets pets;
+
+    private String defaultDateTime;
 }
