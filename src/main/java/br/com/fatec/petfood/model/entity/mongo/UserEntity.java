@@ -46,6 +46,9 @@ public class UserEntity implements Serializable {
     private String address;
 
     @NonNull
+    private Integer numberAddress;
+
+    @NonNull
     private String cep;
 
     @NonNull

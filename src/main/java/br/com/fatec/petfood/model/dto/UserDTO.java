@@ -23,6 +23,8 @@ public class UserDTO extends UserLoginDTO {
 
     private String address;
 
+    private Integer numberAddress;
+
     private String cep;
 
     private String city;

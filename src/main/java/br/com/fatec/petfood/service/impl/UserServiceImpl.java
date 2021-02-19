@@ -118,6 +118,9 @@ public class UserServiceImpl implements UserService {
         if (!validateUtils.isNotNullAndNotEmpty(userDTO.getAddress()))
             throw new Exception("Endereço passado inválido(vazio ou nulo).");
 
+        if (Objects.isNull(userDTO.getNumberAddress()))
+            throw new Exception("Número do endereço passado inválido(vazio ou nulo).");
+
         if (!validateUtils.isNotNullAndNotEmpty(userDTO.getCep()))
             throw new Exception("Cep passado inválido(vazio ou nulo).");
 

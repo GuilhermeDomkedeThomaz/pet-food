@@ -30,6 +30,7 @@ public class UserMapperTest extends IntegrationTest {
         Assertions.assertEquals(userDTO.getCellPhone(), userEntity.getCellPhone());
         Assertions.assertEquals(userDTO.getBirthdayDate(), userEntity.getBirthdayDate());
         Assertions.assertEquals(userDTO.getAddress(), userEntity.getAddress());
+        Assertions.assertEquals(userDTO.getNumberAddress(), userEntity.getNumberAddress());
         Assertions.assertEquals(userDTO.getCep(), userEntity.getCep());
         Assertions.assertEquals(userDTO.getCity(), userEntity.getCity());
         Assertions.assertEquals(userDTO.getPassword(), new String(Base64.decodeBase64(userEntity.getPassword())));
@@ -48,6 +49,7 @@ public class UserMapperTest extends IntegrationTest {
         Assertions.assertEquals(userEntity.getCellPhone(), userReturnDTO.getCellPhone());
         Assertions.assertEquals(userEntity.getBirthdayDate(), userReturnDTO.getBirthdayDate());
         Assertions.assertEquals(userEntity.getAddress(), userReturnDTO.getAddress());
+        Assertions.assertEquals(userEntity.getNumberAddress(), userReturnDTO.getNumberAddress());
         Assertions.assertEquals(userEntity.getCep(), userReturnDTO.getCep());
         Assertions.assertEquals(userEntity.getCity(), userReturnDTO.getCity());
         Assertions.assertEquals(userEntity.getPets(), userReturnDTO.getPets());

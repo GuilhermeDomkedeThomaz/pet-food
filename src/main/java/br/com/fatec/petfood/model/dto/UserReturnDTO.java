@@ -24,6 +24,8 @@ public class UserReturnDTO {
 
     private String address;
 
+    private Integer numberAddress;
+
     private String cep;
 
     private String city;
