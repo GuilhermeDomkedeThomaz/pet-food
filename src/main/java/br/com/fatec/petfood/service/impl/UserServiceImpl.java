@@ -106,25 +106,25 @@ public class UserServiceImpl implements UserService {
         if (!validateUtils.isNotNullAndNotEmpty(userDTO.getPassword()))
             throw new Exception("Senha passada inválida(vazia ou nula).");
 
-        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getDocument()))
+        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getRegistrationInfos().getDocument()))
             throw new Exception("CPF passado inválido(vazio ou nulo).");
 
-        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getCellPhone()))
+        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getRegistrationInfos().getCellPhone()))
             throw new Exception("Celular passado inválido(vazio ou nulo).");
 
         if (Objects.isNull(userDTO.getBirthdayDate()))
             throw new Exception("Data de Nascimento passada inválida(vazia ou nula).");
 
-        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getAddress()))
+        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getRegistrationInfos().getAddress()))
             throw new Exception("Endereço passado inválido(vazio ou nulo).");
 
-        if (Objects.isNull(userDTO.getNumberAddress()))
+        if (Objects.isNull(userDTO.getRegistrationInfos().getNumberAddress()))
             throw new Exception("Número do endereço passado inválido(vazio ou nulo).");
 
-        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getCep()))
+        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getRegistrationInfos().getCep()))
             throw new Exception("Cep passado inválido(vazio ou nulo).");
 
-        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getCity()))
+        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getRegistrationInfos().getCity()))
             throw new Exception("Cidade passada inválida(vazia ou nula).");
     }
 }

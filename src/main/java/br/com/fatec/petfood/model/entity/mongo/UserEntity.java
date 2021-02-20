@@ -2,6 +2,7 @@ package br.com.fatec.petfood.model.entity.mongo;
 
 import br.com.fatec.petfood.model.enums.CityZone;
 import br.com.fatec.petfood.model.enums.Pets;
+import br.com.fatec.petfood.model.generic.RegistrationInfos;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -34,25 +35,10 @@ public class UserEntity implements Serializable {
     private byte[] password;
 
     @NonNull
-    private String document;
-
-    @NonNull
-    private String cellPhone;
+    private RegistrationInfos registrationInfos;
 
     @NonNull
     private Date birthdayDate;
-
-    @NonNull
-    private String address;
-
-    @NonNull
-    private Integer numberAddress;
-
-    @NonNull
-    private String cep;
-
-    @NonNull
-    private String city;
 
     @NonNull
     private CityZone cityZone;

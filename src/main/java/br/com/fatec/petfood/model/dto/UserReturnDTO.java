@@ -2,6 +2,7 @@ package br.com.fatec.petfood.model.dto;
 
 import br.com.fatec.petfood.model.enums.CityZone;
 import br.com.fatec.petfood.model.enums.Pets;
+import br.com.fatec.petfood.model.generic.RegistrationInfos;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,19 +17,9 @@ public class UserReturnDTO {
 
     private String email;
 
-    private String document;
-
-    private String cellPhone;
+    private RegistrationInfos registrationInfos;
 
     private Date birthdayDate;
-
-    private String address;
-
-    private Integer numberAddress;
-
-    private String cep;
-
-    private String city;
 
     private CityZone cityZone;
 

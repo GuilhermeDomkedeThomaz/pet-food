@@ -26,13 +26,14 @@ public class UserMapperTest extends IntegrationTest {
         UserEntity userEntity = userMapper.toEntity(userDTO, passwordEncrypted, Pets.CAT, CityZone.EAST);
 
         Assertions.assertEquals(userDTO.getName(), userEntity.getName());
-        Assertions.assertEquals(userDTO.getDocument(), userEntity.getDocument());
-        Assertions.assertEquals(userDTO.getCellPhone(), userEntity.getCellPhone());
+        Assertions.assertEquals(userDTO.getEmail(), userEntity.getEmail());
+        Assertions.assertEquals(userDTO.getRegistrationInfos().getDocument(), userEntity.getRegistrationInfos().getDocument());
+        Assertions.assertEquals(userDTO.getRegistrationInfos().getCellPhone(), userEntity.getRegistrationInfos().getCellPhone());
         Assertions.assertEquals(userDTO.getBirthdayDate(), userEntity.getBirthdayDate());
-        Assertions.assertEquals(userDTO.getAddress(), userEntity.getAddress());
-        Assertions.assertEquals(userDTO.getNumberAddress(), userEntity.getNumberAddress());
-        Assertions.assertEquals(userDTO.getCep(), userEntity.getCep());
-        Assertions.assertEquals(userDTO.getCity(), userEntity.getCity());
+        Assertions.assertEquals(userDTO.getRegistrationInfos().getAddress(), userEntity.getRegistrationInfos().getAddress());
+        Assertions.assertEquals(userDTO.getRegistrationInfos().getNumberAddress(), userEntity.getRegistrationInfos().getNumberAddress());
+        Assertions.assertEquals(userDTO.getRegistrationInfos().getCep(), userEntity.getRegistrationInfos().getCep());
+        Assertions.assertEquals(userDTO.getRegistrationInfos().getCity(), userEntity.getRegistrationInfos().getCity());
         Assertions.assertEquals(userDTO.getPassword(), new String(Base64.decodeBase64(userEntity.getPassword())));
         Assertions.assertEquals(Pets.CAT, userEntity.getPets());
         Assertions.assertEquals(CityZone.EAST, userEntity.getCityZone());
@@ -45,13 +46,14 @@ public class UserMapperTest extends IntegrationTest {
         UserReturnDTO userReturnDTO = userMapper.toReturnDTO(userEntity);
 
         Assertions.assertEquals(userEntity.getName(), userReturnDTO.getName());
-        Assertions.assertEquals(userEntity.getDocument(), userReturnDTO.getDocument());
-        Assertions.assertEquals(userEntity.getCellPhone(), userReturnDTO.getCellPhone());
+        Assertions.assertEquals(userEntity.getEmail(), userReturnDTO.getEmail());
+        Assertions.assertEquals(userEntity.getRegistrationInfos().getDocument(), userReturnDTO.getRegistrationInfos().getDocument());
+        Assertions.assertEquals(userEntity.getRegistrationInfos().getCellPhone(), userReturnDTO.getRegistrationInfos().getCellPhone());
         Assertions.assertEquals(userEntity.getBirthdayDate(), userReturnDTO.getBirthdayDate());
-        Assertions.assertEquals(userEntity.getAddress(), userReturnDTO.getAddress());
-        Assertions.assertEquals(userEntity.getNumberAddress(), userReturnDTO.getNumberAddress());
-        Assertions.assertEquals(userEntity.getCep(), userReturnDTO.getCep());
-        Assertions.assertEquals(userEntity.getCity(), userReturnDTO.getCity());
+        Assertions.assertEquals(userEntity.getRegistrationInfos().getAddress(), userReturnDTO.getRegistrationInfos().getAddress());
+        Assertions.assertEquals(userEntity.getRegistrationInfos().getNumberAddress(), userReturnDTO.getRegistrationInfos().getNumberAddress());
+        Assertions.assertEquals(userEntity.getRegistrationInfos().getCep(), userReturnDTO.getRegistrationInfos().getCep());
+        Assertions.assertEquals(userEntity.getRegistrationInfos().getCity(), userReturnDTO.getRegistrationInfos().getCity());
         Assertions.assertEquals(userEntity.getPets(), userReturnDTO.getPets());
         Assertions.assertEquals(userEntity.getCityZone(), userReturnDTO.getCityZone());
     }
