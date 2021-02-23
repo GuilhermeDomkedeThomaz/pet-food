@@ -1,37 +1,42 @@
 package br.com.fatec.petfood.resource;
 
-import br.com.fatec.petfood.model.dto.UserDTO;
+import br.com.fatec.petfood.model.dto.SellerDTO;
 import br.com.fatec.petfood.model.enums.CityZone;
-import br.com.fatec.petfood.model.enums.Pets;
-import br.com.fatec.petfood.service.UserService;
+import br.com.fatec.petfood.service.SellerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/user")
-public class UserResource {
+@RequestMapping(value = "/seller")
+public class SellerResource {
 
-    private final UserService userService;
+    private final SellerService sellerService;
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> createUser(
-            @RequestBody UserDTO userDTO,
-            @RequestParam(value = "pets") Pets pets,
+    public ResponseEntity<?> createSeller(
+            @RequestBody SellerDTO sellerDTO,
             @RequestParam(value = "cityZone") CityZone cityZone
     ) {
-        return userService.createUser(userDTO, pets, cityZone);
+        return sellerService.createSeller(sellerDTO, cityZone);
     }
 
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/find", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> findUser(@RequestParam(value = "name") String name) {
-        return userService.getUser(name);
+        return sellerService.getSeller(name);
     }
 
     @ResponseBody
@@ -41,6 +46,6 @@ public class UserResource {
             @RequestParam(value = "email") String email,
             @RequestParam(value = "password") String password
     ) {
-        return userService.login(email, password);
+        return sellerService.login(email, password);
     }
 }

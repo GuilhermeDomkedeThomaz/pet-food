@@ -6,17 +6,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class UserDTO extends LoginDTO {
+public class SellerDTO extends LoginDTO {
 
     private String name;
 
     private RegistrationInfos registrationInfos;
-
-    private Date birthdayDate;
 }

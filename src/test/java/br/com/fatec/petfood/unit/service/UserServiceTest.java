@@ -6,8 +6,8 @@ import br.com.fatec.petfood.model.entity.mongo.UserEntity;
 import br.com.fatec.petfood.model.mapper.UserMapper;
 import br.com.fatec.petfood.repository.mongo.UserRepository;
 import br.com.fatec.petfood.service.impl.UserServiceImpl;
+import br.com.fatec.petfood.service.impl.ValidationServiceImpl;
 import br.com.fatec.petfood.unit.UnitTest;
-import br.com.fatec.petfood.utils.ValidateUtils;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.junit.jupiter.api.Assertions;
@@ -29,7 +29,7 @@ public class UserServiceTest extends UnitTest {
     private UserMapper userMapper;
 
     @Mock
-    private ValidateUtils validateUtils;
+    private ValidationServiceImpl validationService;
 
     @Mock
     private UserRepository userRepository;
@@ -47,7 +47,6 @@ public class UserServiceTest extends UnitTest {
     public void shouldCreateUserWithSuccess() {
         byte[] passwordEncrypted = Base64.encodeBase64(userDTO.getPassword().getBytes());
 
-        Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.TRUE);
         Mockito.when(userMapper.toEntity(eq(userDTO), eq(passwordEncrypted), eq(userEntity.getPets()), eq(userEntity.getCityZone())))
                 .thenReturn(userEntity);
         Mockito.when(userRepository.save(eq(userEntity))).thenReturn(userEntity);
@@ -59,8 +58,8 @@ public class UserServiceTest extends UnitTest {
     }
 
     @Test
-    public void shouldResponseBadRequestWhenCreateUser() {
-        Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.FALSE);
+    public void shouldResponseBadRequestWhenCreateUser() throws Exception {
+        Mockito.doThrow(new Exception("Nome passado inválido(vazio ou nulo).")).when(validationService).validateUserDTO(userDTO);
 
         ResponseEntity<?> response = userServiceImpl.createUser(userDTO, userEntity.getPets(), userEntity.getCityZone());
 
@@ -72,7 +71,6 @@ public class UserServiceTest extends UnitTest {
     public void shouldResponseInternalServerErrorWithMapperWhenCreateUser() {
         byte[] passwordEncrypted = Base64.encodeBase64(userDTO.getPassword().getBytes());
 
-        Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.TRUE);
         Mockito.when(userMapper.toEntity(eq(userDTO), eq(passwordEncrypted), eq(userEntity.getPets()), eq(userEntity.getCityZone())))
                 .thenThrow(new NullPointerException());
 
@@ -86,7 +84,6 @@ public class UserServiceTest extends UnitTest {
     public void shouldResponseInternalServerErrorWithDataBaseWhenCreateUser() {
         byte[] passwordEncrypted = Base64.encodeBase64(userDTO.getPassword().getBytes());
 
-        Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.TRUE);
         Mockito.when(userMapper.toEntity(eq(userDTO), eq(passwordEncrypted), eq(userEntity.getPets()), eq(userEntity.getCityZone())))
                 .thenReturn(userEntity);
         Mockito.when(userRepository.save(eq(userEntity))).thenThrow(new DataIntegrityViolationException(""));
@@ -127,7 +124,7 @@ public class UserServiceTest extends UnitTest {
         ResponseEntity<?> response = userServiceImpl.login(userDTO.getEmail(), password);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
-        Assertions.assertEquals(response.getBody(), "Login realizado com sucesso.");
+        Assertions.assertEquals(response.getBody(), "Login de usuário realizado com sucesso.");
     }
 
     @Test
@@ -149,6 +146,6 @@ public class UserServiceTest extends UnitTest {
         ResponseEntity<?> response = userServiceImpl.login(userDTO.getEmail(), password);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-        Assertions.assertEquals(response.getBody(), "Login inválido.");
+        Assertions.assertEquals(response.getBody(), "Login de usuário inválido.");
     }
 }

@@ -9,7 +9,7 @@ public interface UserService {
 
     ResponseEntity<?> createUser(UserDTO userDTO, Pets pets, CityZone cityZone);
 
-    ResponseEntity<?> getUser(String name) throws Exception;
+    ResponseEntity<?> getUser(String name);
 
     ResponseEntity<?> login(String email, String password);
 }
