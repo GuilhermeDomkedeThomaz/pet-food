@@ -17,7 +17,6 @@ public class SellerServiceTest extends IntegrationTest {
     private SellerService sellerService;
 
     private final SellerDTO sellerDTO = EnhancedRandom.random(SellerDTO.class);
-
     private final SellerDTO sellerDTOWithoutName = EnhancedRandom.random(SellerDTO.class, "name");
 
     @Test

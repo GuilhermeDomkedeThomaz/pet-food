@@ -38,9 +38,7 @@ public class UserServiceTest extends UnitTest {
     private UserServiceImpl userServiceImpl;
 
     private final UserDTO userDTO = EnhancedRandom.random(UserDTO.class);
-
     private final UserEntity userEntity = EnhancedRandom.random(UserEntity.class);
-
     private final UserReturnDTO userReturnDTO = EnhancedRandom.random(UserReturnDTO.class);
 
     @Test

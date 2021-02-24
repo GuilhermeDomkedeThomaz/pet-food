@@ -67,9 +67,8 @@ public class SellerServiceImpl implements SellerService {
             SellerReturnDTO sellerReturnDTO = sellerMapper.toReturnDTO(sellerEntity);
 
             return new ResponseEntity<>(sellerReturnDTO, HttpStatus.OK);
-        } else {
+        } else
             return new ResponseEntity<>("Lojista não encontrado.", HttpStatus.BAD_REQUEST);
-        }
     }
 
     @Override
@@ -85,8 +84,7 @@ public class SellerServiceImpl implements SellerService {
             } catch (Exception e) {
                 return new ResponseEntity<>("Login de lojista inválido: " + e.getMessage(), HttpStatus.BAD_REQUEST);
             }
-        } else {
+        } else
             return new ResponseEntity<>("Lojista não encontrado.", HttpStatus.BAD_REQUEST);
-        }
     }
 }

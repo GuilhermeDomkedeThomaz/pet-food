@@ -23,7 +23,7 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.eq;
 
-public class SellerServiceTeste extends UnitTest {
+public class SellerServiceTest extends UnitTest {
 
     @Mock
     private SellerMapper sellerMapper;
@@ -38,9 +38,7 @@ public class SellerServiceTeste extends UnitTest {
     private SellerServiceImpl sellerServiceImpl;
 
     private final SellerDTO sellerDTO = EnhancedRandom.random(SellerDTO.class);
-
     private final SellerEntity sellerEntity = EnhancedRandom.random(SellerEntity.class);
-
     private final SellerReturnDTO sellerReturnDTO = EnhancedRandom.random(SellerReturnDTO.class);
 
     @Test

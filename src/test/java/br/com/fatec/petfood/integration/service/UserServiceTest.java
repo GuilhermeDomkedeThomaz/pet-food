@@ -18,7 +18,6 @@ public class UserServiceTest extends IntegrationTest {
     private UserService userService;
 
     private final UserDTO userDTO = EnhancedRandom.random(UserDTO.class);
-
     private final UserDTO userDTOWithoutName = EnhancedRandom.random(UserDTO.class, "name");
 
     @Test

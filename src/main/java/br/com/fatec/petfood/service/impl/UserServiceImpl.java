@@ -67,9 +67,8 @@ public class UserServiceImpl implements UserService {
             UserReturnDTO userReturnDTO = userMapper.toReturnDTO(userEntity);
 
             return new ResponseEntity<>(userReturnDTO, HttpStatus.OK);
-        } else {
+        } else
             return new ResponseEntity<>("Usuário não encontrado.", HttpStatus.BAD_REQUEST);
-        }
     }
 
     @Override
@@ -85,8 +84,7 @@ public class UserServiceImpl implements UserService {
             } catch (Exception e) {
                 return new ResponseEntity<>("Login de usuário inválido: " + e.getMessage(), HttpStatus.BAD_REQUEST);
             }
-        } else {
+        } else
             return new ResponseEntity<>("Usuário não encontrado.", HttpStatus.BAD_REQUEST);
-        }
     }
 }
