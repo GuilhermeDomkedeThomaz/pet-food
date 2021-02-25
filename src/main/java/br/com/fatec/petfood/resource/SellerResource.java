@@ -1,20 +1,26 @@
 package br.com.fatec.petfood.resource;
 
 import br.com.fatec.petfood.model.dto.SellerDTO;
+import br.com.fatec.petfood.model.dto.SellerUpdateDTO;
+import br.com.fatec.petfood.model.enums.Category;
 import br.com.fatec.petfood.model.enums.CityZone;
 import br.com.fatec.petfood.service.SellerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,15 +33,16 @@ public class SellerResource {
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createSeller(
             @RequestBody SellerDTO sellerDTO,
-            @RequestParam(value = "cityZone") CityZone cityZone
+            @RequestParam(value = "cityZone") CityZone cityZone,
+            @RequestParam(value = "categories") List<Category> categories
     ) {
-        return sellerService.createSeller(sellerDTO, cityZone);
+        return sellerService.createSeller(sellerDTO, cityZone, categories);
     }
 
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/find", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> findUser(@RequestParam(value = "name") String name) {
+    public ResponseEntity<?> findSeller(@RequestParam(value = "name") String name) {
         return sellerService.getSeller(name);
     }
 
@@ -47,5 +54,22 @@ public class SellerResource {
             @RequestParam(value = "password") String password
     ) {
         return sellerService.login(email, password);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping(value = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateSeller(
+            @RequestParam(value = "name") String name,
+            @RequestBody SellerUpdateDTO sellerUpdateDTO,
+            @RequestParam(value = "cityZone") CityZone cityZone,
+            @RequestParam(value = "categories") List<Category> categories
+    ) {
+        return sellerService.updateSeller(name, sellerUpdateDTO, cityZone, categories);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping(value = "/delete")
+    public ResponseEntity<?> deleteSeller(@RequestParam(value = "name") String name) {
+        return sellerService.deleteSeller(name);
     }
 }

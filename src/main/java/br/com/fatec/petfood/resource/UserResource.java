@@ -1,8 +1,8 @@
 package br.com.fatec.petfood.resource;
 
 import br.com.fatec.petfood.model.dto.UserDTO;
+import br.com.fatec.petfood.model.dto.UserUpdateDTO;
 import br.com.fatec.petfood.model.enums.CityZone;
-import br.com.fatec.petfood.model.enums.Pets;
 import br.com.fatec.petfood.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,10 +21,9 @@ public class UserResource {
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createUser(
             @RequestBody UserDTO userDTO,
-            @RequestParam(value = "pets") Pets pets,
             @RequestParam(value = "cityZone") CityZone cityZone
     ) {
-        return userService.createUser(userDTO, pets, cityZone);
+        return userService.createUser(userDTO, cityZone);
     }
 
     @ResponseBody
@@ -42,5 +41,21 @@ public class UserResource {
             @RequestParam(value = "password") String password
     ) {
         return userService.login(email, password);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping(value = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateUser(
+            @RequestParam(value = "name") String name,
+            @RequestBody UserUpdateDTO userUpdateDTO,
+            @RequestParam(value = "cityZone") CityZone cityZone
+    ) {
+        return userService.updateUser(name, userUpdateDTO, cityZone);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping(value = "/delete")
+    public ResponseEntity<?> deleteUser(@RequestParam(value = "name") String name) {
+        return userService.deleteUser(name);
     }
 }

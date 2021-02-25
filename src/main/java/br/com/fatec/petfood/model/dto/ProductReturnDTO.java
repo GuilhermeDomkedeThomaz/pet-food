@@ -1,12 +1,11 @@
 package br.com.fatec.petfood.model.dto;
 
-import br.com.fatec.petfood.model.enums.Pets;
+import br.com.fatec.petfood.model.enums.Category;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import org.bson.types.ObjectId;
 
 @Data
 @RequiredArgsConstructor
@@ -18,7 +17,7 @@ public class ProductReturnDTO extends ProductDTO {
     private String sellerId;
 
     @NonNull
-    private Pets pets;
+    private Category category;
 
     @NonNull
     private String defaultDateTime;

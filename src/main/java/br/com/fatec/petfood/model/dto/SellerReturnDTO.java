@@ -1,10 +1,13 @@
 package br.com.fatec.petfood.model.dto;
 
+import br.com.fatec.petfood.model.enums.Category;
 import br.com.fatec.petfood.model.enums.CityZone;
 import br.com.fatec.petfood.model.generic.RegistrationInfos;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -18,6 +21,8 @@ public class SellerReturnDTO {
     private RegistrationInfos registrationInfos;
 
     private CityZone cityZone;
+
+    private List<Category> categories;
 
     private String defaultDateTime;
 }

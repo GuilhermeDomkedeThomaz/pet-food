@@ -1,7 +1,6 @@
 package br.com.fatec.petfood.model.entity.mongo;
 
 import br.com.fatec.petfood.model.enums.CityZone;
-import br.com.fatec.petfood.model.enums.Pets;
 import br.com.fatec.petfood.model.generic.RegistrationInfos;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
@@ -42,9 +41,6 @@ public class UserEntity implements Serializable {
 
     @NonNull
     private CityZone cityZone;
-
-    @NonNull
-    private Pets pets;
 
     @CreatedDate
     @JsonIgnore

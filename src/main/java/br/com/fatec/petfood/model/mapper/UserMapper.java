@@ -2,9 +2,9 @@ package br.com.fatec.petfood.model.mapper;
 
 import br.com.fatec.petfood.model.dto.UserDTO;
 import br.com.fatec.petfood.model.dto.UserReturnDTO;
+import br.com.fatec.petfood.model.dto.UserUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.UserEntity;
 import br.com.fatec.petfood.model.enums.CityZone;
-import br.com.fatec.petfood.model.enums.Pets;
 import org.joda.time.DateTime;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,10 +22,21 @@ public interface UserMapper {
             @Mapping(target = "registrationInfos", source = "userDTO.registrationInfos"),
             @Mapping(target = "birthdayDate", source = "userDTO.birthdayDate"),
             @Mapping(target = "cityZone", source = "cityZone"),
-            @Mapping(target = "pets", source = "pets"),
             @Mapping(target = "defaultDateTime", expression = "java(org.joda.time.DateTime.now())")
     })
-    UserEntity toEntity(UserDTO userDTO, byte[] passwordEncrypted, Pets pets, CityZone cityZone);
+    UserEntity toEntity(UserDTO userDTO, byte[] passwordEncrypted, CityZone cityZone);
+
+    @Mappings({
+            @Mapping(target = "id", source = "userEntity.id"),
+            @Mapping(target = "name", source = "userEntity.name"),
+            @Mapping(target = "email", source = "userUpdateDTO.email"),
+            @Mapping(target = "password", source = "passwordEncrypted"),
+            @Mapping(target = "registrationInfos", source = "userUpdateDTO.registrationInfos"),
+            @Mapping(target = "birthdayDate", source = "userUpdateDTO.birthdayDate"),
+            @Mapping(target = "cityZone", source = "cityZone"),
+            @Mapping(target = "defaultDateTime", source = "userEntity.defaultDateTime")
+    })
+    UserEntity toEntity(UserEntity userEntity, UserUpdateDTO userUpdateDTO, byte[] passwordEncrypted, CityZone cityZone);
 
     @Mappings({
             @Mapping(target = "name", source = "user.name"),
@@ -33,7 +44,6 @@ public interface UserMapper {
             @Mapping(target = "registrationInfos", source = "user.registrationInfos"),
             @Mapping(target = "birthdayDate", source = "user.birthdayDate"),
             @Mapping(target = "cityZone", source = "user.cityZone"),
-            @Mapping(target = "pets", source = "user.pets"),
             @Mapping(target = "defaultDateTime", source = "user.defaultDateTime", qualifiedByName = "getDefaultDateTime")
     })
     UserReturnDTO toReturnDTO(UserEntity user);

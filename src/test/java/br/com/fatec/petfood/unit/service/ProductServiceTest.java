@@ -2,9 +2,10 @@ package br.com.fatec.petfood.unit.service;
 
 import br.com.fatec.petfood.model.dto.ProductDTO;
 import br.com.fatec.petfood.model.dto.ProductReturnDTO;
+import br.com.fatec.petfood.model.dto.ProductUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.ProductEntity;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
-import br.com.fatec.petfood.model.enums.Pets;
+import br.com.fatec.petfood.model.enums.Category;
 import br.com.fatec.petfood.model.mapper.ProductMapper;
 import br.com.fatec.petfood.repository.mongo.ProductRepository;
 import br.com.fatec.petfood.service.ValidationService;
@@ -42,15 +43,16 @@ public class ProductServiceTest extends UnitTest {
     private final SellerEntity sellerEntity = EnhancedRandom.random(SellerEntity.class);
     private final ProductEntity productEntity = EnhancedRandom.random(ProductEntity.class);
     private final ProductReturnDTO productReturnDTO = EnhancedRandom.random(ProductReturnDTO.class);
+    private final ProductUpdateDTO productUpdateDTO = EnhancedRandom.random(ProductUpdateDTO.class);
 
     @Test
     public void shouldCreateProductWithSuccess() throws Exception {
-        Mockito.when(validationService.validateProductDTO(eq(productDTO))).thenReturn(sellerEntity);
-        Mockito.when(productMapper.toEntity(eq(productDTO), eq(sellerEntity.getId()), eq(sellerEntity.getName()), eq(Pets.DOG)))
+        Mockito.when(validationService.validateProductDTO(eq(productDTO), eq(Category.FOOD))).thenReturn(sellerEntity);
+        Mockito.when(productMapper.toEntity(eq(productDTO), eq(sellerEntity.getId()), eq(sellerEntity.getName()), eq(Category.FOOD)))
                 .thenReturn(productEntity);
         Mockito.when(productRepository.save(eq(productEntity))).thenReturn(productEntity);
 
-        ResponseEntity<?> response = productServiceImpl.createProduct(productDTO, Pets.DOG);
+        ResponseEntity<?> response = productServiceImpl.createProduct(productDTO, Category.FOOD);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Produto cadastrado com sucesso.");
@@ -59,9 +61,9 @@ public class ProductServiceTest extends UnitTest {
     @Test
     public void shouldResponseBadRequestWhenCreateProduct() throws Exception {
         Mockito.doThrow(new Exception("Nome do lojista passado inválido(vazio ou nulo)."))
-                .when(validationService).validateProductDTO(productDTO);
+                .when(validationService).validateProductDTO(productDTO, Category.FOOD);
 
-        ResponseEntity<?> response = productServiceImpl.createProduct(productDTO, Pets.DOG);
+        ResponseEntity<?> response = productServiceImpl.createProduct(productDTO, Category.FOOD);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Nome do lojista passado inválido(vazio ou nulo).");
@@ -69,11 +71,11 @@ public class ProductServiceTest extends UnitTest {
 
     @Test
     public void shouldResponseInternalServerErrorWithMapperWhenCreateProduct() throws Exception {
-        Mockito.when(validationService.validateProductDTO(eq(productDTO))).thenReturn(sellerEntity);
-        Mockito.when(productMapper.toEntity(eq(productDTO), eq(sellerEntity.getId()), eq(sellerEntity.getName()), eq(Pets.DOG)))
+        Mockito.when(validationService.validateProductDTO(eq(productDTO), eq(Category.FOOD))).thenReturn(sellerEntity);
+        Mockito.when(productMapper.toEntity(eq(productDTO), eq(sellerEntity.getId()), eq(sellerEntity.getName()), eq(Category.FOOD)))
                 .thenThrow(new NullPointerException());
 
-        ResponseEntity<?> response = productServiceImpl.createProduct(productDTO, Pets.DOG);
+        ResponseEntity<?> response = productServiceImpl.createProduct(productDTO, Category.FOOD);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro no mapeamento para criação do produto: null");
@@ -81,12 +83,12 @@ public class ProductServiceTest extends UnitTest {
 
     @Test
     public void shouldResponseInternalServerErrorWithDataBaseWhenCreateProduct() throws Exception {
-        Mockito.when(validationService.validateProductDTO(eq(productDTO))).thenReturn(sellerEntity);
-        Mockito.when(productMapper.toEntity(eq(productDTO), eq(sellerEntity.getId()), eq(sellerEntity.getName()), eq(Pets.DOG)))
+        Mockito.when(validationService.validateProductDTO(eq(productDTO), eq(Category.FOOD))).thenReturn(sellerEntity);
+        Mockito.when(productMapper.toEntity(eq(productDTO), eq(sellerEntity.getId()), eq(sellerEntity.getName()), eq(Category.FOOD)))
                 .thenReturn(productEntity);
         Mockito.when(productRepository.save(eq(productEntity))).thenThrow(new DataIntegrityViolationException(""));
 
-        ResponseEntity<?> response = productServiceImpl.createProduct(productDTO, Pets.DOG);
+        ResponseEntity<?> response = productServiceImpl.createProduct(productDTO, Category.FOOD);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro ao gravar produto na base de dados: ");
@@ -98,7 +100,7 @@ public class ProductServiceTest extends UnitTest {
                 .thenReturn(Optional.of(productEntity));
         Mockito.when(productMapper.toReturnDTO(eq(productEntity))).thenReturn(productReturnDTO);
 
-        ResponseEntity<?> response = productServiceImpl.getProductByTitle(productDTO.getTitle(), productDTO.getSellerName());
+        ResponseEntity<?> response = productServiceImpl.getProductByTitleAndSellerName(productDTO.getTitle(), productDTO.getSellerName());
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(response.getBody(), productReturnDTO);
@@ -109,7 +111,94 @@ public class ProductServiceTest extends UnitTest {
         Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
                 .thenReturn(Optional.empty());
 
-        ResponseEntity<?> response = productServiceImpl.getProductByTitle(productDTO.getTitle(), productDTO.getSellerName());
+        ResponseEntity<?> response = productServiceImpl.getProductByTitleAndSellerName(productDTO.getTitle(), productDTO.getSellerName());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Produto não encontrado.");
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorOnFindProduct() {
+        Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
+                .thenReturn(Optional.of(productEntity));
+        Mockito.when(productMapper.toReturnDTO(eq(productEntity))).thenThrow(new NullPointerException());
+
+        ResponseEntity<?> response = productServiceImpl.getProductByTitleAndSellerName(productDTO.getTitle(), productDTO.getSellerName());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro no mapeamento para retorno do produto: null");
+    }
+
+    @Test
+    public void shouldUpdateProductWithSuccess() {
+        Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
+                .thenReturn(Optional.of(productEntity));
+        Mockito.when(productMapper.toEntity(eq(productUpdateDTO), eq(productEntity), eq(Category.FOOD))).thenReturn(productEntity);
+        Mockito.when(productRepository.save(eq(productEntity))).thenReturn(productEntity);
+
+        ResponseEntity<?> response = productServiceImpl
+                .updateProduct(productDTO.getTitle(), productDTO.getSellerName(), productUpdateDTO, Category.FOOD);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(response.getBody(), "Produto atualizado com sucesso.");
+    }
+
+    @Test
+    public void shouldNotFindProductToUpdate() {
+        Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
+                .thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = productServiceImpl
+                .updateProduct(productDTO.getTitle(), productDTO.getSellerName(), productUpdateDTO, Category.FOOD);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Produto não encontrado.");
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorWithMapperOnUpdateProduct() {
+        Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
+                .thenReturn(Optional.of(productEntity));
+        Mockito.when(productMapper.toEntity(eq(productUpdateDTO), eq(productEntity), eq(Category.FOOD))).thenThrow(new NullPointerException());
+
+        ResponseEntity<?> response = productServiceImpl
+                .updateProduct(productDTO.getTitle(), productDTO.getSellerName(), productUpdateDTO, Category.FOOD);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro no mapeamento para atualização do produto: null");
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorWithDataBaseOnUpdateProduct() {
+        Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
+                .thenReturn(Optional.of(productEntity));
+        Mockito.when(productMapper.toEntity(eq(productUpdateDTO), eq(productEntity), eq(Category.FOOD))).thenReturn(productEntity);
+        Mockito.when(productRepository.save(eq(productEntity))).thenThrow(new DataIntegrityViolationException(""));
+
+        ResponseEntity<?> response = productServiceImpl
+                .updateProduct(productDTO.getTitle(), productDTO.getSellerName(), productUpdateDTO, Category.FOOD);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro ao atualizar produto na base de dados: ");
+    }
+
+    @Test
+    public void shouldDeleteProductWithSuccess() {
+        Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
+                .thenReturn(Optional.of(productEntity));
+
+        ResponseEntity<?> response = productServiceImpl.deleteProduct(productDTO.getTitle(), productDTO.getSellerName());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(response.getBody(), "Produto deletado com sucesso.");
+    }
+
+    @Test
+    public void shouldNotFindProductForDelete() {
+        Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
+                .thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = productServiceImpl.deleteProduct(productDTO.getTitle(), productDTO.getSellerName());
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Produto não encontrado.");

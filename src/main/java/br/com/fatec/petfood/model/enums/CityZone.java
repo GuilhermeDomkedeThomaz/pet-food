@@ -5,5 +5,6 @@ public enum CityZone {
     NORTH,
     SOUTH,
     EAST,
-    WEST
+    WEST,
+    CENTER
 }

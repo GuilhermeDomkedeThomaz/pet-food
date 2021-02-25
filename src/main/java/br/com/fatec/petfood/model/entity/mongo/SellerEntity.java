@@ -1,5 +1,6 @@
 package br.com.fatec.petfood.model.entity.mongo;
 
+import br.com.fatec.petfood.model.enums.Category;
 import br.com.fatec.petfood.model.enums.CityZone;
 import br.com.fatec.petfood.model.generic.RegistrationInfos;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -14,6 +15,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @RequiredArgsConstructor
@@ -38,6 +40,9 @@ public class SellerEntity  implements Serializable {
 
     @NonNull
     private CityZone cityZone;
+
+    @NonNull
+    private List<Category> categories;
 
     @CreatedDate
     @JsonIgnore

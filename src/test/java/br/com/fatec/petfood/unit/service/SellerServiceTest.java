@@ -2,7 +2,9 @@ package br.com.fatec.petfood.unit.service;
 
 import br.com.fatec.petfood.model.dto.SellerDTO;
 import br.com.fatec.petfood.model.dto.SellerReturnDTO;
+import br.com.fatec.petfood.model.dto.SellerUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
+import br.com.fatec.petfood.model.enums.Category;
 import br.com.fatec.petfood.model.mapper.SellerMapper;
 import br.com.fatec.petfood.repository.mongo.SellerRepository;
 import br.com.fatec.petfood.service.impl.SellerServiceImpl;
@@ -19,6 +21,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,17 +43,19 @@ public class SellerServiceTest extends UnitTest {
 
     private final SellerDTO sellerDTO = EnhancedRandom.random(SellerDTO.class);
     private final SellerEntity sellerEntity = EnhancedRandom.random(SellerEntity.class);
+    private final List<Category> categories = Arrays.asList(Category.FOOD, Category.OTHERS);
     private final SellerReturnDTO sellerReturnDTO = EnhancedRandom.random(SellerReturnDTO.class);
+    private final SellerUpdateDTO sellerUpdateDTO = EnhancedRandom.random(SellerUpdateDTO.class);
 
     @Test
     public void shouldCreateSellerWithSuccess() {
         byte[] passwordEncrypted = Base64.encodeBase64(sellerDTO.getPassword().getBytes());
 
-        Mockito.when(sellerMapper.toEntity(eq(sellerDTO), eq(passwordEncrypted), eq(sellerEntity.getCityZone())))
+        Mockito.when(sellerMapper.toEntity(eq(sellerDTO), eq(passwordEncrypted), eq(sellerEntity.getCityZone()), eq(categories)))
                 .thenReturn(sellerEntity);
         Mockito.when(sellerRepository.save(eq(sellerEntity))).thenReturn(sellerEntity);
 
-        ResponseEntity<?> response = sellerServiceImpl.createSeller(sellerDTO, sellerEntity.getCityZone());
+        ResponseEntity<?> response = sellerServiceImpl.createSeller(sellerDTO, sellerEntity.getCityZone(), categories);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Lojista cadastrado com sucesso.");
@@ -57,9 +63,10 @@ public class SellerServiceTest extends UnitTest {
 
     @Test
     public void shouldResponseBadRequestWhenCreateSeller() throws Exception {
-        Mockito.doThrow(new Exception("Nome passado inválido(vazio ou nulo).")).when(validationService).validateSellerDTO(sellerDTO);
+        Mockito.doThrow(new Exception("Nome passado inválido(vazio ou nulo)."))
+                .when(validationService).validateSellerDTO(sellerDTO, sellerEntity.getCityZone(), categories);
 
-        ResponseEntity<?> response = sellerServiceImpl.createSeller(sellerDTO, sellerEntity.getCityZone());
+        ResponseEntity<?> response = sellerServiceImpl.createSeller(sellerDTO, sellerEntity.getCityZone(), categories);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Nome passado inválido(vazio ou nulo).");
@@ -69,10 +76,10 @@ public class SellerServiceTest extends UnitTest {
     public void shouldResponseInternalServerErrorWithMapperWhenCreateSeller() {
         byte[] passwordEncrypted = Base64.encodeBase64(sellerDTO.getPassword().getBytes());
 
-        Mockito.when(sellerMapper.toEntity(eq(sellerDTO), eq(passwordEncrypted), eq(sellerEntity.getCityZone())))
+        Mockito.when(sellerMapper.toEntity(eq(sellerDTO), eq(passwordEncrypted), eq(sellerEntity.getCityZone()), eq(categories)))
                 .thenThrow(new NullPointerException());
 
-        ResponseEntity<?> response = sellerServiceImpl.createSeller(sellerDTO, sellerEntity.getCityZone());
+        ResponseEntity<?> response = sellerServiceImpl.createSeller(sellerDTO, sellerEntity.getCityZone(), categories);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro no mapeamento para criação do lojista: null");
@@ -82,11 +89,11 @@ public class SellerServiceTest extends UnitTest {
     public void shouldResponseInternalServerErrorWithDataBaseWhenCreateSeller() {
         byte[] passwordEncrypted = Base64.encodeBase64(sellerDTO.getPassword().getBytes());
 
-        Mockito.when(sellerMapper.toEntity(eq(sellerDTO), eq(passwordEncrypted), eq(sellerEntity.getCityZone())))
+        Mockito.when(sellerMapper.toEntity(eq(sellerDTO), eq(passwordEncrypted), eq(sellerEntity.getCityZone()), eq(categories)))
                 .thenReturn(sellerEntity);
         Mockito.when(sellerRepository.save(eq(sellerEntity))).thenThrow(new DataIntegrityViolationException(""));
 
-        ResponseEntity<?> response = sellerServiceImpl.createSeller(sellerDTO, sellerEntity.getCityZone());
+        ResponseEntity<?> response = sellerServiceImpl.createSeller(sellerDTO, sellerEntity.getCityZone(), categories);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro ao gravar lojista na base de dados: ");
@@ -114,6 +121,17 @@ public class SellerServiceTest extends UnitTest {
     }
 
     @Test
+    public void shouldResponseInternalServerErrorOnFindSeller() {
+        Mockito.when(sellerRepository.findByName(eq(sellerDTO.getName()))).thenReturn(Optional.of(sellerEntity));
+        Mockito.when(sellerMapper.toReturnDTO(sellerEntity)).thenThrow(new NullPointerException());
+
+        ResponseEntity<?> response = sellerServiceImpl.getSeller(sellerDTO.getName());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro no mapeamento para retorno do lojista: null");
+    }
+
+    @Test
     public void shouldLoginWithSuccess() {
         sellerEntity.setPassword(Base64.encodeBase64("1234".getBytes()));
         String password = new String(Base64.decodeBase64(sellerEntity.getPassword()));
@@ -132,7 +150,7 @@ public class SellerServiceTest extends UnitTest {
         ResponseEntity<?> response = sellerServiceImpl.login(sellerDTO.getEmail(), sellerDTO.getPassword());
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-        Assertions.assertEquals(response.getBody(), "Lojista não encontrado.");
+        Assertions.assertEquals(response.getBody(), "Lojista não encontrado com o email passado.");
     }
 
     @Test
@@ -145,5 +163,83 @@ public class SellerServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Login de lojista inválido.");
+    }
+
+    @Test
+    public void shouldUpdateSellerWithSuccess() {
+        byte[] passwordEncrypted = Base64.encodeBase64(sellerUpdateDTO.getPassword().getBytes());
+
+        Mockito.when(sellerRepository.findByName(eq(sellerEntity.getName()))).thenReturn(Optional.of(sellerEntity));
+        Mockito.when(sellerMapper.toEntity(eq(sellerEntity), eq(sellerUpdateDTO), eq(passwordEncrypted),
+                eq(sellerEntity.getCityZone()), eq(categories))).thenReturn(sellerEntity);
+        Mockito.when(sellerRepository.save(eq(sellerEntity))).thenReturn(sellerEntity);
+
+        ResponseEntity<?> response = sellerServiceImpl
+                .updateSeller(sellerEntity.getName(), sellerUpdateDTO, sellerEntity.getCityZone(), categories);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(response.getBody(), "Lojista atualizado com sucesso.");
+    }
+
+    @Test
+    public void shouldNotFindSellerToUpdate() {
+        Mockito.when(sellerRepository.findByName(eq(sellerEntity.getName()))).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = sellerServiceImpl
+                .updateSeller(sellerEntity.getName(), sellerUpdateDTO, sellerEntity.getCityZone(), categories);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Lojista não encontrado.");
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorWithMapperOnUpdateSeller() {
+        byte[] passwordEncrypted = Base64.encodeBase64(sellerUpdateDTO.getPassword().getBytes());
+
+        Mockito.when(sellerRepository.findByName(eq(sellerEntity.getName()))).thenReturn(Optional.of(sellerEntity));
+        Mockito.when(sellerMapper.toEntity(eq(sellerEntity), eq(sellerUpdateDTO), eq(passwordEncrypted),
+                eq(sellerEntity.getCityZone()), eq(categories))).thenThrow(new NullPointerException());
+
+        ResponseEntity<?> response = sellerServiceImpl
+                .updateSeller(sellerEntity.getName(), sellerUpdateDTO, sellerEntity.getCityZone(), categories);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro no mapeamento para atualização do lojista: null");
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorWithDataBaseOnUpdateSeller() {
+        byte[] passwordEncrypted = Base64.encodeBase64(sellerUpdateDTO.getPassword().getBytes());
+
+        Mockito.when(sellerRepository.findByName(eq(sellerEntity.getName()))).thenReturn(Optional.of(sellerEntity));
+        Mockito.when(sellerMapper.toEntity(eq(sellerEntity), eq(sellerUpdateDTO), eq(passwordEncrypted),
+                eq(sellerEntity.getCityZone()), eq(categories))).thenReturn(sellerEntity);
+        Mockito.when(sellerRepository.save(eq(sellerEntity))).thenThrow(new DataIntegrityViolationException(""));
+
+        ResponseEntity<?> response = sellerServiceImpl
+                .updateSeller(sellerEntity.getName(), sellerUpdateDTO, sellerEntity.getCityZone(), categories);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro ao atualizar lojista na base de dados: ");
+    }
+
+    @Test
+    public void shouldDeleteSellerWithSuccess() {
+        Mockito.when(sellerRepository.findByName(eq(sellerDTO.getName()))).thenReturn(Optional.of(sellerEntity));
+
+        ResponseEntity<?> response = sellerServiceImpl.deleteSeller(sellerDTO.getName());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(response.getBody(), "Lojista deletado com sucesso.");
+    }
+
+    @Test
+    public void shouldNotFindSellerForDelete() {
+        Mockito.when(sellerRepository.findByName(eq(sellerDTO.getName()))).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = sellerServiceImpl.deleteSeller(sellerDTO.getName());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Lojista não encontrado.");
     }
 }

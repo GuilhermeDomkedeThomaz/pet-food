@@ -1,6 +1,6 @@
 package br.com.fatec.petfood.model.entity.mongo;
 
-import br.com.fatec.petfood.model.enums.Pets;
+import br.com.fatec.petfood.model.enums.Category;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -39,7 +39,7 @@ public class ProductEntity implements Serializable {
     private String brand;
 
     @NonNull
-    private String category;
+    private Category category;
 
     @NonNull
     private Double pricePromotion;
@@ -52,9 +52,6 @@ public class ProductEntity implements Serializable {
 
     @NonNull
     private String imageUrl;
-
-    @NonNull
-    private Pets pets;
 
     private String additionalInfo;
 

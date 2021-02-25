@@ -18,4 +18,6 @@ public class RegistrationInfos {
     private String cep;
 
     private String city;
+
+    private String uf;
 }
