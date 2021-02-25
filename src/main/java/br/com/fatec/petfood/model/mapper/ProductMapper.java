@@ -13,7 +13,7 @@ import org.mapstruct.Mappings;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProductMapper {
 
     @Mappings({

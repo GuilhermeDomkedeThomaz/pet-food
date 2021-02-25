@@ -15,7 +15,7 @@ import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface SellerMapper {
 
     @Mappings({
