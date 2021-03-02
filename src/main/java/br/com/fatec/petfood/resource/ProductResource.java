@@ -37,7 +37,7 @@ public class ProductResource {
 
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/find/title", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/find/title/seller", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> findProductByTitleAndSellerName(
             @RequestParam(value = "title") String title,
             @RequestParam(value = "sellerName") String sellerName
