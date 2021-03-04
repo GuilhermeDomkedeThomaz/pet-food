@@ -11,6 +11,7 @@ import br.com.fatec.petfood.repository.mongo.ProductRepository;
 import br.com.fatec.petfood.service.ValidationService;
 import br.com.fatec.petfood.service.impl.ProductServiceImpl;
 import br.com.fatec.petfood.unit.UnitTest;
+import br.com.fatec.petfood.utils.ResponseHeadersUtils;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -36,6 +38,9 @@ public class ProductServiceTest extends UnitTest {
     @Mock
     private ValidationService validationService;
 
+    @Mock
+    private ResponseHeadersUtils responseHeadersUtils;
+
     @InjectMocks
     private ProductServiceImpl productServiceImpl;
 
@@ -47,6 +52,10 @@ public class ProductServiceTest extends UnitTest {
 
     @Test
     public void shouldCreateProductWithSuccess() throws Exception {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setAccessControlAllowOrigin("*");
+
+        Mockito.when(responseHeadersUtils.getDefaultResponseHeaders()).thenReturn(responseHeaders);
         Mockito.when(validationService.validateProductDTO(eq(productDTO), eq(Category.FOOD))).thenReturn(sellerEntity);
         Mockito.when(productMapper.toEntity(eq(productDTO), eq(sellerEntity.getId()), eq(sellerEntity.getName()), eq(Category.FOOD)))
                 .thenReturn(productEntity);
@@ -56,10 +65,15 @@ public class ProductServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Produto cadastrado com sucesso.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
     public void shouldResponseBadRequestWhenCreateProduct() throws Exception {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setAccessControlAllowOrigin("*");
+
+        Mockito.when(responseHeadersUtils.getDefaultResponseHeaders()).thenReturn(responseHeaders);
         Mockito.doThrow(new Exception("Nome do lojista passado inválido(vazio ou nulo)."))
                 .when(validationService).validateProductDTO(productDTO, Category.FOOD);
 
@@ -67,10 +81,15 @@ public class ProductServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Nome do lojista passado inválido(vazio ou nulo).");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
     public void shouldResponseInternalServerErrorWithMapperWhenCreateProduct() throws Exception {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setAccessControlAllowOrigin("*");
+
+        Mockito.when(responseHeadersUtils.getDefaultResponseHeaders()).thenReturn(responseHeaders);
         Mockito.when(validationService.validateProductDTO(eq(productDTO), eq(Category.FOOD))).thenReturn(sellerEntity);
         Mockito.when(productMapper.toEntity(eq(productDTO), eq(sellerEntity.getId()), eq(sellerEntity.getName()), eq(Category.FOOD)))
                 .thenThrow(new NullPointerException());
@@ -79,10 +98,15 @@ public class ProductServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro no mapeamento para criação do produto: null");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
     public void shouldResponseInternalServerErrorWithDataBaseWhenCreateProduct() throws Exception {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setAccessControlAllowOrigin("*");
+
+        Mockito.when(responseHeadersUtils.getDefaultResponseHeaders()).thenReturn(responseHeaders);
         Mockito.when(validationService.validateProductDTO(eq(productDTO), eq(Category.FOOD))).thenReturn(sellerEntity);
         Mockito.when(productMapper.toEntity(eq(productDTO), eq(sellerEntity.getId()), eq(sellerEntity.getName()), eq(Category.FOOD)))
                 .thenReturn(productEntity);
@@ -92,10 +116,15 @@ public class ProductServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro ao gravar produto na base de dados: ");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
     public void shouldFindProductWithSuccess() {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setAccessControlAllowOrigin("*");
+
+        Mockito.when(responseHeadersUtils.getDefaultResponseHeaders()).thenReturn(responseHeaders);
         Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
                 .thenReturn(Optional.of(productEntity));
         Mockito.when(productMapper.toReturnDTO(eq(productEntity))).thenReturn(productReturnDTO);
@@ -104,10 +133,15 @@ public class ProductServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(response.getBody(), productReturnDTO);
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
     public void shouldNotFindProduct() {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setAccessControlAllowOrigin("*");
+
+        Mockito.when(responseHeadersUtils.getDefaultResponseHeaders()).thenReturn(responseHeaders);
         Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
                 .thenReturn(Optional.empty());
 
@@ -115,10 +149,15 @@ public class ProductServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Produto não encontrado.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
     public void shouldResponseInternalServerErrorOnFindProduct() {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setAccessControlAllowOrigin("*");
+
+        Mockito.when(responseHeadersUtils.getDefaultResponseHeaders()).thenReturn(responseHeaders);
         Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
                 .thenReturn(Optional.of(productEntity));
         Mockito.when(productMapper.toReturnDTO(eq(productEntity))).thenThrow(new NullPointerException());
@@ -127,10 +166,15 @@ public class ProductServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro no mapeamento para retorno do produto: null");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
     public void shouldUpdateProductWithSuccess() {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setAccessControlAllowOrigin("*");
+
+        Mockito.when(responseHeadersUtils.getDefaultResponseHeaders()).thenReturn(responseHeaders);
         Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
                 .thenReturn(Optional.of(productEntity));
         Mockito.when(productMapper.toEntity(eq(productUpdateDTO), eq(productEntity), eq(Category.FOOD))).thenReturn(productEntity);
@@ -141,10 +185,15 @@ public class ProductServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(response.getBody(), "Produto atualizado com sucesso.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
     public void shouldNotFindProductToUpdate() {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setAccessControlAllowOrigin("*");
+
+        Mockito.when(responseHeadersUtils.getDefaultResponseHeaders()).thenReturn(responseHeaders);
         Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
                 .thenReturn(Optional.empty());
 
@@ -153,10 +202,15 @@ public class ProductServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Produto não encontrado.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
     public void shouldResponseInternalServerErrorWithMapperOnUpdateProduct() {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setAccessControlAllowOrigin("*");
+
+        Mockito.when(responseHeadersUtils.getDefaultResponseHeaders()).thenReturn(responseHeaders);
         Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
                 .thenReturn(Optional.of(productEntity));
         Mockito.when(productMapper.toEntity(eq(productUpdateDTO), eq(productEntity), eq(Category.FOOD))).thenThrow(new NullPointerException());
@@ -166,10 +220,15 @@ public class ProductServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro no mapeamento para atualização do produto: null");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
     public void shouldResponseInternalServerErrorWithDataBaseOnUpdateProduct() {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setAccessControlAllowOrigin("*");
+
+        Mockito.when(responseHeadersUtils.getDefaultResponseHeaders()).thenReturn(responseHeaders);
         Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
                 .thenReturn(Optional.of(productEntity));
         Mockito.when(productMapper.toEntity(eq(productUpdateDTO), eq(productEntity), eq(Category.FOOD))).thenReturn(productEntity);
@@ -180,10 +239,15 @@ public class ProductServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro ao atualizar produto na base de dados: ");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
     public void shouldDeleteProductWithSuccess() {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setAccessControlAllowOrigin("*");
+
+        Mockito.when(responseHeadersUtils.getDefaultResponseHeaders()).thenReturn(responseHeaders);
         Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
                 .thenReturn(Optional.of(productEntity));
 
@@ -191,10 +255,15 @@ public class ProductServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(response.getBody(), "Produto deletado com sucesso.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
     public void shouldNotFindProductForDelete() {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setAccessControlAllowOrigin("*");
+
+        Mockito.when(responseHeadersUtils.getDefaultResponseHeaders()).thenReturn(responseHeaders);
         Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
                 .thenReturn(Optional.empty());
 
@@ -202,5 +271,6 @@ public class ProductServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Produto não encontrado.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 }

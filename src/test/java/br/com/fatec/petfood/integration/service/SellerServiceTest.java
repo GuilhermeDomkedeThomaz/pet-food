@@ -32,6 +32,7 @@ public class SellerServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Lojista cadastrado com sucesso.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -40,6 +41,7 @@ public class SellerServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Nome passado inválido(vazio ou nulo).");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -48,11 +50,13 @@ public class SellerServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Lojista cadastrado com sucesso.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> secondResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
 
         Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(secondResponse.getBody(), "Lojista já existe com o nome passado.");
+        Assertions.assertEquals(secondResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -61,10 +65,12 @@ public class SellerServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Lojista cadastrado com sucesso.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> findResponse = sellerService.getSeller(sellerDTO.getName());
 
         Assertions.assertEquals(findResponse.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(findResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -73,6 +79,7 @@ public class SellerServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(findResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(findResponse.getBody(), "Lojista não encontrado.");
+        Assertions.assertEquals(findResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -81,11 +88,13 @@ public class SellerServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Lojista cadastrado com sucesso.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> loginResponse = sellerService.login(sellerDTO.getEmail(), sellerDTO.getPassword());
 
         Assertions.assertEquals(loginResponse.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(loginResponse.getBody(), "Login de lojista realizado com sucesso.");
+        Assertions.assertEquals(loginResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -94,11 +103,13 @@ public class SellerServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Lojista cadastrado com sucesso.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> loginResponse = sellerService.login(sellerDTO.getEmail(), "Teste");
 
         Assertions.assertEquals(loginResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(loginResponse.getBody(), "Login de lojista inválido.");
+        Assertions.assertEquals(loginResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -107,11 +118,13 @@ public class SellerServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Lojista cadastrado com sucesso.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> updateResponse = sellerService.updateSeller(sellerDTO.getName(), sellerUpdateDTO, CityZone.EAST, categories);
 
         Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(updateResponse.getBody(), "Lojista atualizado com sucesso.");
+        Assertions.assertEquals(updateResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -120,6 +133,7 @@ public class SellerServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(updateResponse.getBody(), "Lojista não encontrado.");
+        Assertions.assertEquals(updateResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -128,11 +142,13 @@ public class SellerServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Lojista cadastrado com sucesso.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> updateResponse = sellerService.updateSeller(sellerDTO.getName(), sellerUpdateDTO, CityZone.EAST, null);
 
         Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(updateResponse.getBody(), "Categoria passada inválida(vazia ou nula).");
+        Assertions.assertEquals(updateResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -141,11 +157,13 @@ public class SellerServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Lojista cadastrado com sucesso.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> findResponse = sellerService.deleteSeller(sellerDTO.getName());
 
         Assertions.assertEquals(findResponse.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(findResponse.getBody(), "Lojista deletado com sucesso.");
+        Assertions.assertEquals(findResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -154,5 +172,6 @@ public class SellerServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Lojista não encontrado.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 }

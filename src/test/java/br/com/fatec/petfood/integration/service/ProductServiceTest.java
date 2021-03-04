@@ -40,11 +40,13 @@ public class ProductServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(sellerResponse.getBody(), "Lojista cadastrado com sucesso.");
+        Assertions.assertEquals(sellerResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> response = productService.createProduct(productDTO, Category.FOOD);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Produto cadastrado com sucesso.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -53,6 +55,7 @@ public class ProductServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Nome do lojista passado inválido(vazio ou nulo).");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -61,6 +64,7 @@ public class ProductServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Lojista não encontrado com o nome passado.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -71,16 +75,19 @@ public class ProductServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(sellerResponse.getBody(), "Lojista cadastrado com sucesso.");
+        Assertions.assertEquals(sellerResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> response = productService.createProduct(productDTO, Category.FOOD);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Produto cadastrado com sucesso.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> productExistsResponse = productService.createProduct(productDTO, Category.FOOD);
 
         Assertions.assertEquals(productExistsResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(productExistsResponse.getBody(), "Título passado já cadastrado para o lojista passado.");
+        Assertions.assertEquals(productExistsResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -91,15 +98,18 @@ public class ProductServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(sellerResponse.getBody(), "Lojista cadastrado com sucesso.");
+        Assertions.assertEquals(sellerResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> response = productService.createProduct(productDTO, Category.FOOD);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Produto cadastrado com sucesso.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> findResponse = productService.getProductByTitleAndSellerName(productDTO.getTitle(), productDTO.getSellerName());
 
         Assertions.assertEquals(findResponse.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(findResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -108,6 +118,7 @@ public class ProductServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(findResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(findResponse.getBody(), "Produto não encontrado.");
+        Assertions.assertEquals(findResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -118,17 +129,20 @@ public class ProductServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(sellerResponse.getBody(), "Lojista cadastrado com sucesso.");
+        Assertions.assertEquals(sellerResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> response = productService.createProduct(productDTO, Category.FOOD);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Produto cadastrado com sucesso.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> updateResponse = productService
                 .updateProduct(productDTO.getTitle(), productDTO.getSellerName(), productUpdateDTO, Category.FOOD);
 
         Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(updateResponse.getBody(), "Produto atualizado com sucesso.");
+        Assertions.assertEquals(updateResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -138,6 +152,7 @@ public class ProductServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Produto não encontrado.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -148,16 +163,19 @@ public class ProductServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(sellerResponse.getBody(), "Lojista cadastrado com sucesso.");
+        Assertions.assertEquals(sellerResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> response = productService.createProduct(productDTO, Category.FOOD);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Produto cadastrado com sucesso.");
+        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> deleteResponse = productService.deleteProduct(productDTO.getTitle(), productDTO.getSellerName());
 
         Assertions.assertEquals(deleteResponse.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(deleteResponse.getBody(), "Produto deletado com sucesso.");
+        Assertions.assertEquals(deleteResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -166,5 +184,6 @@ public class ProductServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(findResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(findResponse.getBody(), "Produto não encontrado.");
+        Assertions.assertEquals(findResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 }
