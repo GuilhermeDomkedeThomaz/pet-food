@@ -221,6 +221,10 @@ public class ValidationServiceTest extends UnitTest {
 
     @Test
     public void shouldValidateProductDTOWithSuccess() {
+        productDTO.setStock(5);
+        productDTO.setPrice(9.99);
+        productDTO.setPricePromotion(9.99);
+
         Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.TRUE);
         Mockito.when(sellerRepository.findByName(eq(productDTO.getSellerName()))).thenReturn(Optional.of(sellerEntity));
         Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(sellerEntity.getName())))
@@ -292,7 +296,7 @@ public class ValidationServiceTest extends UnitTest {
         try {
             validationServiceImpl.validateProductDTO(productDTO, Category.FOOD);
         } catch (Exception e) {
-            Assertions.assertEquals("Preço de promoção passado inválido(igual a 0).", e.getMessage());
+            Assertions.assertEquals("Preço de promoção passado inválido(menor ou igual a 0).", e.getMessage());
         }
     }
 
@@ -308,7 +312,7 @@ public class ValidationServiceTest extends UnitTest {
         try {
             validationServiceImpl.validateProductDTO(productDTO, Category.FOOD);
         } catch (Exception e) {
-            Assertions.assertEquals("Preço passado inválido(igual a 0).", e.getMessage());
+            Assertions.assertEquals("Preço passado inválido(menor ou igual a 0).", e.getMessage());
         }
     }
 }

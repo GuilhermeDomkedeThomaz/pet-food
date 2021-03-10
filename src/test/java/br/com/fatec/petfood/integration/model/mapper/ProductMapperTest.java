@@ -7,6 +7,7 @@ import br.com.fatec.petfood.model.dto.ProductUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.ProductEntity;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.enums.Category;
+import br.com.fatec.petfood.model.generic.ProductRequest;
 import br.com.fatec.petfood.model.mapper.ProductMapper;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import org.junit.jupiter.api.Assertions;
@@ -76,5 +77,18 @@ public class ProductMapperTest extends IntegrationTest {
         Assertions.assertEquals(productEntity.getStock(), productReturnDTO.getStock());
         Assertions.assertEquals(productEntity.getImageUrl(), productReturnDTO.getImageUrl());
         Assertions.assertEquals(productEntity.getAdditionalInfo(), productReturnDTO.getAdditionalInfo());
+    }
+
+    @Test
+    public void shouldMapperToProductRequest() {
+        ProductEntity productEntity = EnhancedRandom.random(ProductEntity.class);
+
+        ProductRequest productRequest = productMapper.toProductRequest(productEntity, 1);
+
+        Assertions.assertEquals(productRequest.getProductId(), productEntity.getId());
+        Assertions.assertEquals(productRequest.getTitle(), productEntity.getTitle());
+        Assertions.assertEquals(productRequest.getPricePromotion(), productEntity.getPricePromotion());
+        Assertions.assertEquals(productRequest.getPrice(), productEntity.getPrice());
+        Assertions.assertEquals(productRequest.getQuantity(), 1);
     }
 }

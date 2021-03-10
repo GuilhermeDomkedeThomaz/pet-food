@@ -34,6 +34,9 @@ public class ProductServiceTest extends IntegrationTest {
 
     @Test
     public void shouldCreateProductWithSuccess() {
+        productDTO.setStock(5);
+        productDTO.setPrice(9.99);
+        productDTO.setPricePromotion(9.99);
         productDTO.setSellerName(sellerDTO.getName());
 
         ResponseEntity<?> sellerResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
@@ -69,6 +72,9 @@ public class ProductServiceTest extends IntegrationTest {
 
     @Test
     public void shouldResponseBadRequestWhenCreateProductAlreadyExists() {
+        productDTO.setStock(5);
+        productDTO.setPrice(9.99);
+        productDTO.setPricePromotion(9.99);
         productDTO.setSellerName(sellerDTO.getName());
 
         ResponseEntity<?> sellerResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
@@ -92,6 +98,9 @@ public class ProductServiceTest extends IntegrationTest {
 
     @Test
     public void shouldFindProductWithSuccess() {
+        productDTO.setStock(5);
+        productDTO.setPrice(9.99);
+        productDTO.setPricePromotion(9.99);
         productDTO.setSellerName(sellerDTO.getName());
 
         ResponseEntity<?> sellerResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
@@ -123,7 +132,13 @@ public class ProductServiceTest extends IntegrationTest {
 
     @Test
     public void shouldUpdateProductWithSuccess() {
+        productDTO.setStock(5);
+        productDTO.setPrice(9.99);
+        productDTO.setPricePromotion(9.99);
         productDTO.setSellerName(sellerDTO.getName());
+        productUpdateDTO.setStock(10);
+        productUpdateDTO.setPrice(99.99);
+        productUpdateDTO.setPricePromotion(99.99);
 
         ResponseEntity<?> sellerResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
 
@@ -157,6 +172,9 @@ public class ProductServiceTest extends IntegrationTest {
 
     @Test
     public void shouldDeleteProductWithSuccess() {
+        productDTO.setStock(5);
+        productDTO.setPrice(9.99);
+        productDTO.setPricePromotion(9.99);
         productDTO.setSellerName(sellerDTO.getName());
 
         ResponseEntity<?> sellerResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);

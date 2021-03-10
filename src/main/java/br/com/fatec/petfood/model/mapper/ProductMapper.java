@@ -5,6 +5,7 @@ import br.com.fatec.petfood.model.dto.ProductReturnDTO;
 import br.com.fatec.petfood.model.dto.ProductUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.ProductEntity;
 import br.com.fatec.petfood.model.enums.Category;
+import br.com.fatec.petfood.model.generic.ProductRequest;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.mapstruct.Mapper;
@@ -64,6 +65,15 @@ public interface ProductMapper {
             @Mapping(target = "defaultDateTime", source = "productEntity.defaultDateTime", qualifiedByName = "getDefaultDateTime")
     })
     ProductReturnDTO toReturnDTO(ProductEntity productEntity);
+
+    @Mappings({
+            @Mapping(target = "productId", source = "productEntity.id"),
+            @Mapping(target = "title", source = "productEntity.title"),
+            @Mapping(target = "pricePromotion", source = "productEntity.pricePromotion"),
+            @Mapping(target = "price", source = "productEntity.price"),
+            @Mapping(target = "quantity", source = "quantity")
+    })
+    ProductRequest toProductRequest(ProductEntity productEntity, Integer quantity);
 
     @Named("getSellerId")
     default String getSellerId(ObjectId sellerId) {

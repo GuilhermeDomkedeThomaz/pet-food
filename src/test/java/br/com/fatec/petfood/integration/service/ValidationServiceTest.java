@@ -187,8 +187,11 @@ public class ValidationServiceTest extends IntegrationTest {
 
     @Test
     public void shouldValidateProductDTOWithSuccess() {
-        sellerRepository.save(sellerMapper.toEntity(sellerDTO, Base64.encodeBase64(sellerDTO.getPassword().getBytes()), CityZone.EAST, categories));
+        productDTO.setStock(5);
+        productDTO.setPrice(9.99);
+        productDTO.setPricePromotion(9.99);
         productDTO.setSellerName(sellerDTO.getName());
+        sellerRepository.save(sellerMapper.toEntity(sellerDTO, Base64.encodeBase64(sellerDTO.getPassword().getBytes()), CityZone.EAST, categories));
 
         Assertions.assertDoesNotThrow(() -> validationServiceImpl.validateProductDTO(productDTO, Category.FOOD));
     }
@@ -246,7 +249,7 @@ public class ValidationServiceTest extends IntegrationTest {
         try {
             validationServiceImpl.validateProductDTO(productDTO, Category.FOOD);
         } catch (Exception e) {
-            Assertions.assertEquals("Preço de promoção passado inválido(igual a 0).", e.getMessage());
+            Assertions.assertEquals("Preço de promoção passado inválido(menor ou igual a 0).", e.getMessage());
         }
     }
 
@@ -259,7 +262,7 @@ public class ValidationServiceTest extends IntegrationTest {
         try {
             validationServiceImpl.validateProductDTO(productDTO, Category.FOOD);
         } catch (Exception e) {
-            Assertions.assertEquals("Preço passado inválido(igual a 0).", e.getMessage());
+            Assertions.assertEquals("Preço passado inválido(menor ou igual a 0).", e.getMessage());
         }
     }
 }

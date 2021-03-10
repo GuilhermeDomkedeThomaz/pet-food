@@ -187,16 +187,18 @@ public class ValidationServiceImpl implements ValidationService {
 
         if (Objects.isNull(pricePromotion))
             throw new Exception("Preço de promoção passado inválido(vazio ou nulo).");
-        else if (pricePromotion.equals(0.0))
-            throw new Exception("Preço de promoção passado inválido(igual a 0).");
+        else if (pricePromotion <= 0.0)
+            throw new Exception("Preço de promoção passado inválido(menor ou igual a 0).");
 
         if (Objects.isNull(price))
             throw new Exception("Preço passado inválido(vazio ou nulo).");
-        else if (price.equals(0.0))
-            throw new Exception("Preço passado inválido(igual a 0).");
+        else if (price <= 0.0)
+            throw new Exception("Preço passado inválido(menor ou igual a 0).");
 
         if (Objects.isNull(stock))
             throw new Exception("Estoque passado inválido(vazio ou nulo).");
+        else if (stock <= 0)
+            throw new Exception("Estoque passado inválido(menor ou igual a 0).");
 
         if (!validateUtils.isNotNullAndNotEmpty(imageUrl))
             throw new Exception("Url da imagem passada inválida(vazia ou nula).");
