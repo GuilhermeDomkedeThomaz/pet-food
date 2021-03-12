@@ -2,6 +2,7 @@ package br.com.fatec.petfood.service.impl;
 
 import br.com.fatec.petfood.model.dto.ProductRequestDTO;
 import br.com.fatec.petfood.model.entity.mongo.ProductEntity;
+import br.com.fatec.petfood.model.entity.mongo.RequestEntity;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.entity.mongo.UserEntity;
 import br.com.fatec.petfood.model.generic.ProductRequest;
@@ -31,9 +32,16 @@ public class RequestValidationServiceImpl implements RequestValidationService {
     private String errors;
 
     @Override
+    public void validateShippingPrice(Double shippingPrice) throws Exception {
+        if (Objects.isNull(shippingPrice))
+            throw new Exception("Valor de frete passado inválido(vazio ou nulo).");
+        else if (shippingPrice <= 0.0)
+            throw new Exception("Valor de frete passado inválido(menor ou igual a zero).");
+    }
+
+    @Override
     public SellerEntity validateSellerRequestDTO(String sellerName) throws Exception {
-        if (!validateUtils.isNotNullAndNotEmpty(sellerName))
-            throw new Exception("Nome do lojista passado inválido(vazio ou nulo).");
+        this.genericValidateSeller(sellerName);
 
         Optional<SellerEntity> sellerEntity = sellerRepository.findByName(sellerName);
 
@@ -45,8 +53,7 @@ public class RequestValidationServiceImpl implements RequestValidationService {
 
     @Override
     public UserEntity validateUserRequestDTO(String userName) throws Exception {
-        if (!validateUtils.isNotNullAndNotEmpty(userName))
-            throw new Exception("Nome do usuário passado inválido(vazio ou nulo).");
+        this.genericValidateUser(userName);
 
         Optional<UserEntity> userEntity = userRepository.findByName(userName);
 
@@ -108,5 +115,34 @@ public class RequestValidationServiceImpl implements RequestValidationService {
             throw new Exception("Produto(s) inválido(s): " + errors);
         } else
             return productRequests;
+    }
+
+    @Override
+    public void validateRequestEntityTotalValue(RequestEntity requestEntity) throws Exception {
+        if (Objects.isNull(requestEntity.getTotalValue()))
+            throw new Exception("Erro no mapeamento para criação do pedido: Valor total não mapeado.");
+
+        if (requestEntity.getTotalValue() <= 0.0)
+            throw new Exception("Erro no mapeamento para criação do pedido: Valor total inválido(menor ou igual a zero).");
+    }
+
+    @Override
+    public void validateFindRequestBySeller(String sellerName) throws Exception {
+        this.genericValidateSeller(sellerName);
+    }
+
+    @Override
+    public void validateFindRequestByUser(String userName) throws Exception {
+        this.genericValidateUser(userName);
+    }
+
+    private void genericValidateSeller(String sellerName) throws Exception {
+        if (!validateUtils.isNotNullAndNotEmpty(sellerName))
+            throw new Exception("Nome do lojista passado inválido(vazio ou nulo).");
+    }
+
+    private void genericValidateUser(String userName) throws Exception {
+        if (!validateUtils.isNotNullAndNotEmpty(userName))
+            throw new Exception("Nome do usuário passado inválido(vazio ou nulo).");
     }
 }

@@ -6,4 +6,10 @@ import org.springframework.http.ResponseEntity;
 public interface RequestService {
 
     ResponseEntity<?> createRequest(RequestDTO requestDTO);
+
+    ResponseEntity<?> findRequestBySeller(String sellerName);
+
+    ResponseEntity<?> findRequestByUser(String userName);
+
+    ResponseEntity<?> findRequestBySellerAndUser(String sellerName, String userName);
 }

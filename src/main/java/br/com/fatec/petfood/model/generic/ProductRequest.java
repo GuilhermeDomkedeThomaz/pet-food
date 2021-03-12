@@ -1,5 +1,6 @@
 package br.com.fatec.petfood.model.generic;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import org.bson.types.ObjectId;
 @AllArgsConstructor
 public class ProductRequest {
 
+    @JsonIgnore
     private ObjectId productId;
 
     private String title;

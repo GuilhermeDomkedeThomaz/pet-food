@@ -2,6 +2,7 @@ package br.com.fatec.petfood.unit.service;
 
 import br.com.fatec.petfood.model.dto.ProductRequestDTO;
 import br.com.fatec.petfood.model.entity.mongo.ProductEntity;
+import br.com.fatec.petfood.model.entity.mongo.RequestEntity;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.entity.mongo.UserEntity;
 import br.com.fatec.petfood.model.generic.ProductRequest;
@@ -48,11 +49,32 @@ public class RequestValidationServiceTest extends UnitTest {
     private final UserEntity userEntity = EnhancedRandom.random(UserEntity.class);
     private final SellerEntity sellerEntity = EnhancedRandom.random(SellerEntity.class);
     private final ProductEntity productEntity = EnhancedRandom.random(ProductEntity.class);
+    private final RequestEntity requestEntity = EnhancedRandom.random(RequestEntity.class);
     private final ProductRequest productRequest = EnhancedRandom.random(ProductRequest.class);
     private final ProductRequestDTO firstProductRequestDTO = EnhancedRandom.random(ProductRequestDTO.class);
     private final ProductRequestDTO secondProductRequestDTO = EnhancedRandom.random(ProductRequestDTO.class);
     private final ProductRequestDTO invalidProductRequestDTO = EnhancedRandom.random(ProductRequestDTO.class, "quantity");
     private final List<ProductRequestDTO> productsRequestDTO = List.of(firstProductRequestDTO, secondProductRequestDTO);
+
+    @Test
+    public void shouldValidateShippingPriceRequestDTOWithSuccess() {
+        Assertions.assertDoesNotThrow(() -> requestValidationServiceImpl.validateShippingPrice(9.99));
+    }
+
+    @Test
+    public void shouldValidateRequestDTOWithInvalidShippingPrice() {
+        try {
+            requestValidationServiceImpl.validateShippingPrice(null);
+        } catch (Exception e) {
+            Assertions.assertEquals("Valor de frete passado inválido(vazio ou nulo).", e.getMessage());
+        }
+
+        try {
+            requestValidationServiceImpl.validateShippingPrice(-9.99);
+        } catch (Exception e) {
+            Assertions.assertEquals("Valor de frete passado inválido(menor ou igual a zero).", e.getMessage());
+        }
+    }
 
     @Test
     public void shouldValidateSellerRequestDTOWithSuccess() {
@@ -190,6 +212,58 @@ public class RequestValidationServiceTest extends UnitTest {
         } catch (Exception e) {
             Assertions.assertEquals("Lista de produtos atrelados ao pedido passada inválida(nenhum produto válido para realização do pedido):  [Produto com o título: {"
                     + firstProductRequestDTO.getTitle() + "} não encontrado para o lojista passado.] ", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldValidateRequestEntityTotalValueWithSuccess() {
+        requestEntity.setTotalValue(99.99);
+        Assertions.assertDoesNotThrow(() -> requestValidationServiceImpl.validateRequestEntityTotalValue(requestEntity));
+    }
+
+    @Test
+    public void shouldValidateInvalidRequestEntityTotalValue() {
+        requestEntity.setTotalValue(null);
+
+        try {
+            requestValidationServiceImpl.validateRequestEntityTotalValue(requestEntity);
+        } catch (Exception e) {
+            Assertions.assertEquals("Erro no mapeamento para criação do pedido: Valor total não mapeado.",
+                    e.getMessage());
+        }
+
+        requestEntity.setTotalValue(-99.99);
+
+        try {
+            requestValidationServiceImpl.validateRequestEntityTotalValue(requestEntity);
+        } catch (Exception e) {
+            Assertions.assertEquals("Erro no mapeamento para criação do pedido: Valor total inválido(menor ou igual a zero).",
+                    e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldValidateFindRequestsWithSuccess() {
+        Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.TRUE);
+
+        Assertions.assertDoesNotThrow(() -> requestValidationServiceImpl.validateFindRequestBySeller(sellerEntity.getName()));
+        Assertions.assertDoesNotThrow(() -> requestValidationServiceImpl.validateFindRequestByUser(userEntity.getName()));
+    }
+
+    @Test
+    public void shouldValidateFindRequestsWithInvalidParams() {
+        Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.FALSE);
+
+        try {
+            requestValidationServiceImpl.validateFindRequestBySeller("");
+        } catch (Exception e) {
+            Assertions.assertEquals("Nome do lojista passado inválido(vazio ou nulo).", e.getMessage());
+        }
+
+        try {
+            requestValidationServiceImpl.validateFindRequestByUser("");
+        } catch (Exception e) {
+            Assertions.assertEquals("Nome do usuário passado inválido(vazio ou nulo).", e.getMessage());
         }
     }
 }

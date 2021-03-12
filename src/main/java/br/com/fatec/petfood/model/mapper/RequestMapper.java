@@ -1,9 +1,11 @@
 package br.com.fatec.petfood.model.mapper;
 
+import br.com.fatec.petfood.model.dto.RequestReturnDTO;
 import br.com.fatec.petfood.model.entity.mongo.RequestEntity;
 import br.com.fatec.petfood.model.enums.Status;
 import br.com.fatec.petfood.model.generic.ProductRequest;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,6 +15,7 @@ import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
+import java.util.Objects;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface RequestMapper {
@@ -32,6 +35,21 @@ public interface RequestMapper {
     })
     RequestEntity toEntity(ObjectId sellerId, String sellerName, ObjectId userId, String userName,
                            List<ProductRequest> productRequests, Double shippingPrice, Status status);
+
+    @Mappings({
+            @Mapping(target = "sellerName", source = "requestEntity.sellerName"),
+            @Mapping(target = "userName", source = "requestEntity.userName"),
+            @Mapping(target = "products", source = "requestEntity.products"),
+            @Mapping(target = "totalPricePromotion", source = "requestEntity.totalPricePromotion"),
+            @Mapping(target = "totalPrice", source = "requestEntity.totalPrice"),
+            @Mapping(target = "totalQuantity", source = "requestEntity.totalQuantity"),
+            @Mapping(target = "shippingPrice", source = "requestEntity.shippingPrice"),
+            @Mapping(target = "totalValue", source = "requestEntity.totalValue"),
+            @Mapping(target = "status", source = "requestEntity.status"),
+            @Mapping(target = "defaultDateTime", source = "requestEntity.defaultDateTime", qualifiedByName = "getDefaultDateTime"),
+            @Mapping(target = "lastUpdateDateTime", source = "requestEntity.lastUpdateDateTime", qualifiedByName = "getLastUpdateDateTime")
+    })
+    RequestReturnDTO toReturnDTO(RequestEntity requestEntity);
 
     @AfterMapping
     default void setTotalValue(@MappingTarget RequestEntity requestEntity) {
@@ -69,5 +87,18 @@ public interface RequestMapper {
         }
 
         return totalQuantity;
+    }
+
+    @Named("getDefaultDateTime")
+    default String getDefaultDateTime(DateTime defaultDateTime) {
+        return defaultDateTime.toString();
+    }
+
+    @Named("getLastUpdateDateTime")
+    default String getLastUpdateDateTime(DateTime lastUpdateDateTime) {
+        if (!Objects.isNull(lastUpdateDateTime)) {
+            return lastUpdateDateTime.toString();
+        } else
+            return "";
     }
 }

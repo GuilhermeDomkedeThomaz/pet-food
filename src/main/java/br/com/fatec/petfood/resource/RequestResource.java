@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,26 +33,26 @@ public class RequestResource {
 
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/find/user", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> findRequestByUser() {
-        //TO DO
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/find/seller", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> findRequestBySeller() {
-        //TO DO
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<?> findRequestBySeller(@RequestParam(value = "sellerName") String sellerName) {
+        return requestService.findRequestBySeller(sellerName);
     }
 
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/find/user/seller", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> findRequestByUserAndSeller() {
-        //TO DO
-        return new ResponseEntity<>(HttpStatus.OK);
+    @GetMapping(value = "/find/user", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> findRequestByUser(@RequestParam(value = "userName") String userName) {
+        return requestService.findRequestByUser(userName);
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/find/seller/user", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> findRequestBySellerAndUser(
+            @RequestParam(value = "sellerName") String sellerName,
+            @RequestParam(value = "userName") String userName
+    ) {
+        return requestService.findRequestBySellerAndUser(sellerName, userName);
     }
 
     @ResponseStatus(HttpStatus.OK)
