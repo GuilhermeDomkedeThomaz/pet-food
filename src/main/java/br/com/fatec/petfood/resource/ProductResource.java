@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +27,7 @@ public class ProductResource {
 
     private final ProductService productService;
 
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createProduct(
@@ -36,6 +38,7 @@ public class ProductResource {
     }
 
     @ResponseBody
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/find/title/seller", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> findProductByTitleAndSellerName(
@@ -45,6 +48,7 @@ public class ProductResource {
         return productService.getProductByTitleAndSellerName(title, sellerName);
     }
 
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(value = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateProduct(
@@ -56,6 +60,7 @@ public class ProductResource {
         return productService.updateProduct(title, sellerName, productUpdateDTO, category);
     }
 
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping(value = "/delete")
     public ResponseEntity<?> deleteProduct(

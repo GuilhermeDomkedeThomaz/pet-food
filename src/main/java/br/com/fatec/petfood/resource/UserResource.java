@@ -17,6 +17,7 @@ public class UserResource {
 
     private final UserService userService;
 
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createUser(
@@ -27,6 +28,7 @@ public class UserResource {
     }
 
     @ResponseBody
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/find", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> findUser(@RequestParam(value = "name") String name) {
@@ -34,6 +36,7 @@ public class UserResource {
     }
 
     @ResponseBody
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> login(
@@ -43,6 +46,7 @@ public class UserResource {
         return userService.login(email, password);
     }
 
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(value = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateUser(
@@ -53,6 +57,7 @@ public class UserResource {
         return userService.updateUser(name, userUpdateDTO, cityZone);
     }
 
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping(value = "/delete")
     public ResponseEntity<?> deleteUser(@RequestParam(value = "name") String name) {

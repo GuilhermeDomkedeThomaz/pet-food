@@ -67,7 +67,6 @@ public class RequestServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Pedido registrado com sucesso.");
-        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -78,7 +77,6 @@ public class RequestServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(nullResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(nullResponse.getBody(), "Valor de frete passado inválido(vazio ou nulo).");
-        Assertions.assertEquals(nullResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         requestDTO.setShippingPrice(-9.99);
 
@@ -86,7 +84,6 @@ public class RequestServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Valor de frete passado inválido(menor ou igual a zero).");
-        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -97,7 +94,6 @@ public class RequestServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(nullResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(nullResponse.getBody(), "Nome do lojista passado inválido(vazio ou nulo).");
-        Assertions.assertEquals(nullResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         requestDTO.setSellerName(sellerEntity.getName());
 
@@ -105,7 +101,6 @@ public class RequestServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Lojista não encontrado com o nome passado.");
-        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -119,7 +114,6 @@ public class RequestServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(nullResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(nullResponse.getBody(), "Nome do usuário passado inválido(vazio ou nulo).");
-        Assertions.assertEquals(nullResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         requestDTO.setUserName(userEntity.getName());
 
@@ -127,7 +121,6 @@ public class RequestServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Usuário não encontrado com o nome passado.");
-        Assertions.assertEquals(response.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -143,7 +136,6 @@ public class RequestServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(nullResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(nullResponse.getBody(), "Lista de produtos atrelados ao pedido passada inválida(vazia ou nula).");
-        Assertions.assertEquals(nullResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         requestDTO.setProducts(new ArrayList<>());
 
@@ -151,7 +143,6 @@ public class RequestServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(emptyResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(emptyResponse.getBody(), "Lista de produtos atrelados ao pedido passada inválida(vazia ou nula).");
-        Assertions.assertEquals(emptyResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         final ProductRequestDTO notExistsProductRequestDTO = new ProductRequestDTO(firstProductEntity.getTitle(), 1);
         requestDTO.setProducts(List.of(notExistsProductRequestDTO));
@@ -161,7 +152,6 @@ public class RequestServiceTest extends IntegrationTest {
         Assertions.assertEquals(notExistsResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(notExistsResponse.getBody(), "Lista de produtos atrelados ao pedido passada inválida(nenhum produto válido para realização do pedido):  [Produto com o título: {"
                 + notExistsProductRequestDTO.getTitle() + "} não encontrado para o lojista passado.] ");
-        Assertions.assertEquals(notExistsResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         final ProductRequestDTO nullStockProductRequestDTO = new ProductRequestDTO(firstProductEntity.getTitle(), null);
         requestDTO.setProducts(List.of(nullStockProductRequestDTO));
@@ -171,7 +161,6 @@ public class RequestServiceTest extends IntegrationTest {
         Assertions.assertEquals(nullStockResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(nullStockResponse.getBody(), "Lista de produtos atrelados ao pedido passada inválida(nenhum produto válido para realização do pedido):  [Produto com o título: {"
                 + nullStockProductRequestDTO.getTitle() + "} passado com estoque inválido(vazio ou nulo).] ");
-        Assertions.assertEquals(nullStockResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         final ProductRequestDTO negativeStockProductRequestDTO = new ProductRequestDTO(firstProductEntity.getTitle(), -1);
         requestDTO.setProducts(List.of(negativeStockProductRequestDTO));
@@ -181,7 +170,6 @@ public class RequestServiceTest extends IntegrationTest {
         Assertions.assertEquals(negativeStockResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(negativeStockResponse.getBody(), "Lista de produtos atrelados ao pedido passada inválida(nenhum produto válido para realização do pedido):  [Produto com o título: {"
                 + negativeStockProductRequestDTO.getTitle() + "} passado com estoque inválido(menor ou igual a 0).] ");
-        Assertions.assertEquals(negativeStockResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         firstProductEntity.setStock(5);
         firstProductEntity.setPrice(9.99);
@@ -198,7 +186,6 @@ public class RequestServiceTest extends IntegrationTest {
         Assertions.assertEquals(invalidStockResponse.getBody(), "Lista de produtos atrelados ao pedido passada inválida(nenhum produto válido para realização do pedido):  [Produto com o título: {"
                 + invalidStockProductRequestDTO.getTitle() + "} não tem estoque necessário. Estoque solicitado: {" + invalidStockProductRequestDTO.getQuantity() +
                 "}, estoque atual: {" + firstProductEntity.getStock() + "}] ");
-        Assertions.assertEquals(invalidStockResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -228,18 +215,15 @@ public class RequestServiceTest extends IntegrationTest {
         ResponseEntity<?> sellerResponse = requestService.findRequestBySeller(sellerEntity.getName());
 
         Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.OK);
-        Assertions.assertEquals(sellerResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> userResponse = requestService.findRequestByUser(userEntity.getName());
 
         Assertions.assertEquals(userResponse.getStatusCode(), HttpStatus.OK);
-        Assertions.assertEquals(userResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> sellerAndUserResponse =
                 requestService.findRequestBySellerAndUser(sellerEntity.getName(), userEntity.getName());
 
         Assertions.assertEquals(sellerAndUserResponse.getStatusCode(), HttpStatus.OK);
-        Assertions.assertEquals(sellerAndUserResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -248,25 +232,21 @@ public class RequestServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(nullSellerResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(nullSellerResponse.getBody(), "Nome do lojista passado inválido(vazio ou nulo).");
-        Assertions.assertEquals(nullSellerResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> emptySellerResponse = requestService.findRequestBySeller("");
 
         Assertions.assertEquals(emptySellerResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(emptySellerResponse.getBody(), "Nome do lojista passado inválido(vazio ou nulo).");
-        Assertions.assertEquals(emptySellerResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> nullUserResponse = requestService.findRequestByUser(null);
 
         Assertions.assertEquals(nullUserResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(nullUserResponse.getBody(), "Nome do usuário passado inválido(vazio ou nulo).");
-        Assertions.assertEquals(nullUserResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> emptyUserResponse = requestService.findRequestByUser("");
 
         Assertions.assertEquals(emptyUserResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(emptyUserResponse.getBody(), "Nome do usuário passado inválido(vazio ou nulo).");
-        Assertions.assertEquals(emptyUserResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -276,28 +256,24 @@ public class RequestServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(nullSellerResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(nullSellerResponse.getBody(), "Nome do lojista passado inválido(vazio ou nulo).");
-        Assertions.assertEquals(nullSellerResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> emptySellerResponse =
                 requestService.findRequestBySellerAndUser("", userEntity.getName());
 
         Assertions.assertEquals(emptySellerResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(emptySellerResponse.getBody(), "Nome do lojista passado inválido(vazio ou nulo).");
-        Assertions.assertEquals(emptySellerResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> nullUserResponse =
                 requestService.findRequestBySellerAndUser(sellerEntity.getName(), null);
 
         Assertions.assertEquals(nullUserResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(nullUserResponse.getBody(), "Nome do usuário passado inválido(vazio ou nulo).");
-        Assertions.assertEquals(nullUserResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> emptyUserResponse =
                 requestService.findRequestBySellerAndUser(sellerEntity.getName(), "");
 
         Assertions.assertEquals(emptyUserResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(emptyUserResponse.getBody(), "Nome do usuário passado inválido(vazio ou nulo).");
-        Assertions.assertEquals(emptyUserResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 
     @Test
@@ -306,13 +282,11 @@ public class RequestServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(sellerResponse.getBody(), "Pedido(s) não encontrado(s) com o nome de lojista passado.");
-        Assertions.assertEquals(sellerResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> userResponse = requestService.findRequestByUser(userEntity.getName());
 
         Assertions.assertEquals(userResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(userResponse.getBody(), "Pedido(s) não encontrado(s) com o nome de usuário passado.");
-        Assertions.assertEquals(userResponse.getHeaders().getAccessControlAllowOrigin(), "*");
 
         ResponseEntity<?> sellerAndUserResponse =
                 requestService.findRequestBySellerAndUser(sellerEntity.getName(), userEntity.getName());
@@ -320,6 +294,5 @@ public class RequestServiceTest extends IntegrationTest {
         Assertions.assertEquals(sellerAndUserResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(sellerAndUserResponse.getBody(),
                 "Pedido(s) não encontrado(s) com os nomes de lojista e de usuário passados.");
-        Assertions.assertEquals(sellerAndUserResponse.getHeaders().getAccessControlAllowOrigin(), "*");
     }
 }

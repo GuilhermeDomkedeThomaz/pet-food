@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,6 +26,7 @@ public class RequestResource {
 
     private final RequestService requestService;
 
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createRequest(@RequestBody RequestDTO requestDTO) {
@@ -32,6 +34,7 @@ public class RequestResource {
     }
 
     @ResponseBody
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/find/seller", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> findRequestBySeller(@RequestParam(value = "sellerName") String sellerName) {
@@ -39,6 +42,7 @@ public class RequestResource {
     }
 
     @ResponseBody
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/find/user", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> findRequestByUser(@RequestParam(value = "userName") String userName) {
@@ -46,6 +50,7 @@ public class RequestResource {
     }
 
     @ResponseBody
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/find/seller/user", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> findRequestBySellerAndUser(
@@ -55,6 +60,7 @@ public class RequestResource {
         return requestService.findRequestBySellerAndUser(sellerName, userName);
     }
 
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(value = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateRequest() {
@@ -62,6 +68,7 @@ public class RequestResource {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping(value = "/rate", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> rateRequest() {
@@ -69,6 +76,7 @@ public class RequestResource {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping(value = "/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> cancelRequest() {
@@ -76,6 +84,7 @@ public class RequestResource {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping(value = "/delete")
     public ResponseEntity<?> deleteRequest() {

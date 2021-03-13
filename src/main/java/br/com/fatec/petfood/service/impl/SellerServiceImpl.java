@@ -10,10 +10,8 @@ import br.com.fatec.petfood.model.mapper.SellerMapper;
 import br.com.fatec.petfood.repository.mongo.SellerRepository;
 import br.com.fatec.petfood.service.SellerService;
 import br.com.fatec.petfood.service.ValidationService;
-import br.com.fatec.petfood.utils.ResponseHeadersUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.codec.binary.Base64;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -29,24 +27,22 @@ public class SellerServiceImpl implements SellerService {
     private final SellerMapper sellerMapper;
     private final SellerRepository sellerRepository;
     private final ValidationService validationService;
-    private final ResponseHeadersUtils responseHeadersUtils;
 
     @Override
     public ResponseEntity<?> createSeller(SellerDTO sellerDTO, CityZone cityZone, List<Category> categories) {
         byte[] passwordEncrypted;
-        HttpHeaders responseHeaders = responseHeadersUtils.getDefaultResponseHeaders();
 
         try {
             validationService.validateSellerDTO(sellerDTO, cityZone, categories);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), responseHeaders, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
         try {
             passwordEncrypted = Base64.encodeBase64(sellerDTO.getPassword().getBytes());
         } catch (Exception e) {
             return new ResponseEntity<>("Erro ao gerar senha criptografada para o lojista: " + e.getMessage(),
-                    responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         if (Objects.nonNull(passwordEncrypted)) {
@@ -55,24 +51,23 @@ public class SellerServiceImpl implements SellerService {
 
                 try {
                     sellerRepository.save(seller);
-                    return new ResponseEntity<>("Lojista cadastrado com sucesso.", responseHeaders, HttpStatus.CREATED);
+                    return new ResponseEntity<>("Lojista cadastrado com sucesso.", HttpStatus.CREATED);
                 } catch (Exception e) {
                     return new ResponseEntity<>("Erro ao gravar lojista na base de dados: " + e.getMessage(),
-                            responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+                            HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             } catch (Exception e) {
                 return new ResponseEntity<>("Erro no mapeamento para criação do lojista: " + e.getMessage(),
-                        responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+                        HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else
             return new ResponseEntity<>("Erro ao gerar senha criptografada para o lojista.",
-                    responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+                    HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override
     public ResponseEntity<?> getSeller(String name) {
         Optional<SellerEntity> seller = sellerRepository.findByName(name);
-        HttpHeaders responseHeaders = responseHeadersUtils.getDefaultResponseHeaders();
 
         if (seller.isPresent()) {
             SellerEntity sellerEntity = seller.get();
@@ -80,38 +75,36 @@ public class SellerServiceImpl implements SellerService {
             try {
                 SellerReturnDTO sellerReturnDTO = sellerMapper.toReturnDTO(sellerEntity);
 
-                return new ResponseEntity<>(sellerReturnDTO, responseHeaders, HttpStatus.OK);
+                return new ResponseEntity<>(sellerReturnDTO, HttpStatus.OK);
             } catch (Exception e) {
                 return new ResponseEntity<>("Erro no mapeamento para retorno do lojista: " + e.getMessage(),
-                        responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+                        HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else
-            return new ResponseEntity<>("Lojista não encontrado.", responseHeaders, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Lojista não encontrado.", HttpStatus.BAD_REQUEST);
     }
 
     @Override
     public ResponseEntity<?> login(String email, String password) {
         Optional<SellerEntity> seller = sellerRepository.findByEmail(email);
-        HttpHeaders responseHeaders = responseHeadersUtils.getDefaultResponseHeaders();
 
         if (seller.isPresent()) {
             try {
                 if (!password.equals(new String(Base64.decodeBase64(seller.get().getPassword()))))
-                    return new ResponseEntity<>("Login de lojista inválido.", responseHeaders, HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>("Login de lojista inválido.", HttpStatus.BAD_REQUEST);
                 else
-                    return new ResponseEntity<>("Login de lojista realizado com sucesso.", responseHeaders, HttpStatus.OK);
+                    return new ResponseEntity<>("Login de lojista realizado com sucesso.", HttpStatus.OK);
             } catch (Exception e) {
-                return new ResponseEntity<>("Login de lojista inválido: " + e.getMessage(), responseHeaders, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Login de lojista inválido: " + e.getMessage(), HttpStatus.BAD_REQUEST);
             }
         } else
-            return new ResponseEntity<>("Lojista não encontrado com o email passado.", responseHeaders, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Lojista não encontrado com o email passado.", HttpStatus.BAD_REQUEST);
     }
 
     @Override
     public ResponseEntity<?> updateSeller(String name, SellerUpdateDTO sellerUpdateDTO, CityZone cityZone, List<Category> categories) {
         byte[] passwordEncrypted;
         Optional<SellerEntity> seller = sellerRepository.findByName(name);
-        HttpHeaders responseHeaders = responseHeadersUtils.getDefaultResponseHeaders();
 
         if (seller.isPresent()) {
             SellerEntity sellerEntity = seller.get();
@@ -119,14 +112,14 @@ public class SellerServiceImpl implements SellerService {
             try {
                 validationService.validateSellerUpdateDTO(sellerUpdateDTO, cityZone, categories);
             } catch (Exception e) {
-                return new ResponseEntity<>(e.getMessage(), responseHeaders, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
             }
 
             try {
                 passwordEncrypted = Base64.encodeBase64(sellerUpdateDTO.getPassword().getBytes());
             } catch (Exception e) {
                 return new ResponseEntity<>("Erro ao gerar senha criptografada para o lojista: " + e.getMessage(),
-                        responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+                        HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
             if (Objects.nonNull(passwordEncrypted)) {
@@ -135,38 +128,37 @@ public class SellerServiceImpl implements SellerService {
 
                     try {
                         sellerRepository.save(updateSellerEntity);
-                        return new ResponseEntity<>("Lojista atualizado com sucesso.", responseHeaders, HttpStatus.OK);
+                        return new ResponseEntity<>("Lojista atualizado com sucesso.", HttpStatus.OK);
                     } catch (Exception e) {
                         return new ResponseEntity<>("Erro ao atualizar lojista na base de dados: " + e.getMessage(),
-                                responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+                                HttpStatus.INTERNAL_SERVER_ERROR);
                     }
                 } catch (Exception e) {
                     return new ResponseEntity<>("Erro no mapeamento para atualização do lojista: " + e.getMessage(),
-                            responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+                            HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             } else
                 return new ResponseEntity<>("Erro ao gerar senha criptografada para o lojista.",
-                        responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+                        HttpStatus.INTERNAL_SERVER_ERROR);
         } else
-            return new ResponseEntity<>("Lojista não encontrado.", responseHeaders, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Lojista não encontrado.", HttpStatus.BAD_REQUEST);
     }
 
     @Override
     public ResponseEntity<?> deleteSeller(String name) {
         Optional<SellerEntity> seller = sellerRepository.findByName(name);
-        HttpHeaders responseHeaders = responseHeadersUtils.getDefaultResponseHeaders();
 
         if (seller.isPresent()) {
             SellerEntity sellerEntity = seller.get();
 
             try {
                 sellerRepository.delete(sellerEntity);
-                return new ResponseEntity<>("Lojista deletado com sucesso.", responseHeaders, HttpStatus.OK);
+                return new ResponseEntity<>("Lojista deletado com sucesso.", HttpStatus.OK);
             } catch (Exception e) {
                 return new ResponseEntity<>("Erro ao deletar lojista na base de dados: " + e.getMessage(),
-                        responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+                        HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else
-            return new ResponseEntity<>("Lojista não encontrado.", responseHeaders, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Lojista não encontrado.", HttpStatus.BAD_REQUEST);
     }
 }
