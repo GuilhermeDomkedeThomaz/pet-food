@@ -36,6 +36,14 @@ public class RequestResource {
     @ResponseBody
     @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/find/id", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> findRequestById(@RequestParam(value = "id") String id) {
+        return requestService.findRequestById(id);
+    }
+
+    @ResponseBody
+    @CrossOrigin(origins = "*")
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/find/seller", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> findRequestBySeller(@RequestParam(value = "sellerName") String sellerName) {
         return requestService.findRequestBySeller(sellerName);

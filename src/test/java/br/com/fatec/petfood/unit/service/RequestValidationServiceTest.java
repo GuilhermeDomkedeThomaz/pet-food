@@ -246,6 +246,7 @@ public class RequestValidationServiceTest extends UnitTest {
     public void shouldValidateFindRequestsWithSuccess() {
         Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.TRUE);
 
+        Assertions.assertDoesNotThrow(() -> requestValidationServiceImpl.validateFindRequestById(requestEntity.getId().toString()));
         Assertions.assertDoesNotThrow(() -> requestValidationServiceImpl.validateFindRequestBySeller(sellerEntity.getName()));
         Assertions.assertDoesNotThrow(() -> requestValidationServiceImpl.validateFindRequestByUser(userEntity.getName()));
     }
@@ -253,6 +254,12 @@ public class RequestValidationServiceTest extends UnitTest {
     @Test
     public void shouldValidateFindRequestsWithInvalidParams() {
         Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.FALSE);
+
+        try {
+            requestValidationServiceImpl.validateFindRequestById("");
+        } catch (Exception e) {
+            Assertions.assertEquals("Id do pedido passado inválido(vazio ou nulo).", e.getMessage());
+        }
 
         try {
             requestValidationServiceImpl.validateFindRequestBySeller("");

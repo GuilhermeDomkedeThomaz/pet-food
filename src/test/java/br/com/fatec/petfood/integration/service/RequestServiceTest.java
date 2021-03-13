@@ -4,9 +4,11 @@ import br.com.fatec.petfood.integration.IntegrationTest;
 import br.com.fatec.petfood.model.dto.ProductRequestDTO;
 import br.com.fatec.petfood.model.dto.RequestDTO;
 import br.com.fatec.petfood.model.entity.mongo.ProductEntity;
+import br.com.fatec.petfood.model.entity.mongo.RequestEntity;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.entity.mongo.UserEntity;
 import br.com.fatec.petfood.repository.mongo.ProductRepository;
+import br.com.fatec.petfood.repository.mongo.RequestRepository;
 import br.com.fatec.petfood.repository.mongo.SellerRepository;
 import br.com.fatec.petfood.repository.mongo.UserRepository;
 import br.com.fatec.petfood.service.RequestService;
@@ -19,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class RequestServiceTest extends IntegrationTest {
 
@@ -30,6 +33,9 @@ public class RequestServiceTest extends IntegrationTest {
 
     @Autowired
     private SellerRepository sellerRepository;
+
+    @Autowired
+    private RequestRepository requestRepository;
 
     @Autowired
     private ProductRepository productRepository;
@@ -66,7 +72,14 @@ public class RequestServiceTest extends IntegrationTest {
         ResponseEntity<?> response = requestService.createRequest(requestDTO);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
-        Assertions.assertEquals(response.getBody(), "Pedido registrado com sucesso.");
+
+        Optional<List<RequestEntity>> optionalRequestEntityList = requestRepository.findAllBySellerName(sellerEntity.getName());
+
+        if (optionalRequestEntityList.isPresent()) {
+            RequestEntity requestEntity = optionalRequestEntityList.get().get(0);
+            Assertions.assertEquals(response.getBody(), "Pedido registrado com sucesso. Id do pedido: "
+                    + requestEntity.getId().toString());
+        }
     }
 
     @Test
@@ -216,6 +229,14 @@ public class RequestServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.OK);
 
+        Optional<List<RequestEntity>> optionalRequestEntityList = requestRepository.findAllBySellerName(sellerEntity.getName());
+
+        if (optionalRequestEntityList.isPresent()) {
+            ResponseEntity<?> idResponse = requestService.findRequestById(optionalRequestEntityList.get().get(0).getId().toString());
+
+            Assertions.assertEquals(idResponse.getStatusCode(), HttpStatus.OK);
+        }
+
         ResponseEntity<?> userResponse = requestService.findRequestByUser(userEntity.getName());
 
         Assertions.assertEquals(userResponse.getStatusCode(), HttpStatus.OK);
@@ -227,7 +248,22 @@ public class RequestServiceTest extends IntegrationTest {
     }
 
     @Test
-    public void shouldResponseBadRequestWithInvalidParamsOnFindBySellerOrUser() {
+    public void shouldResponseBadRequestWithInvalidParamsOnFindByIdOrSellerOrUser() {
+        ResponseEntity<?> nullIdResponse = requestService.findRequestById(null);
+
+        Assertions.assertEquals(nullIdResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(nullIdResponse.getBody(), "Id do pedido passado inválido(vazio ou nulo).");
+
+        ResponseEntity<?> emptyIdResponse = requestService.findRequestById("");
+
+        Assertions.assertEquals(emptyIdResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(emptyIdResponse.getBody(), "Id do pedido passado inválido(vazio ou nulo).");
+
+        ResponseEntity<?> invalidIdResponse = requestService.findRequestById("1");
+
+        Assertions.assertEquals(invalidIdResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(invalidIdResponse.getBody(), "Id do pedido passado inválido.");
+
         ResponseEntity<?> nullSellerResponse = requestService.findRequestBySeller(null);
 
         Assertions.assertEquals(nullSellerResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
@@ -278,6 +314,11 @@ public class RequestServiceTest extends IntegrationTest {
 
     @Test
     public void shouldNotFind() {
+        ResponseEntity<?> idResponse = requestService.findRequestById(sellerEntity.getId().toString());
+
+        Assertions.assertEquals(idResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(idResponse.getBody(), "Pedido(s) não encontrado(s) com o id de pedido passado.");
+
         ResponseEntity<?> sellerResponse = requestService.findRequestBySeller(sellerEntity.getName());
 
         Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.BAD_REQUEST);

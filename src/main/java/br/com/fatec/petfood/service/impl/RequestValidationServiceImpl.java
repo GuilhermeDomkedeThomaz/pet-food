@@ -127,6 +127,12 @@ public class RequestValidationServiceImpl implements RequestValidationService {
     }
 
     @Override
+    public void validateFindRequestById(String id) throws Exception {
+        if (!validateUtils.isNotNullAndNotEmpty(id))
+            throw new Exception("Id do pedido passado inválido(vazio ou nulo).");
+    }
+
+    @Override
     public void validateFindRequestBySeller(String sellerName) throws Exception {
         this.genericValidateSeller(sellerName);
     }

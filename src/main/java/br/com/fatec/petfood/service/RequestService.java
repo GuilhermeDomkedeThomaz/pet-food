@@ -7,6 +7,8 @@ public interface RequestService {
 
     ResponseEntity<?> createRequest(RequestDTO requestDTO);
 
+    ResponseEntity<?> findRequestById(String id);
+
     ResponseEntity<?> findRequestBySeller(String sellerName);
 
     ResponseEntity<?> findRequestByUser(String userName);

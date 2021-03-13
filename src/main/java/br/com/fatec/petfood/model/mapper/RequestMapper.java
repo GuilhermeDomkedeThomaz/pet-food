@@ -37,6 +37,7 @@ public interface RequestMapper {
                            List<ProductRequest> productRequests, Double shippingPrice, Status status);
 
     @Mappings({
+            @Mapping(target = "id", source = "requestEntity.id", qualifiedByName = "getId"),
             @Mapping(target = "sellerName", source = "requestEntity.sellerName"),
             @Mapping(target = "userName", source = "requestEntity.userName"),
             @Mapping(target = "products", source = "requestEntity.products"),
@@ -87,6 +88,11 @@ public interface RequestMapper {
         }
 
         return totalQuantity;
+    }
+
+    @Named("getId")
+    default String getId(ObjectId id) {
+        return id.toString();
     }
 
     @Named("getDefaultDateTime")

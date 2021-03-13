@@ -12,6 +12,7 @@ import br.com.fatec.petfood.repository.mongo.RequestRepository;
 import br.com.fatec.petfood.service.RequestService;
 import br.com.fatec.petfood.service.RequestValidationService;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -70,7 +71,8 @@ public class RequestServiceImpl implements RequestService {
 
             try {
                 requestRepository.save(requestEntity);
-                return new ResponseEntity<>("Pedido registrado com sucesso.", HttpStatus.CREATED);
+                return new ResponseEntity<>("Pedido registrado com sucesso. Id do pedido: " + requestEntity.getId().toString(),
+                        HttpStatus.CREATED);
             } catch (Exception e) {
                 return new ResponseEntity<>("Erro ao gravar pedido na base de dados: " + e.getMessage(),
                         HttpStatus.INTERNAL_SERVER_ERROR);
@@ -79,6 +81,37 @@ public class RequestServiceImpl implements RequestService {
             return new ResponseEntity<>("Erro no mapeamento para criação do pedido: " + e.getMessage(),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Override
+    public ResponseEntity<?> findRequestById(String id) {
+        ObjectId objectId;
+
+        try {
+            requestValidationService.validateFindRequestById(id);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            objectId = new ObjectId(id);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Id do pedido passado inválido.", HttpStatus.BAD_REQUEST);
+        }
+
+        Optional<List<RequestEntity>> optionalRequestEntityList = requestRepository.findAllById(objectId);
+
+        if (optionalRequestEntityList.isPresent()) {
+            List<RequestEntity> requestEntityList = optionalRequestEntityList.get();
+
+            if (!requestEntityList.isEmpty())
+                return this.findReturn(requestEntityList);
+            else
+                return new ResponseEntity<>("Pedido(s) não encontrado(s) com o id de pedido passado.",
+                        HttpStatus.BAD_REQUEST);
+        } else
+            return new ResponseEntity<>("Pedido(s) não encontrado(s) com o id de pedido passado.",
+                    HttpStatus.BAD_REQUEST);
     }
 
     @Override

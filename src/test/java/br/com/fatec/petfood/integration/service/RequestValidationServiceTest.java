@@ -211,6 +211,7 @@ public class RequestValidationServiceTest extends IntegrationTest {
 
     @Test
     public void shouldValidateFindRequestsWithSuccess() {
+        Assertions.assertDoesNotThrow(() -> requestValidationServiceImpl.validateFindRequestById(requestEntity.getId().toString()));
         Assertions.assertDoesNotThrow(() -> requestValidationServiceImpl.validateFindRequestBySeller(sellerEntity.getName()));
         Assertions.assertDoesNotThrow(() -> requestValidationServiceImpl.validateFindRequestByUser(userEntity.getName()));
     }
@@ -218,13 +219,37 @@ public class RequestValidationServiceTest extends IntegrationTest {
     @Test
     public void shouldValidateFindRequestsWithInvalidParams() {
         try {
+            requestValidationServiceImpl.validateFindRequestById(null);
+        } catch (Exception e) {
+            Assertions.assertEquals("Id do pedido passado inválido(vazio ou nulo).", e.getMessage());
+        }
+
+        try {
+            requestValidationServiceImpl.validateFindRequestById("");
+        } catch (Exception e) {
+            Assertions.assertEquals("Id do pedido passado inválido(vazio ou nulo).", e.getMessage());
+        }
+
+        try {
             requestValidationServiceImpl.validateFindRequestBySeller(null);
         } catch (Exception e) {
             Assertions.assertEquals("Nome do lojista passado inválido(vazio ou nulo).", e.getMessage());
         }
 
         try {
+            requestValidationServiceImpl.validateFindRequestBySeller("");
+        } catch (Exception e) {
+            Assertions.assertEquals("Nome do lojista passado inválido(vazio ou nulo).", e.getMessage());
+        }
+
+        try {
             requestValidationServiceImpl.validateFindRequestByUser(null);
+        } catch (Exception e) {
+            Assertions.assertEquals("Nome do usuário passado inválido(vazio ou nulo).", e.getMessage());
+        }
+
+        try {
+            requestValidationServiceImpl.validateFindRequestByUser("");
         } catch (Exception e) {
             Assertions.assertEquals("Nome do usuário passado inválido(vazio ou nulo).", e.getMessage());
         }

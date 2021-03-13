@@ -20,6 +20,8 @@ public interface RequestValidationService {
 
     void validateRequestEntityTotalValue(RequestEntity requestEntity) throws Exception;
 
+    void validateFindRequestById(String id) throws Exception;
+
     void validateFindRequestBySeller(String sellerName) throws Exception;
 
     void validateFindRequestByUser(String userName) throws Exception;

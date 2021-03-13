@@ -14,6 +14,7 @@ import br.com.fatec.petfood.service.impl.RequestServiceImpl;
 import br.com.fatec.petfood.service.impl.RequestValidationServiceImpl;
 import br.com.fatec.petfood.unit.UnitTest;
 import io.github.benas.randombeans.api.EnhancedRandom;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -70,7 +71,8 @@ public class RequestServiceTest extends UnitTest {
         ResponseEntity<?> response = requestServiceImpl.createRequest(requestDTO);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
-        Assertions.assertEquals(response.getBody(), "Pedido registrado com sucesso.");
+        Assertions.assertEquals(response.getBody(), "Pedido registrado com sucesso. Id do pedido: "
+                + requestEntity.getId().toString());
     }
 
     @Test
@@ -168,6 +170,56 @@ public class RequestServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro ao gravar pedido na base de dados: ");
+    }
+
+    @Test
+    public void shouldFindByIdWithSuccess() {
+        Mockito.when(requestRepository.findAllById(Mockito.any(ObjectId.class))).thenReturn(Optional.of(List.of(requestEntity)));
+        Mockito.when(requestMapper.toReturnDTO(eq(requestEntity))).thenReturn(requestReturnDTO);
+
+        ResponseEntity<?> response = requestServiceImpl.findRequestById(requestEntity.getId().toString());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(response.getBody(), List.of(requestReturnDTO));
+    }
+
+    @Test
+    public void shouldResponseBadRequestWithInvalidParamsOnFindById() throws Exception {
+        Mockito.doThrow(new Exception("Id do pedido passado inválido(vazio ou nulo)."))
+                .when(requestValidationServiceImpl).validateFindRequestById(requestEntity.getId().toString());
+
+        ResponseEntity<?> response = requestServiceImpl.findRequestById(requestEntity.getId().toString());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Id do pedido passado inválido(vazio ou nulo).");
+    }
+
+    @Test
+    public void shouldNotFindById() {
+        Mockito.when(requestRepository.findAllById(Mockito.any(ObjectId.class))).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = requestServiceImpl.findRequestById(requestEntity.getId().toString());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Pedido(s) não encontrado(s) com o id de pedido passado.");
+
+        Mockito.when(requestRepository.findAllById(Mockito.any(ObjectId.class))).thenReturn(Optional.of(new ArrayList<>()));
+
+        ResponseEntity<?> listResponse = requestServiceImpl.findRequestById(requestEntity.getId().toString());
+
+        Assertions.assertEquals(listResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(listResponse.getBody(), "Pedido(s) não encontrado(s) com o id de pedido passado.");
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorWithMapperOnFindById() {
+        Mockito.when(requestRepository.findAllById(Mockito.any(ObjectId.class))).thenReturn(Optional.of(List.of(requestEntity)));
+        Mockito.when(requestMapper.toReturnDTO(eq(requestEntity))).thenThrow(new NullPointerException());
+
+        ResponseEntity<?> response = requestServiceImpl.findRequestById(requestEntity.getId().toString());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro no mapeamento para busca de pedido(s): null");
     }
 
     @Test
