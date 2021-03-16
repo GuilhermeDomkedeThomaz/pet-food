@@ -51,7 +51,7 @@ public class ValidationServiceImpl implements ValidationService {
             throw new Exception("CPF passado inválido(vazio ou nulo).");
 
         if (userRepository.findByDocument(userDTO.getRegistrationInfos().getDocument()).isPresent())
-            throw new Exception("Usuário já existe com o cpf passado.");
+            throw new Exception("Usuário já existe com o CPF passado.");
 
         this.genericUserValidate(userDTO.getRegistrationInfos(), userDTO.getPassword(), userDTO.getBirthdayDate(), cityZone);
     }
@@ -96,13 +96,52 @@ public class ValidationServiceImpl implements ValidationService {
         if (sellerRepository.findByName(sellerDTO.getName()).isPresent())
             throw new Exception("Lojista já existe com o nome passado.");
 
-        this.genericSellerValidate(sellerDTO.getEmail(), sellerDTO.getPassword(), sellerDTO.getRegistrationInfos(), cityZone, categories);
+        if (!validateUtils.isNotNullAndNotEmpty(sellerDTO.getEmail()))
+            throw new Exception("Email passado inválido(vazio ou nulo).");
+
+        if (sellerRepository.findByEmail(sellerDTO.getEmail()).isPresent())
+            throw new Exception("Lojista já existe com o email passado.");
+
+        if (!validateUtils.isNotNullAndNotEmpty(sellerDTO.getRegistrationInfos().getDocument()))
+            throw new Exception("CNPJ passado inválido(vazio ou nulo).");
+
+        if (sellerRepository.findByDocument(sellerDTO.getRegistrationInfos().getDocument()).isPresent())
+            throw new Exception("Lojista já existe com o CNPJ passado.");
+
+        this.genericSellerValidate(sellerDTO.getPassword(), sellerDTO.getRegistrationInfos(), cityZone, categories);
     }
 
     @Override
-    public void validateSellerUpdateDTO(SellerUpdateDTO sellerUpdateDTO, CityZone cityZone, List<Category> categories) throws Exception {
-        this.genericSellerValidate(sellerUpdateDTO.getEmail(), sellerUpdateDTO.getPassword(), sellerUpdateDTO.getRegistrationInfos(),
-                cityZone, categories);
+    public RegistrationInfos validateSellerUpdateDTO(SellerEntity sellerEntity, SellerUpdateDTO sellerUpdateDTO,
+                                        CityZone cityZone, List<Category> categories) throws Exception {
+        if (!validateUtils.isNotNullAndNotEmpty(sellerUpdateDTO.getName()))
+            throw new Exception("Nome passado inválido(vazio ou nulo).");
+
+        if (!sellerEntity.getName().equals(sellerUpdateDTO.getName())) {
+            if (sellerRepository.findByName(sellerUpdateDTO.getName()).isPresent())
+                throw new Exception("Lojista já existe com o novo nome passado.");
+        }
+
+        if (!validateUtils.isNotNullAndNotEmpty(sellerUpdateDTO.getEmail()))
+            throw new Exception("Email passado inválido(vazio ou nulo).");
+
+        if (!sellerEntity.getEmail().equals(sellerUpdateDTO.getEmail())) {
+            if (sellerRepository.findByEmail(sellerUpdateDTO.getEmail()).isPresent())
+                throw new Exception("Lojista já existe com o novo email passado.");
+        }
+
+        RegistrationInfos registrationInfos = new RegistrationInfos(
+                sellerEntity.getRegistrationInfos().getDocument(),
+                sellerUpdateDTO.getCellPhone(),
+                sellerUpdateDTO.getAddress(),
+                sellerUpdateDTO.getNumberAddress(),
+                sellerUpdateDTO.getCep(),
+                sellerUpdateDTO.getCity(),
+                sellerUpdateDTO.getUf()
+        );
+
+        this.genericSellerValidate(sellerUpdateDTO.getPassword(), registrationInfos, cityZone, categories);
+        return registrationInfos;
     }
 
     @Override
@@ -183,17 +222,8 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     private void genericSellerValidate(
-            String email, String password, RegistrationInfos registrationInfos,  CityZone cityZone, List<Category> categories
+            String password, RegistrationInfos registrationInfos,  CityZone cityZone, List<Category> categories
     ) throws Exception {
-        if (!validateUtils.isNotNullAndNotEmpty(email))
-            throw new Exception("Email passado inválido(vazio ou nulo).");
-
-        if (sellerRepository.findByEmail(email).isPresent())
-            throw new Exception("Lojista já existe com o email passado.");
-
-        if (!validateUtils.isNotNullAndNotEmpty(registrationInfos.getDocument()))
-            throw new Exception("CNPJ passado inválido(vazio ou nulo).");
-
         this.genericValidate(password, registrationInfos, cityZone);
 
         if (Objects.isNull(categories))

@@ -102,7 +102,7 @@ public class ValidationServiceTest extends IntegrationTest {
         try {
             validationServiceImpl.validateUserDTO(userDTO, CityZone.EAST);
         } catch (Exception e) {
-            Assertions.assertEquals("Usuário já existe com o cpf passado.", e.getMessage());
+            Assertions.assertEquals("Usuário já existe com o CPF passado.", e.getMessage());
         }
     }
 
@@ -160,6 +160,19 @@ public class ValidationServiceTest extends IntegrationTest {
             validationServiceImpl.validateSellerDTO(sellerDTO, CityZone.EAST, categories);
         } catch (Exception e) {
             Assertions.assertEquals("Lojista já existe com o email passado.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldValidateSellerDTOWithExistsDocument() {
+        sellerRepository.save(sellerMapper.toEntity(sellerDTO, Base64.encodeBase64(sellerDTO.getPassword().getBytes()), CityZone.EAST, categories));
+        sellerDTO.setName("Teste");
+        sellerDTO.setEmail("Teste");
+
+        try {
+            validationServiceImpl.validateSellerDTO(sellerDTO, CityZone.EAST, categories);
+        } catch (Exception e) {
+            Assertions.assertEquals("Lojista já existe com o CNPJ passado.", e.getMessage());
         }
     }
 

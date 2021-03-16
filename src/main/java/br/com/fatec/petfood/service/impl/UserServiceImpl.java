@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
                 return new ResponseEntity<>("Login de usuário inválido: " + e.getMessage(), HttpStatus.BAD_REQUEST);
             }
         } else
-            return new ResponseEntity<>("Usuário não encontrado.", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Usuário não encontrado com o email passado.", HttpStatus.BAD_REQUEST);
     }
 
     @Override

@@ -7,6 +7,7 @@ import br.com.fatec.petfood.model.dto.SellerUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.enums.Category;
 import br.com.fatec.petfood.model.enums.CityZone;
+import br.com.fatec.petfood.model.generic.RegistrationInfos;
 import br.com.fatec.petfood.model.mapper.SellerMapper;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import org.apache.tomcat.util.codec.binary.Base64;
@@ -49,18 +50,29 @@ public class SellerMapperTest extends IntegrationTest {
         SellerUpdateDTO sellerUpdateDTO = EnhancedRandom.random(SellerUpdateDTO.class);
         byte[] passwordEncrypted = Base64.encodeBase64(sellerUpdateDTO.getPassword().getBytes());
         List<Category> categories = Arrays.asList(Category.FOOD, Category.OTHERS);
+        RegistrationInfos registrationInfos = new RegistrationInfos(
+                sellerEntity.getRegistrationInfos().getDocument(),
+                sellerUpdateDTO.getCellPhone(),
+                sellerUpdateDTO.getAddress(),
+                sellerUpdateDTO.getNumberAddress(),
+                sellerUpdateDTO.getCep(),
+                sellerUpdateDTO.getCity(),
+                sellerUpdateDTO.getUf()
+        );
 
-        SellerEntity sellerEntityUpdate = sellerMapper.toEntity(sellerEntity, sellerUpdateDTO, passwordEncrypted, CityZone.EAST, categories);
+        SellerEntity sellerEntityUpdate = sellerMapper.toEntity(sellerEntity, sellerUpdateDTO, registrationInfos,
+                passwordEncrypted, CityZone.EAST, categories);
 
         Assertions.assertEquals(sellerEntity.getId(), sellerEntityUpdate.getId());
         Assertions.assertEquals(sellerEntity.getName(), sellerEntityUpdate.getName());
         Assertions.assertEquals(sellerUpdateDTO.getEmail(), sellerEntityUpdate.getEmail());
-        Assertions.assertEquals(sellerUpdateDTO.getRegistrationInfos().getDocument(), sellerEntityUpdate.getRegistrationInfos().getDocument());
-        Assertions.assertEquals(sellerUpdateDTO.getRegistrationInfos().getCellPhone(), sellerEntityUpdate.getRegistrationInfos().getCellPhone());
-        Assertions.assertEquals(sellerUpdateDTO.getRegistrationInfos().getAddress(), sellerEntityUpdate.getRegistrationInfos().getAddress());
-        Assertions.assertEquals(sellerUpdateDTO.getRegistrationInfos().getNumberAddress(), sellerEntityUpdate.getRegistrationInfos().getNumberAddress());
-        Assertions.assertEquals(sellerUpdateDTO.getRegistrationInfos().getCep(), sellerEntityUpdate.getRegistrationInfos().getCep());
-        Assertions.assertEquals(sellerUpdateDTO.getRegistrationInfos().getCity(), sellerEntityUpdate.getRegistrationInfos().getCity());
+        Assertions.assertEquals(sellerEntity.getRegistrationInfos().getDocument(),
+                sellerEntityUpdate.getRegistrationInfos().getDocument());
+        Assertions.assertEquals(sellerUpdateDTO.getCellPhone(), sellerEntityUpdate.getRegistrationInfos().getCellPhone());
+        Assertions.assertEquals(sellerUpdateDTO.getAddress(), sellerEntityUpdate.getRegistrationInfos().getAddress());
+        Assertions.assertEquals(sellerUpdateDTO.getNumberAddress(), sellerEntityUpdate.getRegistrationInfos().getNumberAddress());
+        Assertions.assertEquals(sellerUpdateDTO.getCep(), sellerEntityUpdate.getRegistrationInfos().getCep());
+        Assertions.assertEquals(sellerUpdateDTO.getCity(), sellerEntityUpdate.getRegistrationInfos().getCity());
         Assertions.assertEquals(sellerUpdateDTO.getPassword(), new String(Base64.decodeBase64(sellerEntityUpdate.getPassword())));
         Assertions.assertEquals(CityZone.EAST, sellerEntityUpdate.getCityZone());
         Assertions.assertEquals(categories, sellerEntityUpdate.getCategories());

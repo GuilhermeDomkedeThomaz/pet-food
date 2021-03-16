@@ -112,7 +112,7 @@ public class ValidationServiceTest extends UnitTest {
         try {
             validationServiceImpl.validateUserDTO(userDTO, CityZone.EAST);
         } catch (Exception e) {
-            Assertions.assertEquals("Usuário já existe com o cpf passado.", e.getMessage());
+            Assertions.assertEquals("Usuário já existe com o CPF passado.", e.getMessage());
         }
     }
 
@@ -149,6 +149,8 @@ public class ValidationServiceTest extends UnitTest {
         Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.TRUE);
         Mockito.when(sellerRepository.findByName(eq(sellerDTO.getName()))).thenReturn(Optional.empty());
         Mockito.when(sellerRepository.findByEmail(eq(sellerDTO.getEmail()))).thenReturn(Optional.empty());
+        Mockito.when(sellerRepository.findByDocument(eq(sellerDTO.getRegistrationInfos().getDocument())))
+                .thenReturn(Optional.empty());
 
         Assertions.assertDoesNotThrow(() -> validationServiceImpl.validateSellerDTO(sellerDTO, CityZone.EAST, categories));
     }
@@ -186,6 +188,21 @@ public class ValidationServiceTest extends UnitTest {
             validationServiceImpl.validateSellerDTO(sellerDTO, CityZone.EAST, categories);
         } catch (Exception e) {
             Assertions.assertEquals("Lojista já existe com o email passado.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldValidateSellerDTOWithExistsDocument() {
+        Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.TRUE);
+        Mockito.when(sellerRepository.findByName(eq(sellerDTO.getName()))).thenReturn(Optional.empty());
+        Mockito.when(sellerRepository.findByEmail(eq(sellerDTO.getEmail()))).thenReturn(Optional.empty());
+        Mockito.when(sellerRepository.findByDocument(eq(sellerDTO.getRegistrationInfos().getDocument())))
+                .thenReturn(Optional.of(sellerEntity));
+
+        try {
+            validationServiceImpl.validateSellerDTO(sellerDTO, CityZone.EAST, categories);
+        } catch (Exception e) {
+            Assertions.assertEquals("Lojista já existe com o CNPJ passado.", e.getMessage());
         }
     }
 

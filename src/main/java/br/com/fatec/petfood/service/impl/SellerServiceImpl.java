@@ -6,6 +6,7 @@ import br.com.fatec.petfood.model.dto.SellerUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.enums.Category;
 import br.com.fatec.petfood.model.enums.CityZone;
+import br.com.fatec.petfood.model.generic.RegistrationInfos;
 import br.com.fatec.petfood.model.mapper.SellerMapper;
 import br.com.fatec.petfood.repository.mongo.SellerRepository;
 import br.com.fatec.petfood.service.SellerService;
@@ -91,7 +92,7 @@ public class SellerServiceImpl implements SellerService {
         if (seller.isPresent()) {
             try {
                 if (!password.equals(new String(Base64.decodeBase64(seller.get().getPassword()))))
-                    return new ResponseEntity<>("Login de lojista inválido.", HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>("Senha inválida para o lojista passado.", HttpStatus.BAD_REQUEST);
                 else
                     return new ResponseEntity<>("Login de lojista realizado com sucesso.", HttpStatus.OK);
             } catch (Exception e) {
@@ -102,15 +103,16 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Override
-    public ResponseEntity<?> updateSeller(String name, SellerUpdateDTO sellerUpdateDTO, CityZone cityZone, List<Category> categories) {
+    public ResponseEntity<?> updateSeller(String document, SellerUpdateDTO sellerUpdateDTO, CityZone cityZone, List<Category> categories) {
         byte[] passwordEncrypted;
-        Optional<SellerEntity> seller = sellerRepository.findByName(name);
+        RegistrationInfos registrationInfos;
+        Optional<SellerEntity> seller = sellerRepository.findByDocument(document);
 
         if (seller.isPresent()) {
             SellerEntity sellerEntity = seller.get();
 
             try {
-                validationService.validateSellerUpdateDTO(sellerUpdateDTO, cityZone, categories);
+                registrationInfos = validationService.validateSellerUpdateDTO(seller.get(), sellerUpdateDTO, cityZone, categories);
             } catch (Exception e) {
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
             }
@@ -124,7 +126,8 @@ public class SellerServiceImpl implements SellerService {
 
             if (Objects.nonNull(passwordEncrypted)) {
                 try {
-                    SellerEntity updateSellerEntity = sellerMapper.toEntity(sellerEntity, sellerUpdateDTO, passwordEncrypted, cityZone, categories);
+                    SellerEntity updateSellerEntity = sellerMapper.toEntity(sellerEntity, sellerUpdateDTO, registrationInfos,
+                            passwordEncrypted, cityZone, categories);
 
                     try {
                         sellerRepository.save(updateSellerEntity);

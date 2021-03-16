@@ -64,12 +64,12 @@ public class SellerResource {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(value = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateSeller(
-            @RequestParam(value = "name") String name,
+            @RequestParam(value = "document") String document,
             @RequestBody SellerUpdateDTO sellerUpdateDTO,
             @RequestParam(value = "cityZone") CityZone cityZone,
             @RequestParam(value = "categories") List<Category> categories
     ) {
-        return sellerService.updateSeller(name, sellerUpdateDTO, cityZone, categories);
+        return sellerService.updateSeller(document, sellerUpdateDTO, cityZone, categories);
     }
 
     @CrossOrigin(origins = "*")

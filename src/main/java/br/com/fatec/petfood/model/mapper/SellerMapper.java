@@ -6,6 +6,7 @@ import br.com.fatec.petfood.model.dto.SellerUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.enums.Category;
 import br.com.fatec.petfood.model.enums.CityZone;
+import br.com.fatec.petfood.model.generic.RegistrationInfos;
 import org.joda.time.DateTime;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -34,12 +35,13 @@ public interface SellerMapper {
             @Mapping(target = "name", source = "sellerEntity.name"),
             @Mapping(target = "email", source = "sellerUpdateDTO.email"),
             @Mapping(target = "password", source = "passwordEncrypted"),
-            @Mapping(target = "registrationInfos", source = "sellerUpdateDTO.registrationInfos"),
+            @Mapping(target = "registrationInfos", source = "registrationInfos"),
             @Mapping(target = "cityZone", source = "cityZone"),
             @Mapping(target = "categories", source = "categories"),
             @Mapping(target = "defaultDateTime", source = "sellerEntity.defaultDateTime")
     })
-    SellerEntity toEntity(SellerEntity sellerEntity, SellerUpdateDTO sellerUpdateDTO, byte[] passwordEncrypted, CityZone cityZone, List<Category> categories);
+    SellerEntity toEntity(SellerEntity sellerEntity, SellerUpdateDTO sellerUpdateDTO, RegistrationInfos registrationInfos,
+                          byte[] passwordEncrypted, CityZone cityZone, List<Category> categories);
 
     @Mappings({
             @Mapping(target = "name", source = "seller.name"),

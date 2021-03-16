@@ -22,7 +22,7 @@ public interface ValidationService {
 
     void validateSellerDTO(SellerDTO sellerDTO, CityZone cityZone, List<Category> categories) throws Exception;
 
-    void validateSellerUpdateDTO(SellerUpdateDTO sellerUpdateDTO, CityZone cityZone, List<Category> categories) throws Exception;
+    RegistrationInfos validateSellerUpdateDTO(SellerEntity sellerEntity, SellerUpdateDTO sellerUpdateDTO, CityZone cityZone, List<Category> categories) throws Exception;
 
     SellerEntity validateProductDTO(ProductDTO productDTO, Category category) throws Exception;
 

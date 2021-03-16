@@ -5,6 +5,7 @@ import br.com.fatec.petfood.model.dto.SellerReturnDTO;
 import br.com.fatec.petfood.model.dto.SellerUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.enums.Category;
+import br.com.fatec.petfood.model.generic.RegistrationInfos;
 import br.com.fatec.petfood.model.mapper.SellerMapper;
 import br.com.fatec.petfood.repository.mongo.SellerRepository;
 import br.com.fatec.petfood.service.impl.SellerServiceImpl;
@@ -164,20 +165,24 @@ public class SellerServiceTest extends UnitTest {
         ResponseEntity<?> response = sellerServiceImpl.login(sellerDTO.getEmail(), password);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-        Assertions.assertEquals(response.getBody(), "Login de lojista inválido.");
+        Assertions.assertEquals(response.getBody(), "Senha inválida para o lojista passado.");
     }
 
     @Test
-    public void shouldUpdateSellerWithSuccess() {
+    public void shouldUpdateSellerWithSuccess() throws Exception {
+        RegistrationInfos registrationInfos = EnhancedRandom.random(RegistrationInfos.class);
         byte[] passwordEncrypted = Base64.encodeBase64(sellerUpdateDTO.getPassword().getBytes());
 
-        Mockito.when(sellerRepository.findByName(eq(sellerEntity.getName()))).thenReturn(Optional.of(sellerEntity));
-        Mockito.when(sellerMapper.toEntity(eq(sellerEntity), eq(sellerUpdateDTO), eq(passwordEncrypted),
-                eq(sellerEntity.getCityZone()), eq(categories))).thenReturn(sellerEntity);
+        Mockito.when(sellerRepository.findByDocument(eq(sellerEntity.getRegistrationInfos().getDocument())))
+                .thenReturn(Optional.of(sellerEntity));
+        Mockito.when(validationService.validateSellerUpdateDTO(eq(sellerEntity), eq(sellerUpdateDTO), eq(sellerEntity.getCityZone()),
+                eq(categories))).thenReturn(registrationInfos);
+        Mockito.when(sellerMapper.toEntity(eq(sellerEntity), eq(sellerUpdateDTO), eq(registrationInfos),
+                eq(passwordEncrypted), eq(sellerEntity.getCityZone()), eq(categories))).thenReturn(sellerEntity);
         Mockito.when(sellerRepository.save(eq(sellerEntity))).thenReturn(sellerEntity);
 
         ResponseEntity<?> response = sellerServiceImpl
-                .updateSeller(sellerEntity.getName(), sellerUpdateDTO, sellerEntity.getCityZone(), categories);
+                .updateSeller(sellerEntity.getRegistrationInfos().getDocument(), sellerUpdateDTO, sellerEntity.getCityZone(), categories);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(response.getBody(), "Lojista atualizado com sucesso.");
@@ -185,41 +190,50 @@ public class SellerServiceTest extends UnitTest {
 
     @Test
     public void shouldNotFindSellerToUpdate() {
-        Mockito.when(sellerRepository.findByName(eq(sellerEntity.getName()))).thenReturn(Optional.empty());
+        Mockito.when(sellerRepository.findByDocument(eq(sellerEntity.getRegistrationInfos().getDocument())))
+                .thenReturn(Optional.empty());
 
         ResponseEntity<?> response = sellerServiceImpl
-                .updateSeller(sellerEntity.getName(), sellerUpdateDTO, sellerEntity.getCityZone(), categories);
+                .updateSeller(sellerEntity.getRegistrationInfos().getDocument(), sellerUpdateDTO, sellerEntity.getCityZone(), categories);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Lojista não encontrado.");
     }
 
     @Test
-    public void shouldResponseInternalServerErrorWithMapperOnUpdateSeller() {
+    public void shouldResponseInternalServerErrorWithMapperOnUpdateSeller() throws Exception {
+        RegistrationInfos registrationInfos = EnhancedRandom.random(RegistrationInfos.class);
         byte[] passwordEncrypted = Base64.encodeBase64(sellerUpdateDTO.getPassword().getBytes());
 
-        Mockito.when(sellerRepository.findByName(eq(sellerEntity.getName()))).thenReturn(Optional.of(sellerEntity));
-        Mockito.when(sellerMapper.toEntity(eq(sellerEntity), eq(sellerUpdateDTO), eq(passwordEncrypted),
-                eq(sellerEntity.getCityZone()), eq(categories))).thenThrow(new NullPointerException());
+        Mockito.when(sellerRepository.findByDocument(eq(sellerEntity.getRegistrationInfos().getDocument())))
+                .thenReturn(Optional.of(sellerEntity));
+        Mockito.when(validationService.validateSellerUpdateDTO(eq(sellerEntity), eq(sellerUpdateDTO), eq(sellerEntity.getCityZone()),
+                eq(categories))).thenReturn(registrationInfos);
+        Mockito.when(sellerMapper.toEntity(eq(sellerEntity), eq(sellerUpdateDTO), eq(registrationInfos),
+                eq(passwordEncrypted), eq(sellerEntity.getCityZone()), eq(categories))).thenThrow(new NullPointerException());
 
         ResponseEntity<?> response = sellerServiceImpl
-                .updateSeller(sellerEntity.getName(), sellerUpdateDTO, sellerEntity.getCityZone(), categories);
+                .updateSeller(sellerEntity.getRegistrationInfos().getDocument(), sellerUpdateDTO, sellerEntity.getCityZone(), categories);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro no mapeamento para atualização do lojista: null");
     }
 
     @Test
-    public void shouldResponseInternalServerErrorWithDataBaseOnUpdateSeller() {
+    public void shouldResponseInternalServerErrorWithDataBaseOnUpdateSeller() throws Exception {
+        RegistrationInfos registrationInfos = EnhancedRandom.random(RegistrationInfos.class);
         byte[] passwordEncrypted = Base64.encodeBase64(sellerUpdateDTO.getPassword().getBytes());
 
-        Mockito.when(sellerRepository.findByName(eq(sellerEntity.getName()))).thenReturn(Optional.of(sellerEntity));
-        Mockito.when(sellerMapper.toEntity(eq(sellerEntity), eq(sellerUpdateDTO), eq(passwordEncrypted),
-                eq(sellerEntity.getCityZone()), eq(categories))).thenReturn(sellerEntity);
+        Mockito.when(sellerRepository.findByDocument(eq(sellerEntity.getRegistrationInfos().getDocument())))
+                .thenReturn(Optional.of(sellerEntity));
+        Mockito.when(validationService.validateSellerUpdateDTO(eq(sellerEntity), eq(sellerUpdateDTO), eq(sellerEntity.getCityZone()),
+                eq(categories))).thenReturn(registrationInfos);
+        Mockito.when(sellerMapper.toEntity(eq(sellerEntity), eq(sellerUpdateDTO), eq(registrationInfos),
+                eq(passwordEncrypted), eq(sellerEntity.getCityZone()), eq(categories))).thenReturn(sellerEntity);
         Mockito.when(sellerRepository.save(eq(sellerEntity))).thenThrow(new DataIntegrityViolationException(""));
 
         ResponseEntity<?> response = sellerServiceImpl
-                .updateSeller(sellerEntity.getName(), sellerUpdateDTO, sellerEntity.getCityZone(), categories);
+                .updateSeller(sellerEntity.getRegistrationInfos().getDocument(), sellerUpdateDTO, sellerEntity.getCityZone(), categories);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro ao atualizar lojista na base de dados: ");

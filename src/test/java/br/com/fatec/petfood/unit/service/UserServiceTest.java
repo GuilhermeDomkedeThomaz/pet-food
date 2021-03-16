@@ -149,7 +149,7 @@ public class UserServiceTest extends UnitTest {
         ResponseEntity<?> response = userServiceImpl.login(userDTO.getEmail(), userDTO.getPassword());
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-        Assertions.assertEquals(response.getBody(), "Usuário não encontrado.");
+        Assertions.assertEquals(response.getBody(), "Usuário não encontrado com o email passado.");
     }
 
     @Test

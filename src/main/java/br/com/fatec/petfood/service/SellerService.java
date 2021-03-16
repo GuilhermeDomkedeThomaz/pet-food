@@ -16,7 +16,7 @@ public interface SellerService {
 
     ResponseEntity<?> login(String email, String password);
 
-    ResponseEntity<?> updateSeller(String name, SellerUpdateDTO sellerUpdateDTO, CityZone cityZone, List<Category> categories);
+    ResponseEntity<?> updateSeller(String document, SellerUpdateDTO sellerUpdateDTO, CityZone cityZone, List<Category> categories);
 
     ResponseEntity<?> deleteSeller(String name);
 }

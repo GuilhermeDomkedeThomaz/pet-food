@@ -43,7 +43,7 @@ public class SellerServiceTest extends IntegrationTest {
     }
 
     @Test
-    public void shouldResponseBadRequestWhenCreateSellerAlreadyExists() {
+    public void shouldResponseBadRequestWhenCreateSellerAlreadyExistsName() {
         ResponseEntity<?> response = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
@@ -53,6 +53,37 @@ public class SellerServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(secondResponse.getBody(), "Lojista já existe com o nome passado.");
+    }
+
+    @Test
+    public void shouldResponseBadRequestWhenCreateSellerAlreadyExistsEmail() {
+        ResponseEntity<?> response = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(response.getBody(), "Lojista cadastrado com sucesso.");
+
+        sellerDTO.setName("Teste");
+
+        ResponseEntity<?> secondResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
+
+        Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(secondResponse.getBody(), "Lojista já existe com o email passado.");
+    }
+
+    @Test
+    public void shouldResponseBadRequestWhenCreateSellerAlreadyExistsDocument() {
+        ResponseEntity<?> response = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(response.getBody(), "Lojista cadastrado com sucesso.");
+
+        sellerDTO.setName("Teste");
+        sellerDTO.setEmail("Teste");
+
+        ResponseEntity<?> secondResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
+
+        Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(secondResponse.getBody(), "Lojista já existe com o CNPJ passado.");
     }
 
     @Test
@@ -98,7 +129,7 @@ public class SellerServiceTest extends IntegrationTest {
         ResponseEntity<?> loginResponse = sellerService.login(sellerDTO.getEmail(), "Teste");
 
         Assertions.assertEquals(loginResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
-        Assertions.assertEquals(loginResponse.getBody(), "Login de lojista inválido.");
+        Assertions.assertEquals(loginResponse.getBody(), "Senha inválida para o lojista passado.");
     }
 
     @Test
@@ -108,7 +139,8 @@ public class SellerServiceTest extends IntegrationTest {
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Lojista cadastrado com sucesso.");
 
-        ResponseEntity<?> updateResponse = sellerService.updateSeller(sellerDTO.getName(), sellerUpdateDTO, CityZone.EAST, categories);
+        ResponseEntity<?> updateResponse = sellerService.updateSeller(sellerDTO.getRegistrationInfos().getDocument(),
+                sellerUpdateDTO, CityZone.EAST, categories);
 
         Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(updateResponse.getBody(), "Lojista atualizado com sucesso.");
@@ -116,10 +148,57 @@ public class SellerServiceTest extends IntegrationTest {
 
     @Test
     public void shouldNotFindSellerToUpdate() {
-        ResponseEntity<?> updateResponse = sellerService.updateSeller(sellerDTO.getName(), sellerUpdateDTO, CityZone.EAST, categories);
+        ResponseEntity<?> updateResponse = sellerService.updateSeller(sellerDTO.getRegistrationInfos().getDocument(),
+                sellerUpdateDTO, CityZone.EAST, categories);
 
         Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(updateResponse.getBody(), "Lojista não encontrado.");
+    }
+
+    @Test
+    public void shouldResponseBadRequestWhenUpdateSellerAlreadyExistsName() {
+        SellerDTO secondSellerDTO = EnhancedRandom.random(SellerDTO.class);
+
+        ResponseEntity<?> firstResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
+
+        Assertions.assertEquals(firstResponse.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(firstResponse.getBody(), "Lojista cadastrado com sucesso.");
+
+        ResponseEntity<?> secondResponse = sellerService.createSeller(secondSellerDTO, CityZone.EAST, categories);
+
+        Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(secondResponse.getBody(), "Lojista cadastrado com sucesso.");
+
+        sellerUpdateDTO.setName(secondSellerDTO.getName());
+
+        ResponseEntity<?> updateResponse = sellerService.updateSeller(sellerDTO.getRegistrationInfos().getDocument(),
+                sellerUpdateDTO, CityZone.EAST, categories);
+
+        Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(updateResponse.getBody(), "Lojista já existe com o novo nome passado.");
+    }
+
+    @Test
+    public void shouldResponseBadRequestWhenUpdateSellerAlreadyExistsEmail() {
+        SellerDTO secondSellerDTO = EnhancedRandom.random(SellerDTO.class);
+
+        ResponseEntity<?> firstResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
+
+        Assertions.assertEquals(firstResponse.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(firstResponse.getBody(), "Lojista cadastrado com sucesso.");
+
+        ResponseEntity<?> secondResponse = sellerService.createSeller(secondSellerDTO, CityZone.EAST, categories);
+
+        Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(secondResponse.getBody(), "Lojista cadastrado com sucesso.");
+
+        sellerUpdateDTO.setEmail(secondSellerDTO.getEmail());
+
+        ResponseEntity<?> updateResponse = sellerService.updateSeller(sellerDTO.getRegistrationInfos().getDocument(),
+                sellerUpdateDTO, CityZone.EAST, categories);
+
+        Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(updateResponse.getBody(), "Lojista já existe com o novo email passado.");
     }
 
     @Test
@@ -129,7 +208,8 @@ public class SellerServiceTest extends IntegrationTest {
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Lojista cadastrado com sucesso.");
 
-        ResponseEntity<?> updateResponse = sellerService.updateSeller(sellerDTO.getName(), sellerUpdateDTO, CityZone.EAST, null);
+        ResponseEntity<?> updateResponse = sellerService.updateSeller(sellerDTO.getRegistrationInfos().getDocument(),
+                sellerUpdateDTO, CityZone.EAST, null);
 
         Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(updateResponse.getBody(), "Categoria passada inválida(vazia ou nula).");

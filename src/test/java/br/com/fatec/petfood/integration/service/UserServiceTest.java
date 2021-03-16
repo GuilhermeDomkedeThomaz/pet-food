@@ -78,7 +78,7 @@ public class UserServiceTest extends IntegrationTest {
         ResponseEntity<?> secondResponse = userService.createUser(userDTO, CityZone.EAST);
 
         Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
-        Assertions.assertEquals(secondResponse.getBody(), "Usuário já existe com o cpf passado.");
+        Assertions.assertEquals(secondResponse.getBody(), "Usuário já existe com o CPF passado.");
     }
 
     @Test
