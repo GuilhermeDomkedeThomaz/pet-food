@@ -38,7 +38,7 @@ public class UserServiceTest extends IntegrationTest {
     }
 
     @Test
-    public void shouldResponseBadRequestWhenCreateUserAlreadyExists() {
+    public void shouldResponseBadRequestWhenCreateUserAlreadyExistsName() {
         ResponseEntity<?> response = userService.createUser(userDTO, CityZone.EAST);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
@@ -48,6 +48,37 @@ public class UserServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(secondResponse.getBody(), "Usuário já existe com o nome passado.");
+    }
+
+    @Test
+    public void shouldResponseBadRequestWhenCreateUserAlreadyExistsEmail() {
+        ResponseEntity<?> response = userService.createUser(userDTO, CityZone.EAST);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(response.getBody(), "Usuário cadastrado com sucesso.");
+
+        userDTO.setName("Teste");
+
+        ResponseEntity<?> secondResponse = userService.createUser(userDTO, CityZone.EAST);
+
+        Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(secondResponse.getBody(), "Usuário já existe com o email passado.");
+    }
+
+    @Test
+    public void shouldResponseBadRequestWhenCreateUserAlreadyExistsDocument() {
+        ResponseEntity<?> response = userService.createUser(userDTO, CityZone.EAST);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(response.getBody(), "Usuário cadastrado com sucesso.");
+
+        userDTO.setName("Teste");
+        userDTO.setEmail("Teste");
+
+        ResponseEntity<?> secondResponse = userService.createUser(userDTO, CityZone.EAST);
+
+        Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(secondResponse.getBody(), "Usuário já existe com o cpf passado.");
     }
 
     @Test
@@ -93,7 +124,7 @@ public class UserServiceTest extends IntegrationTest {
         ResponseEntity<?> loginResponse = userService.login(userDTO.getEmail(), "Teste");
 
         Assertions.assertEquals(loginResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
-        Assertions.assertEquals(loginResponse.getBody(), "Login de usuário inválido.");
+        Assertions.assertEquals(loginResponse.getBody(), "Senha inválida para o usuário passado.");
     }
 
     @Test
@@ -103,7 +134,8 @@ public class UserServiceTest extends IntegrationTest {
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Usuário cadastrado com sucesso.");
 
-        ResponseEntity<?> updateResponse = userService.updateUser(userDTO.getName(), userUpdateDTO, CityZone.EAST);
+        ResponseEntity<?> updateResponse = userService.updateUser(userDTO.getRegistrationInfos().getDocument(),
+                userUpdateDTO, CityZone.EAST);
 
         Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(updateResponse.getBody(), "Usuário atualizado com sucesso.");
@@ -111,10 +143,57 @@ public class UserServiceTest extends IntegrationTest {
 
     @Test
     public void shouldNotFindUserToUpdate() {
-        ResponseEntity<?> updateResponse = userService.updateUser(userDTO.getName(), userUpdateDTO, CityZone.EAST);
+        ResponseEntity<?> updateResponse = userService.updateUser(userDTO.getRegistrationInfos().getDocument(),
+                userUpdateDTO, CityZone.EAST);
 
         Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(updateResponse.getBody(), "Usuário não encontrado.");
+    }
+
+    @Test
+    public void shouldResponseBadRequestWhenUpdateUserAlreadyExistsName() {
+        UserDTO secondUserDTO = EnhancedRandom.random(UserDTO.class);
+
+        ResponseEntity<?> firstResponse = userService.createUser(userDTO, CityZone.EAST);
+
+        Assertions.assertEquals(firstResponse.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(firstResponse.getBody(), "Usuário cadastrado com sucesso.");
+
+        ResponseEntity<?> secondResponse = userService.createUser(secondUserDTO, CityZone.NORTH);
+
+        Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(secondResponse.getBody(), "Usuário cadastrado com sucesso.");
+
+        userUpdateDTO.setName(secondUserDTO.getName());
+
+        ResponseEntity<?> response = userService.updateUser(userDTO.getRegistrationInfos().getDocument(),
+                userUpdateDTO, CityZone.EAST);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Usuário já existe com o novo nome passado.");
+    }
+
+    @Test
+    public void shouldResponseBadRequestWhenUpdateUserAlreadyExistsEmail() {
+        UserDTO secondUserDTO = EnhancedRandom.random(UserDTO.class);
+
+        ResponseEntity<?> firstResponse = userService.createUser(userDTO, CityZone.EAST);
+
+        Assertions.assertEquals(firstResponse.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(firstResponse.getBody(), "Usuário cadastrado com sucesso.");
+
+        ResponseEntity<?> secondResponse = userService.createUser(secondUserDTO, CityZone.NORTH);
+
+        Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(secondResponse.getBody(), "Usuário cadastrado com sucesso.");
+
+        userUpdateDTO.setEmail(secondUserDTO.getEmail());
+
+        ResponseEntity<?> response = userService.updateUser(userDTO.getRegistrationInfos().getDocument(),
+                userUpdateDTO, CityZone.EAST);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Usuário já existe com o novo email passado.");
     }
 
     @Test
@@ -124,7 +203,8 @@ public class UserServiceTest extends IntegrationTest {
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
         Assertions.assertEquals(response.getBody(), "Usuário cadastrado com sucesso.");
 
-        ResponseEntity<?> updateResponse = userService.updateUser(userDTO.getName(), userUpdateDTO, null);
+        ResponseEntity<?> updateResponse = userService.updateUser(userDTO.getRegistrationInfos().getDocument(),
+                userUpdateDTO, null);
 
         Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(updateResponse.getBody(), "Zona da cidade passada inválida(vazia ou nula).");

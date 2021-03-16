@@ -59,6 +59,8 @@ public class ValidationServiceTest extends UnitTest {
         Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.TRUE);
         Mockito.when(userRepository.findByName(eq(userDTO.getName()))).thenReturn(Optional.empty());
         Mockito.when(userRepository.findByEmail(eq(userDTO.getEmail()))).thenReturn(Optional.empty());
+        Mockito.when(userRepository.findByDocument(eq(userDTO.getRegistrationInfos().getDocument())))
+                .thenReturn(Optional.empty());
 
         Assertions.assertDoesNotThrow(() -> validationServiceImpl.validateUserDTO(userDTO, CityZone.EAST));
     }
@@ -96,6 +98,21 @@ public class ValidationServiceTest extends UnitTest {
             validationServiceImpl.validateUserDTO(userDTO, CityZone.EAST);
         } catch (Exception e) {
             Assertions.assertEquals("Usuário já existe com o email passado.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldValidateUserDTOWithExistsDocument() {
+        Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.TRUE);
+        Mockito.when(userRepository.findByName(eq(userDTO.getName()))).thenReturn(Optional.empty());
+        Mockito.when(userRepository.findByEmail(eq(userDTO.getEmail()))).thenReturn(Optional.empty());
+        Mockito.when(userRepository.findByDocument(eq(userDTO.getRegistrationInfos().getDocument())))
+                .thenReturn(Optional.of(userEntity));
+
+        try {
+            validationServiceImpl.validateUserDTO(userDTO, CityZone.EAST);
+        } catch (Exception e) {
+            Assertions.assertEquals("Usuário já existe com o cpf passado.", e.getMessage());
         }
     }
 

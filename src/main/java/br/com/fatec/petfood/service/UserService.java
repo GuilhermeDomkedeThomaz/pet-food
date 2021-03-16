@@ -13,7 +13,7 @@ public interface UserService {
 
     ResponseEntity<?> login(String email, String password);
 
-    ResponseEntity<?> updateUser(String name, UserUpdateDTO userUpdateDTO, CityZone cityZone);
+    ResponseEntity<?> updateUser(String document, UserUpdateDTO userUpdateDTO, CityZone cityZone);
 
     ResponseEntity<?> deleteUser(String name);
 }

@@ -5,6 +5,7 @@ import br.com.fatec.petfood.model.dto.UserReturnDTO;
 import br.com.fatec.petfood.model.dto.UserUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.UserEntity;
 import br.com.fatec.petfood.model.enums.CityZone;
+import br.com.fatec.petfood.model.generic.RegistrationInfos;
 import org.joda.time.DateTime;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -31,12 +32,13 @@ public interface UserMapper {
             @Mapping(target = "name", source = "userEntity.name"),
             @Mapping(target = "email", source = "userUpdateDTO.email"),
             @Mapping(target = "password", source = "passwordEncrypted"),
-            @Mapping(target = "registrationInfos", source = "userUpdateDTO.registrationInfos"),
+            @Mapping(target = "registrationInfos", source = "registrationInfos"),
             @Mapping(target = "birthdayDate", source = "userUpdateDTO.birthdayDate"),
             @Mapping(target = "cityZone", source = "cityZone"),
             @Mapping(target = "defaultDateTime", source = "userEntity.defaultDateTime")
     })
-    UserEntity toEntity(UserEntity userEntity, UserUpdateDTO userUpdateDTO, byte[] passwordEncrypted, CityZone cityZone);
+    UserEntity toEntity(UserEntity userEntity, UserUpdateDTO userUpdateDTO, RegistrationInfos registrationInfos,
+                        byte[] passwordEncrypted, CityZone cityZone);
 
     @Mappings({
             @Mapping(target = "name", source = "user.name"),

@@ -94,6 +94,19 @@ public class ValidationServiceTest extends IntegrationTest {
     }
 
     @Test
+    public void shouldValidateUserDTOWithExistsDocument() {
+        userRepository.save(userMapper.toEntity(userDTO, Base64.encodeBase64(userDTO.getPassword().getBytes()), CityZone.EAST));
+        userDTO.setName("Teste");
+        userDTO.setEmail("Teste");
+
+        try {
+            validationServiceImpl.validateUserDTO(userDTO, CityZone.EAST);
+        } catch (Exception e) {
+            Assertions.assertEquals("Usuário já existe com o cpf passado.", e.getMessage());
+        }
+    }
+
+    @Test
     public void shouldValidateUserDTOWithInvalidNumberAddress() {
         userDTO.getRegistrationInfos().setNumberAddress(0);
 

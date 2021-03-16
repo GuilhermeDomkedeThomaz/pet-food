@@ -1,6 +1,5 @@
 package br.com.fatec.petfood.model.dto;
 
-import br.com.fatec.petfood.model.generic.RegistrationInfos;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,7 +15,19 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 public class UserUpdateDTO extends LoginDTO {
 
-    private RegistrationInfos registrationInfos;
+    private String name;
+
+    private String cellPhone;
+
+    private String address;
+
+    private Integer numberAddress;
+
+    private String cep;
+
+    private String city;
+
+    private String uf;
 
     private Date birthdayDate;
 }

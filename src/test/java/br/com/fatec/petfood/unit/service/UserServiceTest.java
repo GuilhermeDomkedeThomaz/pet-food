@@ -5,6 +5,7 @@ import br.com.fatec.petfood.model.dto.UserReturnDTO;
 import br.com.fatec.petfood.model.dto.UserUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.UserEntity;
 import br.com.fatec.petfood.model.enums.CityZone;
+import br.com.fatec.petfood.model.generic.RegistrationInfos;
 import br.com.fatec.petfood.model.mapper.UserMapper;
 import br.com.fatec.petfood.repository.mongo.UserRepository;
 import br.com.fatec.petfood.service.impl.UserServiceImpl;
@@ -161,19 +162,24 @@ public class UserServiceTest extends UnitTest {
         ResponseEntity<?> response = userServiceImpl.login(userDTO.getEmail(), password);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-        Assertions.assertEquals(response.getBody(), "Login de usuário inválido.");
+        Assertions.assertEquals(response.getBody(), "Senha inválida para o usuário passado.");
     }
 
     @Test
-    public void shouldUpdateUserWithSuccess() {
+    public void shouldUpdateUserWithSuccess() throws Exception {
+        RegistrationInfos registrationInfos = EnhancedRandom.random(RegistrationInfos.class);
         byte[] passwordEncrypted = Base64.encodeBase64(userUpdateDTO.getPassword().getBytes());
 
-        Mockito.when(userRepository.findByName(eq(userEntity.getName()))).thenReturn(Optional.of(userEntity));
-        Mockito.when(userMapper.toEntity(eq(userEntity), eq(userUpdateDTO), eq(passwordEncrypted), eq(userEntity.getCityZone())))
-                .thenReturn(userEntity);
+        Mockito.when(userRepository.findByDocument(eq(userEntity.getRegistrationInfos().getDocument())))
+                .thenReturn(Optional.of(userEntity));
+        Mockito.when(validationService.validateUserUpdateDTO(eq(userEntity), eq(userUpdateDTO), eq(userEntity.getCityZone())))
+                .thenReturn(registrationInfos);
+        Mockito.when(userMapper.toEntity(eq(userEntity), eq(userUpdateDTO), eq(registrationInfos),
+                eq(passwordEncrypted), eq(userEntity.getCityZone()))).thenReturn(userEntity);
         Mockito.when(userRepository.save(eq(userEntity))).thenReturn(userEntity);
 
-        ResponseEntity<?> response = userServiceImpl.updateUser(userEntity.getName(), userUpdateDTO, userEntity.getCityZone());
+        ResponseEntity<?> response = userServiceImpl.updateUser(userEntity.getRegistrationInfos().getDocument(),
+                userUpdateDTO, userEntity.getCityZone());
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(response.getBody(), "Usuário atualizado com sucesso.");
@@ -181,38 +187,50 @@ public class UserServiceTest extends UnitTest {
 
     @Test
     public void shouldNotFindUserToUpdate() {
-        Mockito.when(userRepository.findByName(eq(userDTO.getName()))).thenReturn(Optional.empty());
+        Mockito.when(userRepository.findByDocument(userEntity.getRegistrationInfos().getDocument()))
+                .thenReturn(Optional.empty());
 
-        ResponseEntity<?> response = userServiceImpl.updateUser(userDTO.getName(), userUpdateDTO, CityZone.EAST);
+        ResponseEntity<?> response = userServiceImpl.updateUser(userEntity.getRegistrationInfos().getDocument(),
+                userUpdateDTO, CityZone.EAST);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Usuário não encontrado.");
     }
 
     @Test
-    public void shouldResponseInternalUserErrorWithMapperOnUpdateSeller() {
+    public void shouldResponseInternalUserErrorWithMapperOnUpdateUser() throws Exception {
+        RegistrationInfos registrationInfos = EnhancedRandom.random(RegistrationInfos.class);
         byte[] passwordEncrypted = Base64.encodeBase64(userUpdateDTO.getPassword().getBytes());
 
-        Mockito.when(userRepository.findByName(eq(userEntity.getName()))).thenReturn(Optional.of(userEntity));
-        Mockito.when(userMapper.toEntity(eq(userEntity), eq(userUpdateDTO), eq(passwordEncrypted), eq(userEntity.getCityZone())))
-                .thenThrow(new NullPointerException());
+        Mockito.when(userRepository.findByDocument(eq(userEntity.getRegistrationInfos().getDocument())))
+                .thenReturn(Optional.of(userEntity));
+        Mockito.when(validationService.validateUserUpdateDTO(eq(userEntity), eq(userUpdateDTO), eq(userEntity.getCityZone())))
+                .thenReturn(registrationInfos);
+        Mockito.when(userMapper.toEntity(eq(userEntity), eq(userUpdateDTO), eq(registrationInfos),
+                eq(passwordEncrypted), eq(userEntity.getCityZone()))).thenThrow(new NullPointerException());
 
-        ResponseEntity<?> response = userServiceImpl.updateUser(userEntity.getName(), userUpdateDTO, userEntity.getCityZone());
+        ResponseEntity<?> response = userServiceImpl.updateUser(userEntity.getRegistrationInfos().getDocument(),
+                userUpdateDTO, userEntity.getCityZone());
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro no mapeamento para atualização do usuário: null");
     }
 
     @Test
-    public void shouldResponseInternalServerErrorWithDataBaseOnUpdateUser() {
+    public void shouldResponseInternalServerErrorWithDataBaseOnUpdateUser() throws Exception {
+        RegistrationInfos registrationInfos = EnhancedRandom.random(RegistrationInfos.class);
         byte[] passwordEncrypted = Base64.encodeBase64(userUpdateDTO.getPassword().getBytes());
 
-        Mockito.when(userRepository.findByName(eq(userEntity.getName()))).thenReturn(Optional.of(userEntity));
-        Mockito.when(userMapper.toEntity(eq(userEntity), eq(userUpdateDTO), eq(passwordEncrypted), eq(userEntity.getCityZone())))
-                .thenReturn(userEntity);
+        Mockito.when(userRepository.findByDocument(eq(userEntity.getRegistrationInfos().getDocument())))
+                .thenReturn(Optional.of(userEntity));
+        Mockito.when(validationService.validateUserUpdateDTO(eq(userEntity), eq(userUpdateDTO), eq(userEntity.getCityZone())))
+                .thenReturn(registrationInfos);
+        Mockito.when(userMapper.toEntity(eq(userEntity), eq(userUpdateDTO), eq(registrationInfos),
+                eq(passwordEncrypted), eq(userEntity.getCityZone()))).thenReturn(userEntity);
         Mockito.when(userRepository.save(eq(userEntity))).thenThrow(new DataIntegrityViolationException(""));
 
-        ResponseEntity<?> response = userServiceImpl.updateUser(userEntity.getName(), userUpdateDTO, userEntity.getCityZone());
+        ResponseEntity<?> response = userServiceImpl.updateUser(userEntity.getRegistrationInfos().getDocument(),
+                userUpdateDTO, userEntity.getCityZone());
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro ao atualizar usuário na base de dados: ");

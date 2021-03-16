@@ -5,6 +5,7 @@ import br.com.fatec.petfood.model.dto.UserReturnDTO;
 import br.com.fatec.petfood.model.dto.UserUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.UserEntity;
 import br.com.fatec.petfood.model.enums.CityZone;
+import br.com.fatec.petfood.model.generic.RegistrationInfos;
 import br.com.fatec.petfood.model.mapper.UserMapper;
 import br.com.fatec.petfood.repository.mongo.UserRepository;
 import br.com.fatec.petfood.service.UserService;
@@ -88,7 +89,7 @@ public class UserServiceImpl implements UserService {
         if (user.isPresent()) {
             try {
                 if (!password.equals(new String(Base64.decodeBase64(user.get().getPassword()))))
-                    return new ResponseEntity<>("Login de usuário inválido.", HttpStatus.BAD_REQUEST);
+                        return new ResponseEntity<>("Senha inválida para o usuário passado.", HttpStatus.BAD_REQUEST);
                 else {
                     return new ResponseEntity<>("Login de usuário realizado com sucesso.", HttpStatus.OK);
                 }
@@ -100,13 +101,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<?> updateUser(String name, UserUpdateDTO userUpdateDTO, CityZone cityZone) {
+    public ResponseEntity<?> updateUser(String document, UserUpdateDTO userUpdateDTO, CityZone cityZone) {
         byte[] passwordEncrypted;
-        Optional<UserEntity> user = userRepository.findByName(name);
+        RegistrationInfos registrationInfos;
+        Optional<UserEntity> user = userRepository.findByDocument(document);
 
         if (user.isPresent()) {
             try {
-                validationService.validateUserUpdateDTO(userUpdateDTO, cityZone);
+                registrationInfos = validationService.validateUserUpdateDTO(user.get(), userUpdateDTO, cityZone);
             } catch (Exception e) {
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
             }
@@ -120,7 +122,7 @@ public class UserServiceImpl implements UserService {
 
             if (Objects.nonNull(passwordEncrypted)) {
                 try {
-                    UserEntity userEntity = userMapper.toEntity(user.get(), userUpdateDTO, passwordEncrypted, cityZone);
+                    UserEntity userEntity = userMapper.toEntity(user.get(), userUpdateDTO, registrationInfos, passwordEncrypted, cityZone);
 
                     try {
                         userRepository.save(userEntity);

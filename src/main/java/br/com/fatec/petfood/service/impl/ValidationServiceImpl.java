@@ -7,6 +7,7 @@ import br.com.fatec.petfood.model.dto.SellerUpdateDTO;
 import br.com.fatec.petfood.model.dto.UserDTO;
 import br.com.fatec.petfood.model.dto.UserUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
+import br.com.fatec.petfood.model.entity.mongo.UserEntity;
 import br.com.fatec.petfood.model.enums.Category;
 import br.com.fatec.petfood.model.enums.CityZone;
 import br.com.fatec.petfood.model.generic.RegistrationInfos;
@@ -40,14 +41,51 @@ public class ValidationServiceImpl implements ValidationService {
         if (userRepository.findByName(userDTO.getName()).isPresent())
             throw new Exception("Usuário já existe com o nome passado.");
 
-        this.genericUserValidate(userDTO.getEmail(), userDTO.getRegistrationInfos(), userDTO.getPassword(),
-                userDTO.getBirthdayDate(), cityZone);
+        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getEmail()))
+            throw new Exception("Email passado inválido(vazio ou nulo).");
+
+        if (userRepository.findByEmail(userDTO.getEmail()).isPresent())
+            throw new Exception("Usuário já existe com o email passado.");
+
+        if (!validateUtils.isNotNullAndNotEmpty(userDTO.getRegistrationInfos().getDocument()))
+            throw new Exception("CPF passado inválido(vazio ou nulo).");
+
+        if (userRepository.findByDocument(userDTO.getRegistrationInfos().getDocument()).isPresent())
+            throw new Exception("Usuário já existe com o cpf passado.");
+
+        this.genericUserValidate(userDTO.getRegistrationInfos(), userDTO.getPassword(), userDTO.getBirthdayDate(), cityZone);
     }
 
     @Override
-    public void validateUserUpdateDTO(UserUpdateDTO userUpdateDTO, CityZone cityZone) throws Exception {
-        this.genericUserValidate(userUpdateDTO.getEmail(), userUpdateDTO.getRegistrationInfos(), userUpdateDTO.getPassword(),
-                userUpdateDTO.getBirthdayDate(), cityZone);
+    public RegistrationInfos validateUserUpdateDTO(UserEntity userEntity, UserUpdateDTO userUpdateDTO, CityZone cityZone) throws Exception {
+        if (!validateUtils.isNotNullAndNotEmpty(userUpdateDTO.getName()))
+            throw new Exception("Nome passado inválido(vazio ou nulo).");
+
+        if (!userEntity.getName().equals(userUpdateDTO.getName())) {
+            if (userRepository.findByName(userUpdateDTO.getName()).isPresent())
+                throw new Exception("Usuário já existe com o novo nome passado.");
+        }
+
+        if (!validateUtils.isNotNullAndNotEmpty(userUpdateDTO.getEmail()))
+            throw new Exception("Email passado inválido(vazio ou nulo).");
+
+        if (!userEntity.getEmail().equals(userUpdateDTO.getEmail())) {
+            if (userRepository.findByEmail(userUpdateDTO.getEmail()).isPresent())
+                throw new Exception("Usuário já existe com o novo email passado.");
+        }
+
+        RegistrationInfos registrationInfos = new RegistrationInfos(
+                userEntity.getRegistrationInfos().getDocument(),
+                userUpdateDTO.getCellPhone(),
+                userUpdateDTO.getAddress(),
+                userUpdateDTO.getNumberAddress(),
+                userUpdateDTO.getCep(),
+                userUpdateDTO.getCity(),
+                userUpdateDTO.getUf()
+        );
+
+        this.genericUserValidate(registrationInfos, userUpdateDTO.getPassword(), userUpdateDTO.getBirthdayDate(), cityZone);
+        return registrationInfos;
     }
 
     @Override
@@ -136,17 +174,8 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     private void genericUserValidate(
-            String email, RegistrationInfos registrationInfos, String password, Date birthdayDate, CityZone cityZone
+            RegistrationInfos registrationInfos, String password, Date birthdayDate, CityZone cityZone
     ) throws Exception {
-        if (!validateUtils.isNotNullAndNotEmpty(email))
-            throw new Exception("Email passado inválido(vazio ou nulo).");
-
-        if (userRepository.findByEmail(email).isPresent())
-            throw new Exception("Usuário já existe com o email passado.");
-
-        if (!validateUtils.isNotNullAndNotEmpty(registrationInfos.getDocument()))
-            throw new Exception("CPF passado inválido(vazio ou nulo).");
-
         if (Objects.isNull(birthdayDate))
             throw new Exception("Data de Nascimento passada inválida(vazia ou nula).");
 

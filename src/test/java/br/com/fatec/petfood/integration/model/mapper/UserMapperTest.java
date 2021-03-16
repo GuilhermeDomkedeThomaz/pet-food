@@ -6,6 +6,7 @@ import br.com.fatec.petfood.model.dto.UserReturnDTO;
 import br.com.fatec.petfood.model.dto.UserUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.UserEntity;
 import br.com.fatec.petfood.model.enums.CityZone;
+import br.com.fatec.petfood.model.generic.RegistrationInfos;
 import br.com.fatec.petfood.model.mapper.UserMapper;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import org.apache.tomcat.util.codec.binary.Base64;
@@ -43,18 +44,28 @@ public class UserMapperTest extends IntegrationTest {
         UserUpdateDTO userUpdateDTO = EnhancedRandom.random(UserUpdateDTO.class);
         UserEntity userEntity = EnhancedRandom.random(UserEntity.class);
         byte[] passwordEncrypted = Base64.encodeBase64(userUpdateDTO.getPassword().getBytes());
+        RegistrationInfos registrationInfos = new RegistrationInfos(
+                userEntity.getRegistrationInfos().getDocument(),
+                userUpdateDTO.getCellPhone(),
+                userUpdateDTO.getAddress(),
+                userUpdateDTO.getNumberAddress(),
+                userUpdateDTO.getCep(),
+                userUpdateDTO.getCity(),
+                userUpdateDTO.getUf()
+        );
 
-        UserEntity userEntityUpdate = userMapper.toEntity(userEntity, userUpdateDTO, passwordEncrypted, CityZone.EAST);
+        UserEntity userEntityUpdate = userMapper.toEntity(userEntity, userUpdateDTO, registrationInfos,
+                passwordEncrypted, CityZone.EAST);
 
         Assertions.assertEquals(userEntity.getName(), userEntityUpdate.getName());
         Assertions.assertEquals(userUpdateDTO.getEmail(), userEntityUpdate.getEmail());
-        Assertions.assertEquals(userUpdateDTO.getRegistrationInfos().getDocument(), userEntityUpdate.getRegistrationInfos().getDocument());
-        Assertions.assertEquals(userUpdateDTO.getRegistrationInfos().getCellPhone(), userEntityUpdate.getRegistrationInfos().getCellPhone());
+        Assertions.assertEquals(userEntity.getRegistrationInfos().getDocument(), userEntityUpdate.getRegistrationInfos().getDocument());
+        Assertions.assertEquals(userUpdateDTO.getCellPhone(), userEntityUpdate.getRegistrationInfos().getCellPhone());
         Assertions.assertEquals(userUpdateDTO.getBirthdayDate(), userEntityUpdate.getBirthdayDate());
-        Assertions.assertEquals(userUpdateDTO.getRegistrationInfos().getAddress(), userEntityUpdate.getRegistrationInfos().getAddress());
-        Assertions.assertEquals(userUpdateDTO.getRegistrationInfos().getNumberAddress(), userEntityUpdate.getRegistrationInfos().getNumberAddress());
-        Assertions.assertEquals(userUpdateDTO.getRegistrationInfos().getCep(), userEntityUpdate.getRegistrationInfos().getCep());
-        Assertions.assertEquals(userUpdateDTO.getRegistrationInfos().getCity(), userEntityUpdate.getRegistrationInfos().getCity());
+        Assertions.assertEquals(userUpdateDTO.getAddress(), userEntityUpdate.getRegistrationInfos().getAddress());
+        Assertions.assertEquals(userUpdateDTO.getNumberAddress(), userEntityUpdate.getRegistrationInfos().getNumberAddress());
+        Assertions.assertEquals(userUpdateDTO.getCep(), userEntityUpdate.getRegistrationInfos().getCep());
+        Assertions.assertEquals(userUpdateDTO.getCity(), userEntityUpdate.getRegistrationInfos().getCity());
         Assertions.assertEquals(userUpdateDTO.getPassword(), new String(Base64.decodeBase64(userEntityUpdate.getPassword())));
         Assertions.assertEquals(CityZone.EAST, userEntityUpdate.getCityZone());
     }

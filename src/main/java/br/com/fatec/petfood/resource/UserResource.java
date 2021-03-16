@@ -50,11 +50,11 @@ public class UserResource {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(value = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateUser(
-            @RequestParam(value = "name") String name,
+            @RequestParam(value = "document") String document,
             @RequestBody UserUpdateDTO userUpdateDTO,
             @RequestParam(value = "cityZone") CityZone cityZone
     ) {
-        return userService.updateUser(name, userUpdateDTO, cityZone);
+        return userService.updateUser(document, userUpdateDTO, cityZone);
     }
 
     @CrossOrigin(origins = "*")
