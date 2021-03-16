@@ -98,7 +98,7 @@ public class UserServiceTest extends UnitTest {
     }
 
     @Test
-    public void shouldFindUserWithSuccess() {
+    public void shouldFindUserByNameWithSuccess() {
         Mockito.when(userRepository.findByName(eq(userDTO.getName()))).thenReturn(Optional.of(userEntity));
         Mockito.when(userMapper.toReturnDTO(userEntity)).thenReturn(userReturnDTO);
 
@@ -109,7 +109,7 @@ public class UserServiceTest extends UnitTest {
     }
 
     @Test
-    public void shouldNotFindUser() {
+    public void shouldNotFindUserByName() {
         Mockito.when(userRepository.findByName(eq(userDTO.getName()))).thenReturn(Optional.empty());
 
         ResponseEntity<?> response = userServiceImpl.getUser(userDTO.getName());
@@ -119,11 +119,43 @@ public class UserServiceTest extends UnitTest {
     }
 
     @Test
-    public void shouldResponseInternalServerErrorOnFindUser() {
+    public void shouldResponseInternalServerErrorOnFindUserByName() {
         Mockito.when(userRepository.findByName(eq(userDTO.getName()))).thenReturn(Optional.of(userEntity));
         Mockito.when(userMapper.toReturnDTO(userEntity)).thenThrow(new NullPointerException());
 
         ResponseEntity<?> response = userServiceImpl.getUser(userDTO.getName());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro no mapeamento para retorno do usuário: null");
+    }
+
+    @Test
+    public void shouldFindUserByEmailWithSuccess() {
+        Mockito.when(userRepository.findByEmail(eq(userDTO.getEmail()))).thenReturn(Optional.of(userEntity));
+        Mockito.when(userMapper.toReturnDTO(userEntity)).thenReturn(userReturnDTO);
+
+        ResponseEntity<?> response = userServiceImpl.getUserByEmail(userDTO.getEmail());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(response.getBody(), userReturnDTO);
+    }
+
+    @Test
+    public void shouldNotFindUserByEmail() {
+        Mockito.when(userRepository.findByEmail(eq(userDTO.getEmail()))).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = userServiceImpl.getUserByEmail(userDTO.getEmail());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Usuário não encontrado.");
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorOnFindUserByEmail() {
+        Mockito.when(userRepository.findByEmail(eq(userDTO.getEmail()))).thenReturn(Optional.of(userEntity));
+        Mockito.when(userMapper.toReturnDTO(userEntity)).thenThrow(new NullPointerException());
+
+        ResponseEntity<?> response = userServiceImpl.getUserByEmail(userDTO.getEmail());
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro no mapeamento para retorno do usuário: null");

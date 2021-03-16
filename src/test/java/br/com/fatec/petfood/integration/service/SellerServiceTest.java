@@ -87,7 +87,7 @@ public class SellerServiceTest extends IntegrationTest {
     }
 
     @Test
-    public void shouldFindSellerWithSuccess() {
+    public void shouldFindSellerByNameWithSuccess() {
         ResponseEntity<?> response = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
@@ -99,8 +99,28 @@ public class SellerServiceTest extends IntegrationTest {
     }
 
     @Test
-    public void shouldNotFindSeller() {
+    public void shouldNotFindSellerByName() {
         ResponseEntity<?> findResponse = sellerService.getSeller(sellerDTO.getName());
+
+        Assertions.assertEquals(findResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(findResponse.getBody(), "Lojista não encontrado.");
+    }
+
+    @Test
+    public void shouldFindSellerByEmailWithSuccess() {
+        ResponseEntity<?> response = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(response.getBody(), "Lojista cadastrado com sucesso.");
+
+        ResponseEntity<?> findResponse = sellerService.getSellerByEmail(sellerDTO.getEmail());
+
+        Assertions.assertEquals(findResponse.getStatusCode(), HttpStatus.OK);
+    }
+
+    @Test
+    public void shouldNotFindSellerByEmail() {
+        ResponseEntity<?> findResponse = sellerService.getSellerByEmail(sellerDTO.getEmail());
 
         Assertions.assertEquals(findResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(findResponse.getBody(), "Lojista não encontrado.");

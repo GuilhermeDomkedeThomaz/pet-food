@@ -101,7 +101,7 @@ public class SellerServiceTest extends UnitTest {
     }
 
     @Test
-    public void shouldFindSellerWithSuccess() {
+    public void shouldFindSellerByNameWithSuccess() {
         Mockito.when(sellerRepository.findByName(eq(sellerDTO.getName()))).thenReturn(Optional.of(sellerEntity));
         Mockito.when(sellerMapper.toReturnDTO(sellerEntity)).thenReturn(sellerReturnDTO);
 
@@ -112,7 +112,7 @@ public class SellerServiceTest extends UnitTest {
     }
 
     @Test
-    public void shouldNotFindSeller() {
+    public void shouldNotFindSellerByName() {
         Mockito.when(sellerRepository.findByName(eq(sellerDTO.getName()))).thenReturn(Optional.empty());
 
         ResponseEntity<?> response = sellerServiceImpl.getSeller(sellerDTO.getName());
@@ -122,11 +122,43 @@ public class SellerServiceTest extends UnitTest {
     }
 
     @Test
-    public void shouldResponseInternalServerErrorOnFindSeller() {
+    public void shouldResponseInternalServerErrorOnFindSellerByName() {
         Mockito.when(sellerRepository.findByName(eq(sellerDTO.getName()))).thenReturn(Optional.of(sellerEntity));
         Mockito.when(sellerMapper.toReturnDTO(sellerEntity)).thenThrow(new NullPointerException());
 
         ResponseEntity<?> response = sellerServiceImpl.getSeller(sellerDTO.getName());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro no mapeamento para retorno do lojista: null");
+    }
+
+    @Test
+    public void shouldFindSellerByEmailWithSuccess() {
+        Mockito.when(sellerRepository.findByEmail(eq(sellerDTO.getEmail()))).thenReturn(Optional.of(sellerEntity));
+        Mockito.when(sellerMapper.toReturnDTO(sellerEntity)).thenReturn(sellerReturnDTO);
+
+        ResponseEntity<?> response = sellerServiceImpl.getSellerByEmail(sellerDTO.getEmail());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(response.getBody(), sellerReturnDTO);
+    }
+
+    @Test
+    public void shouldNotFindSellerByEmail() {
+        Mockito.when(sellerRepository.findByEmail(eq(sellerDTO.getEmail()))).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = sellerServiceImpl.getSellerByEmail(sellerDTO.getEmail());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Lojista não encontrado.");
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorOnFindSellerByEmail() {
+        Mockito.when(sellerRepository.findByEmail(eq(sellerDTO.getEmail()))).thenReturn(Optional.of(sellerEntity));
+        Mockito.when(sellerMapper.toReturnDTO(sellerEntity)).thenThrow(new NullPointerException());
+
+        ResponseEntity<?> response = sellerServiceImpl.getSellerByEmail(sellerDTO.getEmail());
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro no mapeamento para retorno do lojista: null");

@@ -82,7 +82,7 @@ public class UserServiceTest extends IntegrationTest {
     }
 
     @Test
-    public void shouldFindUserWithSuccess() {
+    public void shouldFindUserByNameWithSuccess() {
         ResponseEntity<?> response = userService.createUser(userDTO, CityZone.EAST);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
@@ -94,8 +94,28 @@ public class UserServiceTest extends IntegrationTest {
     }
 
     @Test
-    public void shouldNotFindUser() {
+    public void shouldNotFindUserByName() {
         ResponseEntity<?> findResponse = userService.getUser(userDTO.getName());
+
+        Assertions.assertEquals(findResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(findResponse.getBody(), "Usuário não encontrado.");
+    }
+
+    @Test
+    public void shouldFindUserByEmailWithSuccess() {
+        ResponseEntity<?> response = userService.createUser(userDTO, CityZone.EAST);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(response.getBody(), "Usuário cadastrado com sucesso.");
+
+        ResponseEntity<?> findResponse = userService.getUserByEmail(userDTO.getEmail());
+
+        Assertions.assertEquals(findResponse.getStatusCode(), HttpStatus.OK);
+    }
+
+    @Test
+    public void shouldNotFindUserByEmail() {
+        ResponseEntity<?> findResponse = userService.getUserByEmail(userDTO.getEmail());
 
         Assertions.assertEquals(findResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(findResponse.getBody(), "Usuário não encontrado.");

@@ -52,6 +52,14 @@ public class SellerResource {
     @ResponseBody
     @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/find/email", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> findSellerByEmail(@RequestParam(value = "email") String email) {
+        return sellerService.getSellerByEmail(email);
+    }
+
+    @ResponseBody
+    @CrossOrigin(origins = "*")
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> login(
             @RequestParam(value = "email") String email,

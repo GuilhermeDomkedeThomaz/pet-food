@@ -68,21 +68,12 @@ public class SellerServiceImpl implements SellerService {
 
     @Override
     public ResponseEntity<?> getSeller(String name) {
-        Optional<SellerEntity> seller = sellerRepository.findByName(name);
+        return this.returnSeller(sellerRepository.findByName(name));
+    }
 
-        if (seller.isPresent()) {
-            SellerEntity sellerEntity = seller.get();
-
-            try {
-                SellerReturnDTO sellerReturnDTO = sellerMapper.toReturnDTO(sellerEntity);
-
-                return new ResponseEntity<>(sellerReturnDTO, HttpStatus.OK);
-            } catch (Exception e) {
-                return new ResponseEntity<>("Erro no mapeamento para retorno do lojista: " + e.getMessage(),
-                        HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        } else
-            return new ResponseEntity<>("Lojista não encontrado.", HttpStatus.BAD_REQUEST);
+    @Override
+    public ResponseEntity<?> getSellerByEmail(String email) {
+        return this.returnSeller(sellerRepository.findByEmail(email));
     }
 
     @Override
@@ -159,6 +150,22 @@ public class SellerServiceImpl implements SellerService {
                 return new ResponseEntity<>("Lojista deletado com sucesso.", HttpStatus.OK);
             } catch (Exception e) {
                 return new ResponseEntity<>("Erro ao deletar lojista na base de dados: " + e.getMessage(),
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else
+            return new ResponseEntity<>("Lojista não encontrado.", HttpStatus.BAD_REQUEST);
+    }
+
+    private ResponseEntity<?> returnSeller(Optional<SellerEntity> seller) {
+        if (seller.isPresent()) {
+            SellerEntity sellerEntity = seller.get();
+
+            try {
+                SellerReturnDTO sellerReturnDTO = sellerMapper.toReturnDTO(sellerEntity);
+
+                return new ResponseEntity<>(sellerReturnDTO, HttpStatus.OK);
+            } catch (Exception e) {
+                return new ResponseEntity<>("Erro no mapeamento para retorno do lojista: " + e.getMessage(),
                         HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else

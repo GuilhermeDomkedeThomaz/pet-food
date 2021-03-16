@@ -11,6 +11,8 @@ public interface UserService {
 
     ResponseEntity<?> getUser(String name);
 
+    ResponseEntity<?> getUserByEmail(String email);
+
     ResponseEntity<?> login(String email, String password);
 
     ResponseEntity<?> updateUser(String document, UserUpdateDTO userUpdateDTO, CityZone cityZone);

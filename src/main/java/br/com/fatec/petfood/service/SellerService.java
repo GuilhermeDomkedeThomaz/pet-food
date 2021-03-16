@@ -14,6 +14,8 @@ public interface SellerService {
 
     ResponseEntity<?> getSeller(String name);
 
+    ResponseEntity<?> getSellerByEmail(String email);
+
     ResponseEntity<?> login(String email, String password);
 
     ResponseEntity<?> updateSeller(String document, SellerUpdateDTO sellerUpdateDTO, CityZone cityZone, List<Category> categories);

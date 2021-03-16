@@ -38,6 +38,14 @@ public class UserResource {
     @ResponseBody
     @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/find/email", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> findUserByEmail(@RequestParam(value = "email") String email) {
+        return userService.getUserByEmail(email);
+    }
+
+    @ResponseBody
+    @CrossOrigin(origins = "*")
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> login(
             @RequestParam(value = "email") String email,

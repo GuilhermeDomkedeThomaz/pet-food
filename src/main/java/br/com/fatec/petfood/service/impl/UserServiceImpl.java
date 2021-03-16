@@ -65,21 +65,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<?> getUser(String name) {
-        Optional<UserEntity> user = userRepository.findByName(name);
+        return this.returnUser(userRepository.findByName(name));
+    }
 
-        if (user.isPresent()) {
-            UserEntity userEntity = user.get();
-
-            try {
-                UserReturnDTO userReturnDTO = userMapper.toReturnDTO(userEntity);
-
-                return new ResponseEntity<>(userReturnDTO, HttpStatus.OK);
-            } catch (Exception e) {
-                return new ResponseEntity<>("Erro no mapeamento para retorno do usuário: " + e.getMessage(),
-                        HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        } else
-            return new ResponseEntity<>("Usuário não encontrado.", HttpStatus.BAD_REQUEST);
+    @Override
+    public ResponseEntity<?> getUserByEmail(String email) {
+        return this.returnUser(userRepository.findByEmail(email));
     }
 
     @Override
@@ -153,6 +144,22 @@ public class UserServiceImpl implements UserService {
                 return new ResponseEntity<>("Usuário deletado com sucesso.", HttpStatus.OK);
             } catch (Exception e) {
                 return new ResponseEntity<>("Erro ao deletar usuário na base de dados: " + e.getMessage(),
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else
+            return new ResponseEntity<>("Usuário não encontrado.", HttpStatus.BAD_REQUEST);
+    }
+
+    private ResponseEntity<?> returnUser(Optional<UserEntity> user) {
+        if (user.isPresent()) {
+            UserEntity userEntity = user.get();
+
+            try {
+                UserReturnDTO userReturnDTO = userMapper.toReturnDTO(userEntity);
+
+                return new ResponseEntity<>(userReturnDTO, HttpStatus.OK);
+            } catch (Exception e) {
+                return new ResponseEntity<>("Erro no mapeamento para retorno do usuário: " + e.getMessage(),
                         HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else
