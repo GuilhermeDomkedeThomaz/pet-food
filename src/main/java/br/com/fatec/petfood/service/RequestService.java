@@ -1,6 +1,8 @@
 package br.com.fatec.petfood.service;
 
 import br.com.fatec.petfood.model.dto.RequestDTO;
+import br.com.fatec.petfood.model.dto.RequestUpdateDTO;
+import br.com.fatec.petfood.model.enums.Status;
 import org.springframework.http.ResponseEntity;
 
 public interface RequestService {
@@ -14,4 +16,8 @@ public interface RequestService {
     ResponseEntity<?> findRequestByUser(String userName);
 
     ResponseEntity<?> findRequestBySellerAndUser(String sellerName, String userName);
+
+    ResponseEntity<?> updateRequest(String id, Status status, RequestUpdateDTO requestUpdateDTO);
+
+    ResponseEntity<?> updateStatusRequest(String id, Status status);
 }

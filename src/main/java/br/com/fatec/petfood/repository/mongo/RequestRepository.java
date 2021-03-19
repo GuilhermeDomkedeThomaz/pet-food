@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface RequestRepository extends MongoRepository<RequestEntity, String> {
 
-    Optional<List<RequestEntity>> findAllById(ObjectId id);
+    Optional<RequestEntity> findById(ObjectId id);
 
     Optional<List<RequestEntity>> findAllBySellerName(String sellerName);
 

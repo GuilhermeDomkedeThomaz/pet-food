@@ -2,6 +2,7 @@ package br.com.fatec.petfood.service.impl;
 
 import br.com.fatec.petfood.model.dto.RequestDTO;
 import br.com.fatec.petfood.model.dto.RequestReturnDTO;
+import br.com.fatec.petfood.model.dto.RequestUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.RequestEntity;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.entity.mongo.UserEntity;
@@ -99,18 +100,20 @@ public class RequestServiceImpl implements RequestService {
             return new ResponseEntity<>("Id do pedido passado inválido.", HttpStatus.BAD_REQUEST);
         }
 
-        Optional<List<RequestEntity>> optionalRequestEntityList = requestRepository.findAllById(objectId);
+        Optional<RequestEntity> optionalRequestEntity = requestRepository.findById(objectId);
 
-        if (optionalRequestEntityList.isPresent()) {
-            List<RequestEntity> requestEntityList = optionalRequestEntityList.get();
+        if (optionalRequestEntity.isPresent()) {
+            RequestEntity requestEntity = optionalRequestEntity.get();
 
-            if (!requestEntityList.isEmpty())
-                return this.findReturn(requestEntityList);
-            else
-                return new ResponseEntity<>("Pedido(s) não encontrado(s) com o id de pedido passado.",
-                        HttpStatus.BAD_REQUEST);
+            try {
+                RequestReturnDTO requestReturnDTO = requestMapper.toReturnDTO(requestEntity);
+                return new ResponseEntity<>(requestReturnDTO, HttpStatus.OK);
+            } catch (Exception e) {
+                return new ResponseEntity<>("Erro no mapeamento para busca de pedido: " + e.getMessage(),
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         } else
-            return new ResponseEntity<>("Pedido(s) não encontrado(s) com o id de pedido passado.",
+            return new ResponseEntity<>("Pedido não encontrado com o id de pedido passado.",
                     HttpStatus.BAD_REQUEST);
     }
 
@@ -181,6 +184,96 @@ public class RequestServiceImpl implements RequestService {
                         HttpStatus.BAD_REQUEST);
         } else
             return new ResponseEntity<>("Pedido(s) não encontrado(s) com os nomes de lojista e de usuário passados.",
+                    HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    public ResponseEntity<?> updateRequest(String id, Status status, RequestUpdateDTO requestUpdateDTO) {
+        ObjectId objectId;
+        Double shippingPrice;
+        List<ProductRequest> productRequests;
+
+        try {
+            requestValidationService.validateFindRequestById(id);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            objectId = new ObjectId(id);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Id do pedido passado inválido.", HttpStatus.BAD_REQUEST);
+        }
+
+        Optional<RequestEntity> optionalRequestEntity = requestRepository.findById(objectId);
+
+        if (optionalRequestEntity.isPresent()) {
+            RequestEntity requestEntity = optionalRequestEntity.get();
+
+            try {
+                productRequests = requestValidationService.validateProductsRequestUpdateDTO(requestEntity, requestUpdateDTO);
+            } catch (Exception e) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
+
+            shippingPrice = requestValidationService.validateShippingPriceRequestUpdateDTO(requestEntity, requestUpdateDTO);
+
+            try {
+                RequestEntity requestUpdateEntity = requestMapper.toEntity(requestEntity, productRequests, shippingPrice, status);
+
+                try {
+                    requestRepository.save(requestUpdateEntity);
+                    return new ResponseEntity<>("Pedido atualizado com sucesso.", HttpStatus.OK);
+                } catch (Exception e) {
+                    return new ResponseEntity<>("Erro ao atualizar pedido na base de dados: " + e.getMessage(),
+                            HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+            } catch (Exception e) {
+                return new ResponseEntity<>("Erro no mapeamento para atualização de pedido: " + e.getMessage(),
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else
+            return new ResponseEntity<>("Pedido não encontrado com o id de pedido passado.",
+                    HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    public ResponseEntity<?> updateStatusRequest(String id, Status status) {
+        ObjectId objectId;
+
+        try {
+            requestValidationService.validateFindRequestById(id);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            objectId = new ObjectId(id);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Id do pedido passado inválido.", HttpStatus.BAD_REQUEST);
+        }
+
+        Optional<RequestEntity> optionalRequestEntity = requestRepository.findById(objectId);
+
+        if (optionalRequestEntity.isPresent()) {
+            RequestEntity requestEntity = optionalRequestEntity.get();
+
+            try {
+                RequestEntity requestUpdateEntity = requestMapper.toEntity(requestEntity, status);
+
+                try {
+                    requestRepository.save(requestUpdateEntity);
+                    return new ResponseEntity<>("Status do pedido atualizado com sucesso.", HttpStatus.OK);
+                } catch (Exception e) {
+                    return new ResponseEntity<>("Erro ao atualizar status do pedido na base de dados: " + e.getMessage(),
+                            HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+            } catch (Exception e) {
+                return new ResponseEntity<>("Erro no mapeamento para atualização de status do pedido: " + e.getMessage(),
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else
+            return new ResponseEntity<>("Pedido não encontrado com o id de pedido passado.",
                     HttpStatus.BAD_REQUEST);
     }
 

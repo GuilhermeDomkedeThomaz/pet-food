@@ -1,6 +1,7 @@
 package br.com.fatec.petfood.service;
 
 import br.com.fatec.petfood.model.dto.ProductRequestDTO;
+import br.com.fatec.petfood.model.dto.RequestUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.RequestEntity;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.entity.mongo.UserEntity;
@@ -25,4 +26,8 @@ public interface RequestValidationService {
     void validateFindRequestBySeller(String sellerName) throws Exception;
 
     void validateFindRequestByUser(String userName) throws Exception;
+
+    List<ProductRequest> validateProductsRequestUpdateDTO(RequestEntity requestEntity, RequestUpdateDTO requestUpdateDTO) throws Exception;
+
+    Double validateShippingPriceRequestUpdateDTO(RequestEntity requestEntity, RequestUpdateDTO requestUpdateDTO);
 }

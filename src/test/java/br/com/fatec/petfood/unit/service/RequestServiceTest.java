@@ -3,6 +3,7 @@ package br.com.fatec.petfood.unit.service;
 import br.com.fatec.petfood.model.dto.ProductRequestDTO;
 import br.com.fatec.petfood.model.dto.RequestDTO;
 import br.com.fatec.petfood.model.dto.RequestReturnDTO;
+import br.com.fatec.petfood.model.dto.RequestUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.RequestEntity;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.entity.mongo.UserEntity;
@@ -51,6 +52,7 @@ public class RequestServiceTest extends UnitTest {
     private final ProductRequest firstProductRequest = EnhancedRandom.random(ProductRequest.class);
     private final ProductRequest secondProductRequest = EnhancedRandom.random(ProductRequest.class);
     private final RequestReturnDTO requestReturnDTO = EnhancedRandom.random(RequestReturnDTO.class);
+    private final RequestUpdateDTO requestUpdateDTO = EnhancedRandom.random(RequestUpdateDTO.class);
     private final ProductRequestDTO firstProductRequestDTO = EnhancedRandom.random(ProductRequestDTO.class);
     private final ProductRequestDTO secondProductRequestDTO = EnhancedRandom.random(ProductRequestDTO.class);
     private final List<ProductRequest> productRequestList = List.of(firstProductRequest, secondProductRequest);
@@ -174,13 +176,13 @@ public class RequestServiceTest extends UnitTest {
 
     @Test
     public void shouldFindByIdWithSuccess() {
-        Mockito.when(requestRepository.findAllById(Mockito.any(ObjectId.class))).thenReturn(Optional.of(List.of(requestEntity)));
+        Mockito.when(requestRepository.findById(Mockito.any(ObjectId.class))).thenReturn(Optional.of(requestEntity));
         Mockito.when(requestMapper.toReturnDTO(eq(requestEntity))).thenReturn(requestReturnDTO);
 
         ResponseEntity<?> response = requestServiceImpl.findRequestById(requestEntity.getId().toString());
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
-        Assertions.assertEquals(response.getBody(), List.of(requestReturnDTO));
+        Assertions.assertEquals(response.getBody(), requestReturnDTO);
     }
 
     @Test
@@ -196,30 +198,23 @@ public class RequestServiceTest extends UnitTest {
 
     @Test
     public void shouldNotFindById() {
-        Mockito.when(requestRepository.findAllById(Mockito.any(ObjectId.class))).thenReturn(Optional.empty());
+        Mockito.when(requestRepository.findById(Mockito.any(ObjectId.class))).thenReturn(Optional.empty());
 
         ResponseEntity<?> response = requestServiceImpl.findRequestById(requestEntity.getId().toString());
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-        Assertions.assertEquals(response.getBody(), "Pedido(s) não encontrado(s) com o id de pedido passado.");
-
-        Mockito.when(requestRepository.findAllById(Mockito.any(ObjectId.class))).thenReturn(Optional.of(new ArrayList<>()));
-
-        ResponseEntity<?> listResponse = requestServiceImpl.findRequestById(requestEntity.getId().toString());
-
-        Assertions.assertEquals(listResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
-        Assertions.assertEquals(listResponse.getBody(), "Pedido(s) não encontrado(s) com o id de pedido passado.");
+        Assertions.assertEquals(response.getBody(), "Pedido não encontrado com o id de pedido passado.");
     }
 
     @Test
     public void shouldResponseInternalServerErrorWithMapperOnFindById() {
-        Mockito.when(requestRepository.findAllById(Mockito.any(ObjectId.class))).thenReturn(Optional.of(List.of(requestEntity)));
+        Mockito.when(requestRepository.findById(Mockito.any(ObjectId.class))).thenReturn(Optional.of(requestEntity));
         Mockito.when(requestMapper.toReturnDTO(eq(requestEntity))).thenThrow(new NullPointerException());
 
         ResponseEntity<?> response = requestServiceImpl.findRequestById(requestEntity.getId().toString());
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-        Assertions.assertEquals(response.getBody(), "Erro no mapeamento para busca de pedido(s): null");
+        Assertions.assertEquals(response.getBody(), "Erro no mapeamento para busca de pedido: null");
     }
 
     @Test
@@ -376,5 +371,147 @@ public class RequestServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro no mapeamento para busca de pedido(s): null");
+    }
+
+    @Test
+    public void shouldUpdateRequestWithSuccess() throws Exception {
+        ObjectId objectId = new ObjectId();
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.of(requestEntity));
+        Mockito.when(requestValidationServiceImpl.validateProductsRequestUpdateDTO(eq(requestEntity), eq(requestUpdateDTO)))
+                .thenReturn(productRequestList);
+        Mockito.when(requestValidationServiceImpl.validateShippingPriceRequestUpdateDTO(eq(requestEntity), eq(requestUpdateDTO)))
+                .thenReturn(5.99);
+        Mockito.when(requestMapper.toEntity(eq(requestEntity), eq(productRequestList), eq(5.99), eq(Status.PROCESSED)))
+                .thenReturn(requestEntity);
+        Mockito.when(requestRepository.save(eq(requestEntity))).thenReturn(requestEntity);
+
+        ResponseEntity<?> response = requestServiceImpl.updateRequest(objectId.toString(), Status.PROCESSED, requestUpdateDTO);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(response.getBody(), "Pedido atualizado com sucesso.");
+    }
+
+    @Test
+    public void shouldNotFindRequestToUpdate() {
+        ObjectId objectId = new ObjectId();
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = requestServiceImpl.updateRequest(objectId.toString(), Status.PROCESSED, requestUpdateDTO);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Pedido não encontrado com o id de pedido passado.");
+    }
+
+    @Test
+    public void shouldResponseBadRequestOnValidateProductsRequestUpdate() throws Exception {
+        ObjectId objectId = new ObjectId();
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.of(requestEntity));
+        Mockito.when(requestValidationServiceImpl.validateProductsRequestUpdateDTO(eq(requestEntity), eq(requestUpdateDTO)))
+                .thenThrow(new NullPointerException());
+
+        ResponseEntity<?> response = requestServiceImpl.updateRequest(objectId.toString(), Status.PROCESSED, requestUpdateDTO);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorOnMapperRequestUpdate() throws Exception {
+        ObjectId objectId = new ObjectId();
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.of(requestEntity));
+        Mockito.when(requestValidationServiceImpl.validateProductsRequestUpdateDTO(eq(requestEntity), eq(requestUpdateDTO)))
+                .thenReturn(productRequestList);
+        Mockito.when(requestValidationServiceImpl.validateShippingPriceRequestUpdateDTO(eq(requestEntity), eq(requestUpdateDTO)))
+                .thenReturn(5.99);
+        Mockito.when(requestMapper.toEntity(eq(requestEntity), eq(productRequestList), eq(5.99), eq(Status.PROCESSED)))
+                .thenThrow(new NullPointerException());
+
+        ResponseEntity<?> response = requestServiceImpl.updateRequest(objectId.toString(), Status.PROCESSED, requestUpdateDTO);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro no mapeamento para atualização de pedido: null");
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorOnDataBaseRequestUpdate() throws Exception {
+        ObjectId objectId = new ObjectId();
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.of(requestEntity));
+        Mockito.when(requestValidationServiceImpl.validateProductsRequestUpdateDTO(eq(requestEntity), eq(requestUpdateDTO)))
+                .thenReturn(productRequestList);
+        Mockito.when(requestValidationServiceImpl.validateShippingPriceRequestUpdateDTO(eq(requestEntity), eq(requestUpdateDTO)))
+                .thenReturn(5.99);
+        Mockito.when(requestMapper.toEntity(eq(requestEntity), eq(productRequestList), eq(5.99), eq(Status.PROCESSED)))
+                .thenReturn(requestEntity);
+        Mockito.when(requestRepository.save(eq(requestEntity))).thenThrow(new DataIntegrityViolationException(""));
+
+        ResponseEntity<?> response = requestServiceImpl.updateRequest(objectId.toString(), Status.PROCESSED, requestUpdateDTO);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro ao atualizar pedido na base de dados: ");
+    }
+
+    @Test
+    public void shouldUpdateStatusRequestWithSuccess() {
+        ObjectId objectId = new ObjectId();
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.of(requestEntity));
+        Mockito.when(requestMapper.toEntity(eq(requestEntity), eq(Status.PROCESSED))).thenReturn(requestEntity);
+        Mockito.when(requestRepository.save(eq(requestEntity))).thenReturn(requestEntity);
+
+        ResponseEntity<?> response = requestServiceImpl.updateStatusRequest(objectId.toString(), Status.PROCESSED);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(response.getBody(), "Status do pedido atualizado com sucesso.");
+    }
+
+    @Test
+    public void shouldNotFindRequestToUpdateStatus() {
+        ObjectId objectId = new ObjectId();
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = requestServiceImpl.updateStatusRequest(objectId.toString(), Status.PROCESSED);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Pedido não encontrado com o id de pedido passado.");
+    }
+
+    @Test
+    public void shouldResponseBadRequestOnValidateProductsRequestUpdateStatus() {
+        ResponseEntity<?> response = requestServiceImpl.updateStatusRequest("1", Status.PROCESSED);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Id do pedido passado inválido.");
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorOnMapperRequestUpdateStatus() {
+        ObjectId objectId = new ObjectId();
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.of(requestEntity));
+        Mockito.when(requestMapper.toEntity(eq(requestEntity), eq(Status.PROCESSED))).thenThrow(new NullPointerException());
+
+        ResponseEntity<?> response = requestServiceImpl.updateStatusRequest(objectId.toString(), Status.PROCESSED);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro no mapeamento para atualização de status do pedido: null");
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorOnDataBaseRequestUpdateStatus() {
+        ObjectId objectId = new ObjectId();
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.of(requestEntity));
+        Mockito.when(requestMapper.toEntity(eq(requestEntity), eq(Status.PROCESSED))).thenReturn(requestEntity);
+        Mockito.when(requestRepository.save(eq(requestEntity))).thenThrow(new DataIntegrityViolationException(""));
+
+        ResponseEntity<?> response = requestServiceImpl.updateStatusRequest(objectId.toString(), Status.PROCESSED);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro ao atualizar status do pedido na base de dados: ");
     }
 }

@@ -1,6 +1,8 @@
 package br.com.fatec.petfood.resource;
 
 import br.com.fatec.petfood.model.dto.RequestDTO;
+import br.com.fatec.petfood.model.dto.RequestUpdateDTO;
+import br.com.fatec.petfood.model.enums.Status;
 import br.com.fatec.petfood.service.RequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -71,9 +73,22 @@ public class RequestResource {
     @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(value = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> updateRequest() {
-        //TO DO
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<?> updateRequest(
+            @RequestParam(value = "id") String id,
+            @RequestParam(value = "status") Status status,
+            @RequestBody RequestUpdateDTO requestUpdateDTO
+    ) {
+        return requestService.updateRequest(id, status, requestUpdateDTO);
+    }
+
+    @CrossOrigin(origins = "*")
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping(value = "/update/status", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateStatusRequest(
+            @RequestParam(value = "id") String id,
+            @RequestParam(value = "status") Status status
+    ) {
+        return requestService.updateStatusRequest(id, status);
     }
 
     @CrossOrigin(origins = "*")
@@ -86,17 +101,11 @@ public class RequestResource {
 
     @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
-    @PatchMapping(value = "/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> cancelRequest() {
-        //TO DO
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @CrossOrigin(origins = "*")
-    @ResponseStatus(HttpStatus.OK)
     @DeleteMapping(value = "/delete")
     public ResponseEntity<?> deleteRequest() {
         //TO DO
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    //TO DO - Atualizar estoque dos produtos ao realizar os pedidos
 }

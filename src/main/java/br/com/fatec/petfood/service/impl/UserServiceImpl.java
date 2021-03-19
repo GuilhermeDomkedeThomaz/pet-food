@@ -156,7 +156,6 @@ public class UserServiceImpl implements UserService {
 
             try {
                 UserReturnDTO userReturnDTO = userMapper.toReturnDTO(userEntity);
-
                 return new ResponseEntity<>(userReturnDTO, HttpStatus.OK);
             } catch (Exception e) {
                 return new ResponseEntity<>("Erro no mapeamento para retorno do usuário: " + e.getMessage(),

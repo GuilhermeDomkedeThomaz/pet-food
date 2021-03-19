@@ -3,16 +3,19 @@ package br.com.fatec.petfood.integration.service;
 import br.com.fatec.petfood.integration.IntegrationTest;
 import br.com.fatec.petfood.model.dto.ProductRequestDTO;
 import br.com.fatec.petfood.model.dto.RequestDTO;
+import br.com.fatec.petfood.model.dto.RequestUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.ProductEntity;
 import br.com.fatec.petfood.model.entity.mongo.RequestEntity;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.entity.mongo.UserEntity;
+import br.com.fatec.petfood.model.enums.Status;
 import br.com.fatec.petfood.repository.mongo.ProductRepository;
 import br.com.fatec.petfood.repository.mongo.RequestRepository;
 import br.com.fatec.petfood.repository.mongo.SellerRepository;
 import br.com.fatec.petfood.repository.mongo.UserRepository;
 import br.com.fatec.petfood.service.RequestService;
 import io.github.benas.randombeans.api.EnhancedRandom;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +48,7 @@ public class RequestServiceTest extends IntegrationTest {
     private final SellerEntity sellerEntity = EnhancedRandom.random(SellerEntity.class);
     private final ProductEntity firstProductEntity = EnhancedRandom.random(ProductEntity.class);
     private final ProductEntity secondProductEntity = EnhancedRandom.random(ProductEntity.class);
+    private final RequestUpdateDTO requestUpdateDTO = EnhancedRandom.random(RequestUpdateDTO.class);
 
     @Test
     public void shouldCreateRequestWithSuccess() {
@@ -96,7 +100,7 @@ public class RequestServiceTest extends IntegrationTest {
         ResponseEntity<?> response = requestService.createRequest(requestDTO);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-        Assertions.assertEquals(response.getBody(), "Valor de frete passado inválido(menor ou igual a zero).");
+        Assertions.assertEquals(response.getBody(), "Valor de frete passado inválido(menor que zero).");
     }
 
     @Test
@@ -317,7 +321,7 @@ public class RequestServiceTest extends IntegrationTest {
         ResponseEntity<?> idResponse = requestService.findRequestById(sellerEntity.getId().toString());
 
         Assertions.assertEquals(idResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
-        Assertions.assertEquals(idResponse.getBody(), "Pedido(s) não encontrado(s) com o id de pedido passado.");
+        Assertions.assertEquals(idResponse.getBody(), "Pedido não encontrado com o id de pedido passado.");
 
         ResponseEntity<?> sellerResponse = requestService.findRequestBySeller(sellerEntity.getName());
 
@@ -335,5 +339,200 @@ public class RequestServiceTest extends IntegrationTest {
         Assertions.assertEquals(sellerAndUserResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(sellerAndUserResponse.getBody(),
                 "Pedido(s) não encontrado(s) com os nomes de lojista e de usuário passados.");
+    }
+
+    @Test
+    public void shouldUpdateRequestWithSuccess() {
+        ObjectId objectId;
+        userRepository.save(userEntity);
+        sellerRepository.save(sellerEntity);
+        firstProductEntity.setStock(5);
+        firstProductEntity.setPrice(9.99);
+        firstProductEntity.setPricePromotion(9.99);
+        firstProductEntity.setSellerId(sellerEntity.getId());
+        firstProductEntity.setSellerName(sellerEntity.getName());
+        secondProductEntity.setStock(5);
+        secondProductEntity.setPrice(9.99);
+        secondProductEntity.setPricePromotion(9.99);
+        secondProductEntity.setSellerId(sellerEntity.getId());
+        secondProductEntity.setSellerName(sellerEntity.getName());
+        productRepository.save(firstProductEntity);
+        productRepository.save(secondProductEntity);
+        final ProductRequestDTO firstProductRequestDTO = new ProductRequestDTO(firstProductEntity.getTitle(), 1);
+        final ProductRequestDTO secondProductRequestDTO = new ProductRequestDTO(secondProductEntity.getTitle(), 1);
+        requestDTO.setShippingPrice(9.99);
+        requestDTO.setUserName(userEntity.getName());
+        requestDTO.setSellerName(sellerEntity.getName());
+        requestDTO.setProducts(List.of(firstProductRequestDTO, secondProductRequestDTO));
+
+        ResponseEntity<?> createResponse = requestService.createRequest(requestDTO);
+
+        Assertions.assertEquals(createResponse.getStatusCode(), HttpStatus.CREATED);
+
+        Optional<List<RequestEntity>> optionalRequestEntityList = requestRepository.findAllBySellerName(sellerEntity.getName());
+
+        if (optionalRequestEntityList.isPresent()) {
+            RequestEntity requestEntity = optionalRequestEntityList.get().get(0);
+            Assertions.assertEquals(createResponse.getBody(), "Pedido registrado com sucesso. Id do pedido: "
+                    + requestEntity.getId().toString());
+            objectId = requestEntity.getId();
+
+            firstProductRequestDTO.setQuantity(5);
+            secondProductRequestDTO.setQuantity(5);
+            requestUpdateDTO.setShippingPrice(0.00);
+            requestUpdateDTO.setProducts(List.of(firstProductRequestDTO, secondProductRequestDTO));
+
+            ResponseEntity<?> updateResponse = requestService.updateRequest(objectId.toString(), Status.PROCESSED, requestUpdateDTO);
+
+            Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.OK);
+            Assertions.assertEquals(updateResponse.getBody(), "Pedido atualizado com sucesso.");
+        }
+
+        optionalRequestEntityList = requestRepository.findAllBySellerName(sellerEntity.getName());
+
+        if (optionalRequestEntityList.isPresent()) {
+            RequestEntity requestEntity = optionalRequestEntityList.get().get(0);
+            Assertions.assertEquals(requestEntity.getProducts().get(0).getQuantity(), 5);
+            Assertions.assertEquals(requestEntity.getProducts().get(1).getQuantity(), 5);
+            Assertions.assertEquals(requestEntity.getShippingPrice(), 0.00);
+            Assertions.assertEquals(requestEntity.getStatus(), Status.PROCESSED);
+        }
+    }
+
+    @Test
+    public void shouldUpdateOnlyStatusRequestWithSuccess() {
+        ObjectId objectId;
+        userRepository.save(userEntity);
+        sellerRepository.save(sellerEntity);
+        firstProductEntity.setStock(5);
+        firstProductEntity.setPrice(9.99);
+        firstProductEntity.setPricePromotion(9.99);
+        firstProductEntity.setSellerId(sellerEntity.getId());
+        firstProductEntity.setSellerName(sellerEntity.getName());
+        secondProductEntity.setStock(5);
+        secondProductEntity.setPrice(9.99);
+        secondProductEntity.setPricePromotion(9.99);
+        secondProductEntity.setSellerId(sellerEntity.getId());
+        secondProductEntity.setSellerName(sellerEntity.getName());
+        productRepository.save(firstProductEntity);
+        productRepository.save(secondProductEntity);
+        final ProductRequestDTO firstProductRequestDTO = new ProductRequestDTO(firstProductEntity.getTitle(), 1);
+        final ProductRequestDTO secondProductRequestDTO = new ProductRequestDTO(secondProductEntity.getTitle(), 1);
+        requestDTO.setShippingPrice(9.99);
+        requestDTO.setUserName(userEntity.getName());
+        requestDTO.setSellerName(sellerEntity.getName());
+        requestDTO.setProducts(List.of(firstProductRequestDTO, secondProductRequestDTO));
+
+        ResponseEntity<?> createResponse = requestService.createRequest(requestDTO);
+
+        Assertions.assertEquals(createResponse.getStatusCode(), HttpStatus.CREATED);
+
+        Optional<List<RequestEntity>> optionalRequestEntityList = requestRepository.findAllBySellerName(sellerEntity.getName());
+
+        if (optionalRequestEntityList.isPresent()) {
+            RequestEntity requestEntity = optionalRequestEntityList.get().get(0);
+            Assertions.assertEquals(createResponse.getBody(), "Pedido registrado com sucesso. Id do pedido: "
+                    + requestEntity.getId().toString());
+            objectId = requestEntity.getId();
+
+            requestUpdateDTO.setProducts(List.of(firstProductRequestDTO, secondProductRequestDTO));
+
+            ResponseEntity<?> updateResponse = requestService.updateRequest(objectId.toString(), Status.PROCESSED, requestUpdateDTO);
+
+            Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.OK);
+            Assertions.assertEquals(updateResponse.getBody(), "Pedido atualizado com sucesso.");
+        }
+
+        optionalRequestEntityList = requestRepository.findAllBySellerName(sellerEntity.getName());
+
+        if (optionalRequestEntityList.isPresent()) {
+            RequestEntity requestEntity = optionalRequestEntityList.get().get(0);
+            Assertions.assertEquals(requestEntity.getProducts().get(0).getQuantity(), 1);
+            Assertions.assertEquals(requestEntity.getProducts().get(1).getQuantity(), 1);
+            Assertions.assertEquals(requestEntity.getStatus(), Status.PROCESSED);
+        }
+    }
+
+    @Test
+    public void shouldResponseBadRequestWithInvalidIdOnRequestUpdate() {
+        ResponseEntity<?> updateResponse = requestService.updateRequest("1", Status.PROCESSED, requestUpdateDTO);
+
+        Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(updateResponse.getBody(), "Id do pedido passado inválido.");
+    }
+
+    @Test
+    public void shouldNoFindRequestToUpdate() {
+        ResponseEntity<?> updateResponse =
+                requestService.updateRequest(new ObjectId().toString(), Status.PROCESSED, requestUpdateDTO);
+
+        Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(updateResponse.getBody(), "Pedido não encontrado com o id de pedido passado.");
+    }
+
+    @Test
+    public void shouldUpdateStatusRequestWithSuccess() {
+        ObjectId objectId;
+        userRepository.save(userEntity);
+        sellerRepository.save(sellerEntity);
+        firstProductEntity.setStock(5);
+        firstProductEntity.setPrice(9.99);
+        firstProductEntity.setPricePromotion(9.99);
+        firstProductEntity.setSellerId(sellerEntity.getId());
+        firstProductEntity.setSellerName(sellerEntity.getName());
+        secondProductEntity.setStock(5);
+        secondProductEntity.setPrice(9.99);
+        secondProductEntity.setPricePromotion(9.99);
+        secondProductEntity.setSellerId(sellerEntity.getId());
+        secondProductEntity.setSellerName(sellerEntity.getName());
+        productRepository.save(firstProductEntity);
+        productRepository.save(secondProductEntity);
+        final ProductRequestDTO firstProductRequestDTO = new ProductRequestDTO(firstProductEntity.getTitle(), 1);
+        final ProductRequestDTO secondProductRequestDTO = new ProductRequestDTO(secondProductEntity.getTitle(), 1);
+        requestDTO.setShippingPrice(9.99);
+        requestDTO.setUserName(userEntity.getName());
+        requestDTO.setSellerName(sellerEntity.getName());
+        requestDTO.setProducts(List.of(firstProductRequestDTO, secondProductRequestDTO));
+
+        ResponseEntity<?> createResponse = requestService.createRequest(requestDTO);
+
+        Assertions.assertEquals(createResponse.getStatusCode(), HttpStatus.CREATED);
+
+        Optional<List<RequestEntity>> optionalRequestEntityList = requestRepository.findAllBySellerName(sellerEntity.getName());
+
+        if (optionalRequestEntityList.isPresent()) {
+            RequestEntity requestEntity = optionalRequestEntityList.get().get(0);
+            Assertions.assertEquals(createResponse.getBody(), "Pedido registrado com sucesso. Id do pedido: "
+                    + requestEntity.getId().toString());
+            objectId = requestEntity.getId();
+
+            ResponseEntity<?> updateResponse = requestService.updateStatusRequest(objectId.toString(), Status.PROCESSED);
+
+            Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.OK);
+            Assertions.assertEquals(updateResponse.getBody(), "Status do pedido atualizado com sucesso.");
+        }
+
+        optionalRequestEntityList = requestRepository.findAllBySellerName(sellerEntity.getName());
+
+        if (optionalRequestEntityList.isPresent()) {
+            RequestEntity requestEntity = optionalRequestEntityList.get().get(0);
+            Assertions.assertEquals(requestEntity.getStatus(), Status.PROCESSED);
+        }
+    }
+
+    @Test
+    public void shouldResponseBadRequestWithInvalidIdOnRequestStatusUpdate() {
+        ResponseEntity<?> updateResponse = requestService.updateStatusRequest("1", Status.PROCESSED);
+
+        Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(updateResponse.getBody(), "Id do pedido passado inválido.");
+    }
+
+    @Test
+    public void shouldNoFindRequestToUpdateStatus() {
+        ResponseEntity<?> updateResponse = requestService.updateStatusRequest(new ObjectId().toString(), Status.PROCESSED);
+
+        Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(updateResponse.getBody(), "Pedido não encontrado com o id de pedido passado.");
     }
 }

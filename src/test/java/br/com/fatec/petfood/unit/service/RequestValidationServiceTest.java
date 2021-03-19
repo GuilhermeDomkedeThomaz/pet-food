@@ -1,6 +1,7 @@
 package br.com.fatec.petfood.unit.service;
 
 import br.com.fatec.petfood.model.dto.ProductRequestDTO;
+import br.com.fatec.petfood.model.dto.RequestUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.ProductEntity;
 import br.com.fatec.petfood.model.entity.mongo.RequestEntity;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
@@ -51,6 +52,7 @@ public class RequestValidationServiceTest extends UnitTest {
     private final ProductEntity productEntity = EnhancedRandom.random(ProductEntity.class);
     private final RequestEntity requestEntity = EnhancedRandom.random(RequestEntity.class);
     private final ProductRequest productRequest = EnhancedRandom.random(ProductRequest.class);
+    private final RequestUpdateDTO requestUpdateDTO = EnhancedRandom.random(RequestUpdateDTO.class);
     private final ProductRequestDTO firstProductRequestDTO = EnhancedRandom.random(ProductRequestDTO.class);
     private final ProductRequestDTO secondProductRequestDTO = EnhancedRandom.random(ProductRequestDTO.class);
     private final ProductRequestDTO invalidProductRequestDTO = EnhancedRandom.random(ProductRequestDTO.class, "quantity");
@@ -72,7 +74,7 @@ public class RequestValidationServiceTest extends UnitTest {
         try {
             requestValidationServiceImpl.validateShippingPrice(-9.99);
         } catch (Exception e) {
-            Assertions.assertEquals("Valor de frete passado inválido(menor ou igual a zero).", e.getMessage());
+            Assertions.assertEquals("Valor de frete passado inválido(menor que zero).", e.getMessage());
         }
     }
 
@@ -272,5 +274,35 @@ public class RequestValidationServiceTest extends UnitTest {
         } catch (Exception e) {
             Assertions.assertEquals("Nome do usuário passado inválido(vazio ou nulo).", e.getMessage());
         }
+    }
+
+    @Test
+    public void shouldValidateNullOrEmptyProductsRequestUpdateDTO() throws Exception {
+        requestUpdateDTO.setProducts(null);
+
+        List<ProductRequest> nullProductRequestList =
+                requestValidationServiceImpl.validateProductsRequestUpdateDTO(requestEntity, requestUpdateDTO);
+
+        requestUpdateDTO.setProducts(new ArrayList<>());
+
+        List<ProductRequest> emptyProductRequestList =
+                requestValidationServiceImpl.validateProductsRequestUpdateDTO(requestEntity, requestUpdateDTO);
+
+        Assertions.assertEquals(requestEntity.getProducts(), nullProductRequestList);
+        Assertions.assertEquals(requestEntity.getProducts(), emptyProductRequestList);
+    }
+
+    @Test
+    public void shouldValidateNonNullAndNonEmptyProductsRequestUpdateDTO() {
+        productEntity.setStock(10);
+        requestEntity.setSellerName(sellerEntity.getName());
+        requestUpdateDTO.getProducts().forEach(productRequest -> productRequest.setQuantity(5));
+
+        Mockito.when(productRepository.findByTitleAndSellerName(Mockito.anyString(), eq(sellerEntity.getName())))
+                .thenReturn(Optional.of(productEntity));
+        Mockito.when(productMapper.toProductRequest(productEntity, 5)).thenReturn(productRequest);
+
+        Assertions.assertDoesNotThrow(() ->
+                requestValidationServiceImpl.validateProductsRequestUpdateDTO(requestEntity, requestUpdateDTO));
     }
 }

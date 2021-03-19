@@ -162,7 +162,6 @@ public class SellerServiceImpl implements SellerService {
 
             try {
                 SellerReturnDTO sellerReturnDTO = sellerMapper.toReturnDTO(sellerEntity);
-
                 return new ResponseEntity<>(sellerReturnDTO, HttpStatus.OK);
             } catch (Exception e) {
                 return new ResponseEntity<>("Erro no mapeamento para retorno do lojista: " + e.getMessage(),

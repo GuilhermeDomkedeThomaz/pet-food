@@ -1,6 +1,7 @@
 package br.com.fatec.petfood.service.impl;
 
 import br.com.fatec.petfood.model.dto.ProductRequestDTO;
+import br.com.fatec.petfood.model.dto.RequestUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.ProductEntity;
 import br.com.fatec.petfood.model.entity.mongo.RequestEntity;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
@@ -35,8 +36,8 @@ public class RequestValidationServiceImpl implements RequestValidationService {
     public void validateShippingPrice(Double shippingPrice) throws Exception {
         if (Objects.isNull(shippingPrice))
             throw new Exception("Valor de frete passado inválido(vazio ou nulo).");
-        else if (shippingPrice <= 0.0)
-            throw new Exception("Valor de frete passado inválido(menor ou igual a zero).");
+        else if (shippingPrice < 0.0)
+            throw new Exception("Valor de frete passado inválido(menor que zero).");
     }
 
     @Override
@@ -140,6 +141,27 @@ public class RequestValidationServiceImpl implements RequestValidationService {
     @Override
     public void validateFindRequestByUser(String userName) throws Exception {
         this.genericValidateUser(userName);
+    }
+
+    @Override
+    public List<ProductRequest> validateProductsRequestUpdateDTO(RequestEntity requestEntity, RequestUpdateDTO requestUpdateDTO)
+            throws Exception {
+        if (Objects.isNull(requestUpdateDTO.getProducts()))
+            return requestEntity.getProducts();
+        else if (requestUpdateDTO.getProducts().isEmpty())
+            return requestEntity.getProducts();
+        else
+            return this.validateProductsRequestDTO(requestUpdateDTO.getProducts(), requestEntity.getSellerName());
+    }
+
+    @Override
+    public Double validateShippingPriceRequestUpdateDTO(RequestEntity requestEntity, RequestUpdateDTO requestUpdateDTO) {
+        if (Objects.isNull(requestUpdateDTO.getShippingPrice()))
+            return requestEntity.getShippingPrice();
+        else if (requestUpdateDTO.getShippingPrice() < 0.0)
+            return requestEntity.getShippingPrice();
+        else
+            return requestUpdateDTO.getShippingPrice();
     }
 
     private void genericValidateSeller(String sellerName) throws Exception {
