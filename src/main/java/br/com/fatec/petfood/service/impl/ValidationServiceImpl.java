@@ -187,6 +187,11 @@ public class ValidationServiceImpl implements ValidationService {
         );
     }
 
+    @Override
+    public void validateProductStockUpdate(Integer stock) throws Exception {
+        this.genericProductStockValidate(stock);
+    }
+
     private void genericValidate(String password, RegistrationInfos registrationInfos, CityZone cityZone) throws Exception {
         if (!validateUtils.isNotNullAndNotEmpty(password))
             throw new Exception("Senha passada inválida(vazia ou nula).");
@@ -254,12 +259,16 @@ public class ValidationServiceImpl implements ValidationService {
         else if (price <= 0.0)
             throw new Exception("Preço passado inválido(menor ou igual a 0).");
 
+        this.genericProductStockValidate(stock);
+
+        if (!validateUtils.isNotNullAndNotEmpty(imageUrl))
+            throw new Exception("Url da imagem passada inválida(vazia ou nula).");
+    }
+
+    private void genericProductStockValidate(Integer stock) throws Exception {
         if (Objects.isNull(stock))
             throw new Exception("Estoque passado inválido(vazio ou nulo).");
         else if (stock <= 0)
             throw new Exception("Estoque passado inválido(menor ou igual a 0).");
-
-        if (!validateUtils.isNotNullAndNotEmpty(imageUrl))
-            throw new Exception("Url da imagem passada inválida(vazia ou nula).");
     }
 }

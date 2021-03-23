@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -72,7 +71,7 @@ public class RequestResource {
 
     @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
-    @PutMapping(value = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateRequest(
             @RequestParam(value = "id") String id,
             @RequestParam(value = "status") Status status,
@@ -83,7 +82,7 @@ public class RequestResource {
 
     @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
-    @PutMapping(value = "/update/status", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/update/status")
     public ResponseEntity<?> updateStatusRequest(
             @RequestParam(value = "id") String id,
             @RequestParam(value = "status") Status status
@@ -93,19 +92,18 @@ public class RequestResource {
 
     @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
-    @PatchMapping(value = "/rate", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> rateRequest() {
-        //TO DO
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PatchMapping(value = "/rate")
+    public ResponseEntity<?> rateRequest(
+            @RequestParam(value = "id") String id,
+            @RequestParam(value = "rate") Integer rate
+    ) {
+        return requestService.rateRequest(id, rate);
     }
 
     @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping(value = "/delete")
-    public ResponseEntity<?> deleteRequest() {
-        //TO DO
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<?> deleteRequest(@RequestParam(value = "id") String id) {
+        return requestService.deleteRequest(id);
     }
-
-    //TO DO - Atualizar estoque dos produtos ao realizar os pedidos
 }

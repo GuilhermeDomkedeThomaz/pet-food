@@ -27,4 +27,6 @@ public interface ValidationService {
     SellerEntity validateProductDTO(ProductDTO productDTO, Category category) throws Exception;
 
     void validateProductUpdateDTO(ProductUpdateDTO productUpdateDTO, Category category) throws Exception;
+
+    void validateProductStockUpdate(Integer stock) throws Exception;
 }

@@ -349,4 +349,24 @@ public class ValidationServiceTest extends UnitTest {
             Assertions.assertEquals("Preço passado inválido(menor ou igual a 0).", e.getMessage());
         }
     }
+
+    @Test
+    public void shouldValidateProductStockUpdateWithSuccess() {
+        Assertions.assertDoesNotThrow(() -> validationServiceImpl.validateProductStockUpdate(10));
+    }
+
+    @Test
+    public void shouldValidateProductStockUpdateWithInvalidStock() {
+        try {
+            validationServiceImpl.validateProductStockUpdate(null);
+        } catch (Exception e) {
+            Assertions.assertEquals("Estoque passado inválido(vazio ou nulo).", e.getMessage());
+        }
+
+        try {
+            validationServiceImpl.validateProductStockUpdate(-50);
+        } catch (Exception e) {
+            Assertions.assertEquals("Estoque passado inválido(menor ou igual a 0).", e.getMessage());
+        }
+    }
 }

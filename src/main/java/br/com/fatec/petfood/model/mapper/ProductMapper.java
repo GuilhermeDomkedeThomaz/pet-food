@@ -51,6 +51,23 @@ public interface ProductMapper {
     ProductEntity toEntity(ProductUpdateDTO productUpdateDTO, ProductEntity productEntity, Category category);
 
     @Mappings({
+            @Mapping(target = "id", source = "productEntity.id"),
+            @Mapping(target = "sellerId", source = "productEntity.sellerId"),
+            @Mapping(target = "sellerName", source = "productEntity.sellerName"),
+            @Mapping(target = "title", source = "productEntity.title"),
+            @Mapping(target = "description", source = "productEntity.description"),
+            @Mapping(target = "brand", source = "productEntity.brand"),
+            @Mapping(target = "category", source = "productEntity.category"),
+            @Mapping(target = "pricePromotion", source = "productEntity.pricePromotion"),
+            @Mapping(target = "price", source = "productEntity.price"),
+            @Mapping(target = "stock", source = "stock"),
+            @Mapping(target = "imageUrl", source = "productEntity.imageUrl"),
+            @Mapping(target = "additionalInfo", source = "productEntity.additionalInfo"),
+            @Mapping(target = "defaultDateTime", source = "productEntity.defaultDateTime")
+    })
+    ProductEntity toEntity(ProductEntity productEntity, Integer stock);
+
+    @Mappings({
             @Mapping(target = "sellerId", source = "productEntity.sellerId", qualifiedByName = "getSellerId"),
             @Mapping(target = "sellerName", source = "productEntity.sellerName"),
             @Mapping(target = "title", source = "productEntity.title"),

@@ -346,12 +346,12 @@ public class RequestServiceTest extends IntegrationTest {
         ObjectId objectId;
         userRepository.save(userEntity);
         sellerRepository.save(sellerEntity);
-        firstProductEntity.setStock(5);
+        firstProductEntity.setStock(10);
         firstProductEntity.setPrice(9.99);
         firstProductEntity.setPricePromotion(9.99);
         firstProductEntity.setSellerId(sellerEntity.getId());
         firstProductEntity.setSellerName(sellerEntity.getName());
-        secondProductEntity.setStock(5);
+        secondProductEntity.setStock(10);
         secondProductEntity.setPrice(9.99);
         secondProductEntity.setPricePromotion(9.99);
         secondProductEntity.setSellerId(sellerEntity.getId());
@@ -534,5 +534,128 @@ public class RequestServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(updateResponse.getBody(), "Pedido não encontrado com o id de pedido passado.");
+    }
+
+    @Test
+    public void shouldRateRequestWithSuccess() {
+        ObjectId objectId;
+        userRepository.save(userEntity);
+        sellerRepository.save(sellerEntity);
+        firstProductEntity.setStock(5);
+        firstProductEntity.setPrice(9.99);
+        firstProductEntity.setPricePromotion(9.99);
+        firstProductEntity.setSellerId(sellerEntity.getId());
+        firstProductEntity.setSellerName(sellerEntity.getName());
+        secondProductEntity.setStock(5);
+        secondProductEntity.setPrice(9.99);
+        secondProductEntity.setPricePromotion(9.99);
+        secondProductEntity.setSellerId(sellerEntity.getId());
+        secondProductEntity.setSellerName(sellerEntity.getName());
+        productRepository.save(firstProductEntity);
+        productRepository.save(secondProductEntity);
+        final ProductRequestDTO firstProductRequestDTO = new ProductRequestDTO(firstProductEntity.getTitle(), 1);
+        final ProductRequestDTO secondProductRequestDTO = new ProductRequestDTO(secondProductEntity.getTitle(), 1);
+        requestDTO.setShippingPrice(9.99);
+        requestDTO.setUserName(userEntity.getName());
+        requestDTO.setSellerName(sellerEntity.getName());
+        requestDTO.setProducts(List.of(firstProductRequestDTO, secondProductRequestDTO));
+
+        ResponseEntity<?> createResponse = requestService.createRequest(requestDTO);
+
+        Assertions.assertEquals(createResponse.getStatusCode(), HttpStatus.CREATED);
+
+        Optional<List<RequestEntity>> optionalRequestEntityList = requestRepository.findAllBySellerName(sellerEntity.getName());
+
+        if (optionalRequestEntityList.isPresent()) {
+            RequestEntity requestEntity = optionalRequestEntityList.get().get(0);
+            Assertions.assertEquals(createResponse.getBody(), "Pedido registrado com sucesso. Id do pedido: "
+                    + requestEntity.getId().toString());
+            objectId = requestEntity.getId();
+
+            ResponseEntity<?> updateResponse = requestService.rateRequest(objectId.toString(), 10);
+
+            Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.OK);
+            Assertions.assertEquals(updateResponse.getBody(), "Pedido avaliado com sucesso.");
+        }
+
+        optionalRequestEntityList = requestRepository.findAllBySellerName(sellerEntity.getName());
+
+        if (optionalRequestEntityList.isPresent()) {
+            RequestEntity requestEntity = optionalRequestEntityList.get().get(0);
+            Assertions.assertEquals(requestEntity.getRate(), 10);
+        }
+    }
+
+    @Test
+    public void shouldResponseBadRequestWithInvalidIdOnRateRequest() {
+        ResponseEntity<?> updateResponse = requestService.rateRequest("1", 10);
+
+        Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(updateResponse.getBody(), "Id do pedido passado inválido.");
+    }
+
+    @Test
+    public void shouldNoFindRequestToRateRequest() {
+        ResponseEntity<?> updateResponse = requestService.rateRequest(new ObjectId().toString(), 10);
+
+        Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(updateResponse.getBody(), "Pedido não encontrado com o id de pedido passado.");
+    }
+
+    @Test
+    public void shouldDeleteRequestWithSuccess() {
+        userRepository.save(userEntity);
+        sellerRepository.save(sellerEntity);
+        firstProductEntity.setStock(5);
+        firstProductEntity.setPrice(9.99);
+        firstProductEntity.setPricePromotion(9.99);
+        firstProductEntity.setSellerId(sellerEntity.getId());
+        firstProductEntity.setSellerName(sellerEntity.getName());
+        secondProductEntity.setStock(5);
+        secondProductEntity.setPrice(9.99);
+        secondProductEntity.setPricePromotion(9.99);
+        secondProductEntity.setSellerId(sellerEntity.getId());
+        secondProductEntity.setSellerName(sellerEntity.getName());
+        productRepository.save(firstProductEntity);
+        productRepository.save(secondProductEntity);
+        final ProductRequestDTO firstProductRequestDTO = new ProductRequestDTO(firstProductEntity.getTitle(), 1);
+        final ProductRequestDTO secondProductRequestDTO = new ProductRequestDTO(secondProductEntity.getTitle(), 1);
+        requestDTO.setShippingPrice(9.99);
+        requestDTO.setUserName(userEntity.getName());
+        requestDTO.setSellerName(sellerEntity.getName());
+        requestDTO.setProducts(List.of(firstProductRequestDTO, secondProductRequestDTO));
+
+        ResponseEntity<?> response = requestService.createRequest(requestDTO);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+
+        Optional<List<RequestEntity>> optionalRequestEntityList = requestRepository.findAllBySellerName(sellerEntity.getName());
+
+        if (optionalRequestEntityList.isPresent()) {
+            RequestEntity requestEntity = optionalRequestEntityList.get().get(0);
+            Assertions.assertEquals(response.getBody(), "Pedido registrado com sucesso. Id do pedido: "
+                    + requestEntity.getId().toString());
+
+            ResponseEntity<?> deleteResponse = requestService.deleteRequest(requestEntity.getId().toString());
+
+            Assertions.assertEquals(deleteResponse.getStatusCode(), HttpStatus.OK);
+            Assertions.assertEquals(deleteResponse.getBody(), "Pedido deletado com sucesso.");
+        }
+    }
+
+    @Test
+    public void shouldNotFindRequestForDelete() {
+        ResponseEntity<?> deleteResponse = requestService.deleteRequest(new ObjectId().toString());
+
+        Assertions.assertEquals(deleteResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(deleteResponse.getBody(), "Pedido não encontrado com o id de pedido passado.");
+    }
+
+    @Test
+    public void shouldResponseBadRequestWithInvalidIdOnDeleteRequest() {
+        ResponseEntity<?> deleteResponse = requestService.deleteRequest("1");
+
+        Assertions.assertEquals(deleteResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(deleteResponse.getBody(), "Id do pedido passado inválido.");
     }
 }

@@ -11,6 +11,7 @@ import br.com.fatec.petfood.model.enums.Status;
 import br.com.fatec.petfood.model.generic.ProductRequest;
 import br.com.fatec.petfood.model.mapper.RequestMapper;
 import br.com.fatec.petfood.repository.mongo.RequestRepository;
+import br.com.fatec.petfood.service.ProductService;
 import br.com.fatec.petfood.service.impl.RequestServiceImpl;
 import br.com.fatec.petfood.service.impl.RequestValidationServiceImpl;
 import br.com.fatec.petfood.unit.UnitTest;
@@ -35,6 +36,9 @@ public class RequestServiceTest extends UnitTest {
 
     @Mock
     private RequestMapper requestMapper;
+
+    @Mock
+    private ProductService productService;
 
     @Mock
     private RequestRepository requestRepository;
@@ -513,5 +517,98 @@ public class RequestServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro ao atualizar status do pedido na base de dados: ");
+    }
+
+    @Test
+    public void shouldRateRequestWithSuccess() {
+        ObjectId objectId = new ObjectId();
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.of(requestEntity));
+        Mockito.when(requestMapper.toEntity(eq(requestEntity), eq(10))).thenReturn(requestEntity);
+        Mockito.when(requestRepository.save(eq(requestEntity))).thenReturn(requestEntity);
+
+        ResponseEntity<?> response = requestServiceImpl.rateRequest(objectId.toString(), 10);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(response.getBody(), "Pedido avaliado com sucesso.");
+    }
+
+    @Test
+    public void shouldNotFindRequestToRateRequest() {
+        ObjectId objectId = new ObjectId();
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = requestServiceImpl.rateRequest(objectId.toString(), 10);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Pedido não encontrado com o id de pedido passado.");
+    }
+
+    @Test
+    public void shouldResponseBadRequestOnValidateProductsRateRequest() {
+        ResponseEntity<?> response = requestServiceImpl.rateRequest("1", 10);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Id do pedido passado inválido.");
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorOnMapperRateRequest() {
+        ObjectId objectId = new ObjectId();
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.of(requestEntity));
+        Mockito.when(requestMapper.toEntity(eq(requestEntity), eq(10))).thenThrow(new NullPointerException());
+
+        ResponseEntity<?> response = requestServiceImpl.rateRequest(objectId.toString(), 10);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro no mapeamento para avaliação do pedido: null");
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorOnDataBaseRateRequest() {
+        ObjectId objectId = new ObjectId();
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.of(requestEntity));
+        Mockito.when(requestMapper.toEntity(eq(requestEntity), eq(10))).thenReturn(requestEntity);
+        Mockito.when(requestRepository.save(eq(requestEntity))).thenThrow(new DataIntegrityViolationException(""));
+
+        ResponseEntity<?> response = requestServiceImpl.rateRequest(objectId.toString(), 10);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro ao avaliar pedido na base de dados: ");
+    }
+
+    @Test
+    public void shouldDeleteRequestWithSuccess() {
+        ObjectId objectId = new ObjectId();
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.of(requestEntity));
+
+        ResponseEntity<?> response = requestServiceImpl.deleteRequest(objectId.toString());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(response.getBody(), "Pedido deletado com sucesso.");
+    }
+
+    @Test
+    public void shouldNotFindRequestForDelete() {
+        ObjectId objectId = new ObjectId();
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = requestServiceImpl.deleteRequest(objectId.toString());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Pedido não encontrado com o id de pedido passado.");
+    }
+
+    @Test
+    public void shouldResponseBadRequestWithInvalidIdOnDeleteRequest() {
+        ResponseEntity<?> response = requestServiceImpl.deleteRequest("1");
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Id do pedido passado inválido.");
     }
 }

@@ -74,6 +74,24 @@ public interface RequestMapper {
     RequestEntity toEntity(RequestEntity requestEntity, Status status);
 
     @Mappings({
+            @Mapping(target = "id", source = "requestEntity.id"),
+            @Mapping(target = "sellerId", source = "requestEntity.sellerId"),
+            @Mapping(target = "sellerName", source = "requestEntity.sellerName"),
+            @Mapping(target = "userId", source = "requestEntity.userId"),
+            @Mapping(target = "userName", source = "requestEntity.userName"),
+            @Mapping(target = "products", source = "requestEntity.products"),
+            @Mapping(target = "totalPricePromotion", source = "requestEntity.totalPricePromotion"),
+            @Mapping(target = "totalPrice", source = "requestEntity.totalPrice"),
+            @Mapping(target = "totalQuantity", source = "requestEntity.totalQuantity"),
+            @Mapping(target = "shippingPrice", source = "requestEntity.shippingPrice"),
+            @Mapping(target = "status", source = "requestEntity.status"),
+            @Mapping(target = "rate", source = "rate"),
+            @Mapping(target = "defaultDateTime", source = "requestEntity.defaultDateTime"),
+            @Mapping(target = "lastUpdateDateTime", expression = "java(org.joda.time.DateTime.now())")
+    })
+    RequestEntity toEntity(RequestEntity requestEntity, Integer rate);
+
+    @Mappings({
             @Mapping(target = "id", source = "requestEntity.id", qualifiedByName = "getId"),
             @Mapping(target = "sellerName", source = "requestEntity.sellerName"),
             @Mapping(target = "userName", source = "requestEntity.userName"),

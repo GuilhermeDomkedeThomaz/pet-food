@@ -129,6 +129,37 @@ public class RequestMapperTest extends IntegrationTest {
     }
 
     @Test
+    public void shouldMapperToEntityUpdateRate() {
+        RequestEntity requestEntity = EnhancedRandom.random(RequestEntity.class);
+        requestEntity.getProducts().forEach(product -> {
+            product.setPrice(9.99);
+            product.setPricePromotion(6.99);
+            product.setQuantity(5);
+        });
+        requestEntity.setRate(null);
+        requestEntity.setShippingPrice(9.99);
+
+        RequestEntity requestUpdateEntity = requestMapper.toEntity(requestEntity, 10);
+
+        Assertions.assertEquals(requestEntity.getId(), requestUpdateEntity.getId());
+        Assertions.assertEquals(requestEntity.getSellerId(), requestUpdateEntity.getSellerId());
+        Assertions.assertEquals(requestEntity.getSellerName(), requestUpdateEntity.getSellerName());
+        Assertions.assertEquals(requestEntity.getUserId(), requestUpdateEntity.getUserId());
+        Assertions.assertEquals(requestEntity.getUserName(), requestUpdateEntity.getUserName());
+        Assertions.assertEquals(requestEntity.getProducts(), requestUpdateEntity.getProducts());
+        Assertions.assertEquals(requestEntity.getTotalPricePromotion(), requestUpdateEntity.getTotalPricePromotion());
+        Assertions.assertEquals(requestEntity.getTotalPrice(), requestUpdateEntity.getTotalPrice());
+        Assertions.assertEquals(requestEntity.getTotalQuantity(), requestUpdateEntity.getTotalQuantity());
+        Assertions.assertEquals(requestEntity.getShippingPrice(), requestUpdateEntity.getShippingPrice());
+        Assertions.assertEquals(requestUpdateEntity.getTotalValue(),
+                (requestUpdateEntity.getTotalPrice() + requestUpdateEntity.getShippingPrice()));
+        Assertions.assertEquals(requestEntity.getStatus(), requestUpdateEntity.getStatus());
+        Assertions.assertEquals(requestUpdateEntity.getRate(), 10);
+        Assertions.assertEquals(requestEntity.getDefaultDateTime(), requestUpdateEntity.getDefaultDateTime());
+        Assertions.assertNotNull(requestUpdateEntity.getLastUpdateDateTime());
+    }
+
+    @Test
     public void shouldMapperToReturnDTO() {
         RequestEntity requestEntity = EnhancedRandom.random(RequestEntity.class);
 

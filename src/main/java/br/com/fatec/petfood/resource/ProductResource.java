@@ -62,6 +62,17 @@ public class ProductResource {
 
     @CrossOrigin(origins = "*")
     @ResponseStatus(HttpStatus.OK)
+    @PutMapping(value = "/update/stock")
+    public ResponseEntity<?> updateStockProduct(
+            @RequestParam(value = "title") String title,
+            @RequestParam(value = "sellerName") String sellerName,
+            @RequestParam(value = "stock") Integer stock
+    ) {
+        return productService.updateStockProduct(title, sellerName, stock);
+    }
+
+    @CrossOrigin(origins = "*")
+    @ResponseStatus(HttpStatus.OK)
     @DeleteMapping(value = "/delete")
     public ResponseEntity<?> deleteProduct(
             @RequestParam(value = "title") String title,

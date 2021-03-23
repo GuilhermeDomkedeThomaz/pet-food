@@ -185,4 +185,40 @@ public class ProductServiceTest extends IntegrationTest {
         Assertions.assertEquals(findResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(findResponse.getBody(), "Produto não encontrado.");
     }
+
+    @Test
+    public void shouldUpdateStockProductWithSuccess() {
+        productDTO.setStock(5);
+        productDTO.setPrice(9.99);
+        productDTO.setPricePromotion(9.99);
+        productDTO.setSellerName(sellerDTO.getName());
+        productUpdateDTO.setStock(10);
+        productUpdateDTO.setPrice(99.99);
+        productUpdateDTO.setPricePromotion(99.99);
+
+        ResponseEntity<?> sellerResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
+
+        Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(sellerResponse.getBody(), "Lojista cadastrado com sucesso.");
+
+        ResponseEntity<?> response = productService.createProduct(productDTO, Category.FOOD);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+        Assertions.assertEquals(response.getBody(), "Produto cadastrado com sucesso.");
+
+        ResponseEntity<?> updateResponse = productService
+                .updateStockProduct(productDTO.getTitle(), productDTO.getSellerName(), 50);
+
+        Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(updateResponse.getBody(), "Estoque do produto atualizado com sucesso.");
+    }
+
+    @Test
+    public void shouldNotFindProductToUpdateStock() {
+        ResponseEntity<?> response = productService
+                .updateStockProduct(productDTO.getTitle(), productDTO.getSellerName(), 10);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Produto não encontrado.");
+    }
 }

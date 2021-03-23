@@ -203,4 +203,53 @@ public class ProductServiceTest extends UnitTest {
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Produto não encontrado.");
     }
+
+    @Test
+    public void shouldUpdateStockProductWithSuccess() {
+        Mockito.when(productRepository.findByTitleAndSellerName(eq(productEntity.getTitle()), eq(productEntity.getSellerName())))
+                .thenReturn(Optional.of(productEntity));
+        Mockito.when(productMapper.toEntity(eq(productEntity), eq(10))).thenReturn(productEntity);
+        Mockito.when(productRepository.save(eq(productEntity))).thenReturn(productEntity);
+
+        ResponseEntity<?> response = productServiceImpl.updateStockProduct(productEntity.getTitle(), productEntity.getSellerName(), 10);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(response.getBody(), "Estoque do produto atualizado com sucesso.");
+    }
+
+    @Test
+    public void shouldNotFindProductToUpdateStock() {
+        Mockito.when(productRepository.findByTitleAndSellerName(eq(productEntity.getTitle()), eq(productEntity.getSellerName())))
+                .thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = productServiceImpl.updateStockProduct(productEntity.getTitle(), productEntity.getSellerName(), 10);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Produto não encontrado.");
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorWithMapperOnUpdateStockProduct() {
+        Mockito.when(productRepository.findByTitleAndSellerName(eq(productEntity.getTitle()), eq(productEntity.getSellerName())))
+                .thenReturn(Optional.of(productEntity));
+        Mockito.when(productMapper.toEntity(eq(productEntity), eq(10))).thenThrow(new NullPointerException());
+
+        ResponseEntity<?> response = productServiceImpl.updateStockProduct(productEntity.getTitle(), productEntity.getSellerName(), 10);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro no mapeamento para atualização de estoque do produto: null");
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorWithDataBaseOnUpdateStockProduct() {
+        Mockito.when(productRepository.findByTitleAndSellerName(eq(productEntity.getTitle()), eq(productEntity.getSellerName())))
+                .thenReturn(Optional.of(productEntity));
+        Mockito.when(productMapper.toEntity(eq(productEntity), eq(10))).thenReturn(productEntity);
+        Mockito.when(productRepository.save(eq(productEntity))).thenThrow(new DataIntegrityViolationException(""));
+
+        ResponseEntity<?> response = productServiceImpl.updateStockProduct(productEntity.getTitle(), productEntity.getSellerName(), 10);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro ao atualizar estoque do produto na base de dados: ");
+    }
 }

@@ -13,5 +13,9 @@ public interface ProductService {
 
     ResponseEntity<?> updateProduct(String title, String sellerName, ProductUpdateDTO productUpdateDTO, Category category);
 
+    ResponseEntity<?> updateStockProduct(String title, String sellerName, Integer stock);
+
+    void updateStockProductFromRequest(String title, String sellerName, Integer stock);
+
     ResponseEntity<?> deleteProduct(String title, String sellerName);
 }

@@ -20,4 +20,8 @@ public interface RequestService {
     ResponseEntity<?> updateRequest(String id, Status status, RequestUpdateDTO requestUpdateDTO);
 
     ResponseEntity<?> updateStatusRequest(String id, Status status);
+
+    ResponseEntity<?> rateRequest(String id, Integer rate);
+
+    ResponseEntity<?> deleteRequest(String id);
 }

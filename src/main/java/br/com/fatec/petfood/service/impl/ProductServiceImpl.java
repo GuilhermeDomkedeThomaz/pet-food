@@ -100,6 +100,45 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public ResponseEntity<?> updateStockProduct(String title, String sellerName, Integer stock) {
+        Optional<ProductEntity> productEntity = productRepository.findByTitleAndSellerName(title, sellerName);
+
+        if (productEntity.isPresent()) {
+            try {
+                validationService.validateProductStockUpdate(stock);
+            } catch (Exception e) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
+
+            try {
+                ProductEntity productUpdateEntity = productMapper.toEntity(productEntity.get(), stock);
+
+                try {
+                    productRepository.save(productUpdateEntity);
+                    return new ResponseEntity<>("Estoque do produto atualizado com sucesso.", HttpStatus.OK);
+                } catch (Exception e) {
+                    return new ResponseEntity<>("Erro ao atualizar estoque do produto na base de dados: " + e.getMessage(),
+                            HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+            } catch (Exception e) {
+                return new ResponseEntity<>("Erro no mapeamento para atualização de estoque do produto: " + e.getMessage(),
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else
+            return new ResponseEntity<>("Produto não encontrado.", HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    public void updateStockProductFromRequest(String title, String sellerName, Integer stock) {
+        Optional<ProductEntity> productEntity = productRepository.findByTitleAndSellerName(title, sellerName);
+
+        if (productEntity.isPresent()) {
+            ProductEntity productUpdateEntity = productMapper.toEntity(productEntity.get(), (productEntity.get().getStock() - stock));
+            productRepository.save(productUpdateEntity);
+        }
+    }
+
+    @Override
     public ResponseEntity<?> deleteProduct(String title, String sellerName) {
         Optional<ProductEntity> productEntity = productRepository.findByTitleAndSellerName(title, sellerName);
 

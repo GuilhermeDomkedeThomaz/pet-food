@@ -61,6 +61,27 @@ public class ProductMapperTest extends IntegrationTest {
     }
 
     @Test
+    public void shouldMapperToEntityUpdateStock() {
+        ProductEntity productEntity = EnhancedRandom.random(ProductEntity.class);
+        productEntity.setStock(50);
+
+        ProductEntity productEntityUpdate = productMapper.toEntity(productEntity, 10);
+
+        Assertions.assertEquals(productEntity.getId(), productEntityUpdate.getId());
+        Assertions.assertEquals(productEntity.getSellerId(), productEntityUpdate.getSellerId());
+        Assertions.assertEquals(productEntity.getSellerName(), productEntityUpdate.getSellerName());
+        Assertions.assertEquals(productEntity.getTitle(), productEntityUpdate.getTitle());
+        Assertions.assertEquals(productEntity.getDescription(), productEntityUpdate.getDescription());
+        Assertions.assertEquals(productEntity.getBrand(), productEntityUpdate.getBrand());
+        Assertions.assertEquals(productEntity.getCategory(), productEntityUpdate.getCategory());
+        Assertions.assertEquals(productEntity.getPricePromotion(), productEntityUpdate.getPricePromotion());
+        Assertions.assertEquals(productEntity.getPrice(), productEntityUpdate.getPrice());
+        Assertions.assertEquals(productEntityUpdate.getStock(), 10);
+        Assertions.assertEquals(productEntity.getImageUrl(), productEntityUpdate.getImageUrl());
+        Assertions.assertEquals(productEntity.getAdditionalInfo(), productEntityUpdate.getAdditionalInfo());
+    }
+
+    @Test
     public void shouldMapperToReturnDTO() {
         ProductEntity productEntity = EnhancedRandom.random(ProductEntity.class);
 
