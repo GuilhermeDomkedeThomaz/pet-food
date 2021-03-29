@@ -179,6 +179,27 @@ public class RequestServiceTest extends UnitTest {
     }
 
     @Test
+    public void shouldResponseInternalServerErrorOnUpdateStockProductFromRequestDataBaseWhenCreateRequest() throws Exception {
+        requestDTO.setProducts(productRequestDTOList);
+
+        Mockito.when(requestValidationServiceImpl.validateSellerRequestDTO(Mockito.anyString())).thenReturn(sellerEntity);
+        Mockito.when(requestValidationServiceImpl.validateUserRequestDTO(Mockito.anyString())).thenReturn(userEntity);
+        Mockito.when(requestValidationServiceImpl.validateProductsRequestDTO(eq(productRequestDTOList), Mockito.anyString()))
+                .thenReturn(productRequestList);
+        Mockito.when(requestMapper.toEntity(sellerEntity.getId(), sellerEntity.getName(), userEntity.getId(), userEntity.getName(),
+                productRequestList, requestDTO.getShippingPrice(), Status.CREATED)).thenReturn(requestEntity);
+        Mockito.when(requestRepository.save(requestEntity)).thenReturn(requestEntity);
+        Mockito.doThrow(new DataIntegrityViolationException("")).when(productService)
+                .updateStockProductFromRequest(eq(requestEntity.getProducts().get(0).getTitle()),
+                        eq(requestEntity.getSellerName()), eq(requestEntity.getProducts().get(0).getQuantity()));
+
+        ResponseEntity<?> response = requestServiceImpl.createRequest(requestDTO);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro ao atualizar estoque dos produtos do pedido na base de dados: ");
+    }
+
+    @Test
     public void shouldFindByIdWithSuccess() {
         Mockito.when(requestRepository.findById(Mockito.any(ObjectId.class))).thenReturn(Optional.of(requestEntity));
         Mockito.when(requestMapper.toReturnDTO(eq(requestEntity))).thenReturn(requestReturnDTO);
@@ -470,6 +491,9 @@ public class RequestServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(response.getBody(), "Status do pedido atualizado com sucesso.");
+        Mockito.verify(productService, Mockito.never())
+                .updateStockProductFromRequest(eq(requestEntity.getProducts().get(0).getTitle()), eq(requestEntity.getSellerName()),
+                        eq(requestEntity.getProducts().get(0).getQuantity()));
     }
 
     @Test
@@ -490,6 +514,23 @@ public class RequestServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Id do pedido passado inválido.");
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorOnUpdateStockProductRequestUpdateStatusToCanceled() {
+        ObjectId objectId = new ObjectId();
+        firstProductRequest.setQuantity(5);
+        requestEntity.setProducts(List.of(firstProductRequest));
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.of(requestEntity));
+        Mockito.doThrow(new DataIntegrityViolationException("")).when(productService)
+                .updateStockProductFromRequest(eq(firstProductRequest.getTitle()), eq(requestEntity.getSellerName()),
+                        eq(firstProductRequest.getQuantity() * -1));
+
+        ResponseEntity<?> response = requestServiceImpl.updateStatusRequest(objectId.toString(), Status.CANCELED);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals(response.getBody(), "Erro ao atualizar estoque dos produtos do pedido na base de dados: ");
     }
 
     @Test
@@ -583,6 +624,10 @@ public class RequestServiceTest extends UnitTest {
     @Test
     public void shouldDeleteRequestWithSuccess() {
         ObjectId objectId = new ObjectId();
+        firstProductRequest.setQuantity(5);
+        secondProductRequest.setQuantity(5);
+        requestEntity.setStatus(Status.PROCESSED);
+        requestEntity.setProducts(List.of(firstProductRequest, secondProductRequest));
 
         Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.of(requestEntity));
 
@@ -590,6 +635,28 @@ public class RequestServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(response.getBody(), "Pedido deletado com sucesso.");
+        Mockito.verify(productService, Mockito.times(1)).updateStockProductFromRequest(
+                eq(firstProductRequest.getTitle()), eq(requestEntity.getSellerName()),
+                eq(firstProductRequest.getQuantity()));
+        Mockito.verify(productService, Mockito.times(1)).updateStockProductFromRequest(
+                eq(secondProductRequest.getTitle()), eq(requestEntity.getSellerName()),
+                eq(secondProductRequest.getQuantity()));
+    }
+
+    @Test
+    public void shouldDeleteCanceledRequestWithSuccess() {
+        ObjectId objectId = new ObjectId();
+        requestEntity.setStatus(Status.CANCELED);
+
+        Mockito.when(requestRepository.findById(eq(objectId))).thenReturn(Optional.of(requestEntity));
+
+        ResponseEntity<?> response = requestServiceImpl.deleteRequest(objectId.toString());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(response.getBody(), "Pedido deletado com sucesso.");
+        Mockito.verify(productService, Mockito.never()).updateStockProductFromRequest(
+                eq(requestEntity.getProducts().get(0).getTitle()), eq(requestEntity.getSellerName()),
+                eq(requestEntity.getProducts().get(0).getQuantity()));
     }
 
     @Test

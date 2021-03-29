@@ -84,6 +84,12 @@ public class RequestServiceTest extends IntegrationTest {
             Assertions.assertEquals(response.getBody(), "Pedido registrado com sucesso. Id do pedido: "
                     + requestEntity.getId().toString());
         }
+
+        productRepository.findById(firstProductEntity.getId().toString())
+                .ifPresent(productEntity -> Assertions.assertEquals(productEntity.getStock(), 4));
+
+        productRepository.findById(secondProductEntity.getId().toString())
+                .ifPresent(productEntity -> Assertions.assertEquals(productEntity.getStock(), 4));
     }
 
     @Test
@@ -521,6 +527,68 @@ public class RequestServiceTest extends IntegrationTest {
     }
 
     @Test
+    public void shouldUpdateStatusRequestToCanceledWithSuccess() {
+        ObjectId objectId;
+        userRepository.save(userEntity);
+        sellerRepository.save(sellerEntity);
+        firstProductEntity.setStock(5);
+        firstProductEntity.setPrice(9.99);
+        firstProductEntity.setPricePromotion(9.99);
+        firstProductEntity.setSellerId(sellerEntity.getId());
+        firstProductEntity.setSellerName(sellerEntity.getName());
+        secondProductEntity.setStock(5);
+        secondProductEntity.setPrice(9.99);
+        secondProductEntity.setPricePromotion(9.99);
+        secondProductEntity.setSellerId(sellerEntity.getId());
+        secondProductEntity.setSellerName(sellerEntity.getName());
+        productRepository.save(firstProductEntity);
+        productRepository.save(secondProductEntity);
+        final ProductRequestDTO firstProductRequestDTO = new ProductRequestDTO(firstProductEntity.getTitle(), 1);
+        final ProductRequestDTO secondProductRequestDTO = new ProductRequestDTO(secondProductEntity.getTitle(), 1);
+        requestDTO.setShippingPrice(9.99);
+        requestDTO.setUserName(userEntity.getName());
+        requestDTO.setSellerName(sellerEntity.getName());
+        requestDTO.setProducts(List.of(firstProductRequestDTO, secondProductRequestDTO));
+
+        ResponseEntity<?> createResponse = requestService.createRequest(requestDTO);
+
+        Assertions.assertEquals(createResponse.getStatusCode(), HttpStatus.CREATED);
+
+        Optional<List<RequestEntity>> optionalRequestEntityList = requestRepository.findAllBySellerName(sellerEntity.getName());
+
+        if (optionalRequestEntityList.isPresent()) {
+            RequestEntity requestEntity = optionalRequestEntityList.get().get(0);
+            Assertions.assertEquals(createResponse.getBody(), "Pedido registrado com sucesso. Id do pedido: "
+                    + requestEntity.getId().toString());
+            objectId = requestEntity.getId();
+
+            productRepository.findById(firstProductEntity.getId().toString())
+                    .ifPresent(productEntity -> Assertions.assertEquals(productEntity.getStock(), 4));
+
+            productRepository.findById(secondProductEntity.getId().toString())
+                    .ifPresent(productEntity -> Assertions.assertEquals(productEntity.getStock(), 4));
+
+            ResponseEntity<?> updateResponse = requestService.updateStatusRequest(objectId.toString(), Status.CANCELED);
+
+            Assertions.assertEquals(updateResponse.getStatusCode(), HttpStatus.OK);
+            Assertions.assertEquals(updateResponse.getBody(), "Status do pedido atualizado com sucesso.");
+        }
+
+        optionalRequestEntityList = requestRepository.findAllBySellerName(sellerEntity.getName());
+
+        if (optionalRequestEntityList.isPresent()) {
+            RequestEntity requestEntity = optionalRequestEntityList.get().get(0);
+            Assertions.assertEquals(requestEntity.getStatus(), Status.CANCELED);
+        }
+
+        productRepository.findById(firstProductEntity.getId().toString())
+                .ifPresent(productEntity -> Assertions.assertEquals(productEntity.getStock(), 5));
+
+        productRepository.findById(secondProductEntity.getId().toString())
+                .ifPresent(productEntity -> Assertions.assertEquals(productEntity.getStock(), 5));
+    }
+
+    @Test
     public void shouldResponseBadRequestWithInvalidIdOnRequestStatusUpdate() {
         ResponseEntity<?> updateResponse = requestService.updateStatusRequest("1", Status.PROCESSED);
 
@@ -636,11 +704,79 @@ public class RequestServiceTest extends IntegrationTest {
             Assertions.assertEquals(response.getBody(), "Pedido registrado com sucesso. Id do pedido: "
                     + requestEntity.getId().toString());
 
+            productRepository.findById(firstProductEntity.getId().toString())
+                    .ifPresent(productEntity -> Assertions.assertEquals(productEntity.getStock(), 4));
+
+            productRepository.findById(secondProductEntity.getId().toString())
+                    .ifPresent(productEntity -> Assertions.assertEquals(productEntity.getStock(), 4));
+
             ResponseEntity<?> deleteResponse = requestService.deleteRequest(requestEntity.getId().toString());
 
             Assertions.assertEquals(deleteResponse.getStatusCode(), HttpStatus.OK);
             Assertions.assertEquals(deleteResponse.getBody(), "Pedido deletado com sucesso.");
         }
+
+        productRepository.findById(firstProductEntity.getId().toString())
+                .ifPresent(productEntity -> Assertions.assertEquals(productEntity.getStock(), 5));
+
+        productRepository.findById(secondProductEntity.getId().toString())
+                .ifPresent(productEntity -> Assertions.assertEquals(productEntity.getStock(), 5));
+    }
+
+    @Test
+    public void shouldDeleteCanceledRequestWithSuccess() {
+        userRepository.save(userEntity);
+        sellerRepository.save(sellerEntity);
+        firstProductEntity.setStock(5);
+        firstProductEntity.setPrice(9.99);
+        firstProductEntity.setPricePromotion(9.99);
+        firstProductEntity.setSellerId(sellerEntity.getId());
+        firstProductEntity.setSellerName(sellerEntity.getName());
+        secondProductEntity.setStock(5);
+        secondProductEntity.setPrice(9.99);
+        secondProductEntity.setPricePromotion(9.99);
+        secondProductEntity.setSellerId(sellerEntity.getId());
+        secondProductEntity.setSellerName(sellerEntity.getName());
+        productRepository.save(firstProductEntity);
+        productRepository.save(secondProductEntity);
+        final ProductRequestDTO firstProductRequestDTO = new ProductRequestDTO(firstProductEntity.getTitle(), 1);
+        final ProductRequestDTO secondProductRequestDTO = new ProductRequestDTO(secondProductEntity.getTitle(), 1);
+        requestDTO.setShippingPrice(9.99);
+        requestDTO.setUserName(userEntity.getName());
+        requestDTO.setSellerName(sellerEntity.getName());
+        requestDTO.setProducts(List.of(firstProductRequestDTO, secondProductRequestDTO));
+
+        ResponseEntity<?> response = requestService.createRequest(requestDTO);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+
+        Optional<List<RequestEntity>> optionalRequestEntityList = requestRepository.findAllBySellerName(sellerEntity.getName());
+
+        if (optionalRequestEntityList.isPresent()) {
+            RequestEntity requestEntity = optionalRequestEntityList.get().get(0);
+            Assertions.assertEquals(response.getBody(), "Pedido registrado com sucesso. Id do pedido: "
+                    + requestEntity.getId().toString());
+
+            productRepository.findById(firstProductEntity.getId().toString())
+                    .ifPresent(productEntity -> Assertions.assertEquals(productEntity.getStock(), 4));
+
+            productRepository.findById(secondProductEntity.getId().toString())
+                    .ifPresent(productEntity -> Assertions.assertEquals(productEntity.getStock(), 4));
+
+            requestEntity.setStatus(Status.CANCELED);
+            requestRepository.save(requestEntity);
+
+            ResponseEntity<?> deleteResponse = requestService.deleteRequest(requestEntity.getId().toString());
+
+            Assertions.assertEquals(deleteResponse.getStatusCode(), HttpStatus.OK);
+            Assertions.assertEquals(deleteResponse.getBody(), "Pedido deletado com sucesso.");
+        }
+
+        productRepository.findById(firstProductEntity.getId().toString())
+                .ifPresent(productEntity -> Assertions.assertEquals(productEntity.getStock(), 4));
+
+        productRepository.findById(secondProductEntity.getId().toString())
+                .ifPresent(productEntity -> Assertions.assertEquals(productEntity.getStock(), 4));
     }
 
     @Test

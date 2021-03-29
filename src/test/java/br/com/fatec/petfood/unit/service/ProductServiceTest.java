@@ -183,28 +183,6 @@ public class ProductServiceTest extends UnitTest {
     }
 
     @Test
-    public void shouldDeleteProductWithSuccess() {
-        Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
-                .thenReturn(Optional.of(productEntity));
-
-        ResponseEntity<?> response = productServiceImpl.deleteProduct(productDTO.getTitle(), productDTO.getSellerName());
-
-        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
-        Assertions.assertEquals(response.getBody(), "Produto deletado com sucesso.");
-    }
-
-    @Test
-    public void shouldNotFindProductForDelete() {
-        Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
-                .thenReturn(Optional.empty());
-
-        ResponseEntity<?> response = productServiceImpl.deleteProduct(productDTO.getTitle(), productDTO.getSellerName());
-
-        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
-        Assertions.assertEquals(response.getBody(), "Produto não encontrado.");
-    }
-
-    @Test
     public void shouldUpdateStockProductWithSuccess() {
         Mockito.when(productRepository.findByTitleAndSellerName(eq(productEntity.getTitle()), eq(productEntity.getSellerName())))
                 .thenReturn(Optional.of(productEntity));
@@ -251,5 +229,60 @@ public class ProductServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
         Assertions.assertEquals(response.getBody(), "Erro ao atualizar estoque do produto na base de dados: ");
+    }
+
+    @Test
+    public void shouldUpdateStockProductFromRequestWithSuccess() {
+        Mockito.when(productRepository.findByTitleAndSellerName(eq(productEntity.getTitle()), eq(productEntity.getSellerName())))
+                .thenReturn(Optional.of(productEntity));
+        Mockito.when(productMapper.toEntity(eq(productEntity), eq(10))).thenReturn(productEntity);
+        Mockito.when(productRepository.save(eq(productEntity))).thenReturn(productEntity);
+
+        Assertions.assertDoesNotThrow(() ->
+                productServiceImpl.updateStockProduct(productEntity.getTitle(), productEntity.getSellerName(), 10));
+    }
+
+    @Test
+    public void shouldNotFindProductToUpdateStockFromRequest() {
+        Mockito.when(productRepository.findByTitleAndSellerName(eq(productEntity.getTitle()), eq(productEntity.getSellerName())))
+                .thenReturn(Optional.empty());
+
+        productServiceImpl.updateStockProduct(productEntity.getTitle(), productEntity.getSellerName(), 10);
+
+        Mockito.verify(productMapper, Mockito.never()).toEntity(eq(productEntity), eq(10));
+        Mockito.verify(productRepository, Mockito.never()).save(eq(productEntity));
+    }
+
+    @Test
+    public void shouldResponseInternalServerErrorWithMapperOnUpdateStockProductFromRequest() {
+        Mockito.when(productRepository.findByTitleAndSellerName(eq(productEntity.getTitle()), eq(productEntity.getSellerName())))
+                .thenReturn(Optional.of(productEntity));
+        Mockito.when(productMapper.toEntity(eq(productEntity), eq(10))).thenThrow(new NullPointerException());
+
+        productServiceImpl.updateStockProduct(productEntity.getTitle(), productEntity.getSellerName(), 10);
+
+        Mockito.verify(productRepository, Mockito.never()).save(eq(productEntity));
+    }
+
+    @Test
+    public void shouldDeleteProductWithSuccess() {
+        Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
+                .thenReturn(Optional.of(productEntity));
+
+        ResponseEntity<?> response = productServiceImpl.deleteProduct(productDTO.getTitle(), productDTO.getSellerName());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(response.getBody(), "Produto deletado com sucesso.");
+    }
+
+    @Test
+    public void shouldNotFindProductForDelete() {
+        Mockito.when(productRepository.findByTitleAndSellerName(eq(productDTO.getTitle()), eq(productDTO.getSellerName())))
+                .thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = productServiceImpl.deleteProduct(productDTO.getTitle(), productDTO.getSellerName());
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Produto não encontrado.");
     }
 }

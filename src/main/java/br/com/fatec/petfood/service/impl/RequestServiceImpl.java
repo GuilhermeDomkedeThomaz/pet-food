@@ -74,7 +74,15 @@ public class RequestServiceImpl implements RequestService {
 
             try {
                 requestRepository.save(requestEntity);
-                this.updateStockProduct(requestEntity.getSellerName(), requestEntity.getProducts());
+
+                try {
+                    this.updateStockProduct(requestEntity.getSellerName(), requestEntity.getProducts());
+                } catch (Exception e) {
+                    requestRepository.delete(requestEntity);
+                    return new ResponseEntity<>("Erro ao atualizar estoque dos produtos do pedido na base de dados: " + e.getMessage(),
+                            HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+
                 return new ResponseEntity<>("Pedido registrado com sucesso. Id do pedido: " + requestEntity.getId().toString(),
                         HttpStatus.CREATED);
             } catch (Exception e) {
@@ -262,6 +270,18 @@ public class RequestServiceImpl implements RequestService {
             RequestEntity requestEntity = optionalRequestEntity.get();
 
             try {
+
+                if (status.equals(Status.CANCELED)) {
+                    try {
+                        requestEntity.getProducts().forEach(productRequest ->
+                                productRequest.setQuantity(productRequest.getQuantity() * -1));
+                        this.updateStockProduct(requestEntity.getSellerName(), requestEntity.getProducts());
+                    } catch (Exception e) {
+                        return new ResponseEntity<>("Erro ao atualizar estoque dos produtos do pedido na base de dados: " + e.getMessage(),
+                                HttpStatus.INTERNAL_SERVER_ERROR);
+                    }
+                }
+
                 RequestEntity requestUpdateEntity = requestMapper.toEntity(requestEntity, status);
 
                 try {
@@ -340,6 +360,17 @@ public class RequestServiceImpl implements RequestService {
 
         if (optionalRequestEntity.isPresent()) {
             RequestEntity requestEntity = optionalRequestEntity.get();
+
+            if (!requestEntity.getStatus().equals(Status.CANCELED)) {
+                try {
+                    requestEntity.getProducts().forEach(productRequest ->
+                            productRequest.setQuantity(productRequest.getQuantity() * -1));
+                    this.updateStockProduct(requestEntity.getSellerName(), requestEntity.getProducts());
+                } catch (Exception e) {
+                    return new ResponseEntity<>("Erro ao atualizar estoque dos produtos do pedido na base de dados: " + e.getMessage(),
+                            HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+            }
 
             try {
                 requestRepository.delete(requestEntity);
