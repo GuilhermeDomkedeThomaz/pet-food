@@ -17,6 +17,7 @@ import br.com.fatec.petfood.service.impl.ValidationServiceImpl;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -55,6 +56,14 @@ public class ValidationServiceTest extends IntegrationTest {
     private final UserDTO userDTOWithoutName = EnhancedRandom.random(UserDTO.class, "name");
     private final SellerDTO sellerDTOWithoutName = EnhancedRandom.random(SellerDTO.class, "name");
     private final ProductDTO productDTOWithoutName = EnhancedRandom.random(ProductDTO.class, "sellerName");
+
+    @BeforeEach
+    public void setup() {
+        sellerDTO.setWeekInitialTimeOperation("08:00");
+        sellerDTO.setWeekFinalTimeOperation("18:00");
+        sellerDTO.setWeekendInitialTimeOperation("10:00");
+        sellerDTO.setWeekendFinalTimeOperation("16:00");
+    }
 
     @Test
     public void shouldValidateUserDTOWithSuccess() {
@@ -208,6 +217,25 @@ public class ValidationServiceTest extends IntegrationTest {
             validationServiceImpl.validateSellerDTO(sellerDTO, null, categories);
         } catch (Exception e) {
             Assertions.assertEquals("Zona da cidade passada inválida(vazia ou nula).", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldValidateSellerDTOWithInvalidTimeOperation() {
+        sellerDTO.setWeekInitialTimeOperation("AAAA");
+
+        try {
+            validationServiceImpl.validateSellerDTO(sellerDTO, CityZone.EAST, categories);
+        } catch (Exception e) {
+            Assertions.assertEquals("Horário inicial de funcionamento durante a semana passado inválido. Favor passar no seguinte formato: 'HH:MM'.", e.getMessage());
+        }
+
+        sellerDTO.setWeekInitialTimeOperation(null);
+
+        try {
+            validationServiceImpl.validateSellerDTO(sellerDTO, CityZone.EAST, categories);
+        } catch (Exception e) {
+            Assertions.assertEquals("Horário inicial de funcionamento durante a semana passado inválido(vazio ou nulo).", e.getMessage());
         }
     }
 

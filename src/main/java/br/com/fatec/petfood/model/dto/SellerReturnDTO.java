@@ -20,6 +20,16 @@ public class SellerReturnDTO {
 
     private RegistrationInfos registrationInfos;
 
+    private String imageUrl;
+
+    private String weekInitialTimeOperation;
+
+    private String weekFinalTimeOperation;
+
+    private String weekendInitialTimeOperation;
+
+    private String weekendFinalTimeOperation;
+
     private CityZone cityZone;
 
     private List<Category> categories;

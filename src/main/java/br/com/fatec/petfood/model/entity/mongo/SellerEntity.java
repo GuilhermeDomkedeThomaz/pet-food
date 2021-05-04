@@ -15,6 +15,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
+import java.time.LocalTime;
 import java.util.List;
 
 @Data
@@ -37,6 +38,21 @@ public class SellerEntity  implements Serializable {
 
     @NonNull
     private RegistrationInfos registrationInfos;
+
+    @NonNull
+    private String imageUrl;
+
+    @NonNull
+    private LocalTime weekInitialTimeOperation;
+
+    @NonNull
+    private LocalTime weekFinalTimeOperation;
+
+    @NonNull
+    private LocalTime weekendInitialTimeOperation;
+
+    @NonNull
+    private LocalTime weekendFinalTimeOperation;
 
     @NonNull
     private CityZone cityZone;

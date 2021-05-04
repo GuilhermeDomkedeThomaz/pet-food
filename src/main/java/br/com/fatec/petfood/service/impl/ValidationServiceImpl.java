@@ -19,6 +19,7 @@ import br.com.fatec.petfood.utils.ValidateUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -108,7 +109,9 @@ public class ValidationServiceImpl implements ValidationService {
         if (sellerRepository.findByDocument(sellerDTO.getRegistrationInfos().getDocument()).isPresent())
             throw new Exception("Lojista já existe com o CNPJ passado.");
 
-        this.genericSellerValidate(sellerDTO.getPassword(), sellerDTO.getRegistrationInfos(), cityZone, categories);
+        this.genericSellerValidate(sellerDTO.getPassword(), sellerDTO.getRegistrationInfos(), sellerDTO.getImageUrl(),
+                sellerDTO.getWeekInitialTimeOperation(), sellerDTO.getWeekFinalTimeOperation(),
+                sellerDTO.getWeekendInitialTimeOperation(), sellerDTO.getWeekendFinalTimeOperation(), cityZone, categories);
     }
 
     @Override
@@ -140,7 +143,9 @@ public class ValidationServiceImpl implements ValidationService {
                 sellerUpdateDTO.getUf()
         );
 
-        this.genericSellerValidate(sellerUpdateDTO.getPassword(), registrationInfos, cityZone, categories);
+        this.genericSellerValidate(sellerUpdateDTO.getPassword(), registrationInfos, sellerUpdateDTO.getImageUrl(),
+                sellerUpdateDTO.getWeekInitialTimeOperation(), sellerUpdateDTO.getWeekFinalTimeOperation(),
+                sellerUpdateDTO.getWeekendInitialTimeOperation(), sellerUpdateDTO.getWeekendFinalTimeOperation(), cityZone, categories);
         return registrationInfos;
     }
 
@@ -227,9 +232,54 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     private void genericSellerValidate(
-            String password, RegistrationInfos registrationInfos,  CityZone cityZone, List<Category> categories
+            String password, RegistrationInfos registrationInfos, String imageUrl, String weekInitialTimeOperation,
+            String weekFinalTimeOperation, String weekendInitialTimeOperation, String weekendFinalTimeOperation,
+            CityZone cityZone, List<Category> categories
     ) throws Exception {
         this.genericValidate(password, registrationInfos, cityZone);
+
+        if (!validateUtils.isNotNullAndNotEmpty(imageUrl))
+            throw new Exception("Url da imagem passada inválida(vazia ou nula).");
+
+        if (!validateUtils.isNotNullAndNotEmpty(weekInitialTimeOperation))
+            throw new Exception("Horário inicial de funcionamento durante a semana passado inválido(vazio ou nulo).");
+        else {
+            try {
+                LocalTime.parse(weekInitialTimeOperation);
+            } catch (Exception e) {
+                throw new Exception("Horário inicial de funcionamento durante a semana passado inválido. Favor passar no seguinte formato: 'HH:MM'.");
+            }
+        }
+
+        if (!validateUtils.isNotNullAndNotEmpty(weekFinalTimeOperation))
+            throw new Exception("Horário final de funcionamento durante a semana passado inválido(vazio ou nulo).");
+        else {
+            try {
+                LocalTime.parse(weekInitialTimeOperation);
+            } catch (Exception e) {
+                throw new Exception("Horário final de funcionamento durante a semana passado inválido. Favor passar no seguinte formato: 'HH:MM'.");
+            }
+        }
+
+        if (!validateUtils.isNotNullAndNotEmpty(weekendInitialTimeOperation))
+            throw new Exception("Horário inicial de funcionamento durante o final de semana passado inválido(vazio ou nulo).");
+        else {
+            try {
+                LocalTime.parse(weekInitialTimeOperation);
+            } catch (Exception e) {
+                throw new Exception("Horário inicial de funcionamento durante o final de semana passado inválido. Favor passar no seguinte formato: 'HH:MM'.");
+            }
+        }
+
+        if (!validateUtils.isNotNullAndNotEmpty(weekendFinalTimeOperation))
+            throw new Exception("Horário final de funcionamento durante o final de semana passado inválido(vazio ou nulo).");
+        else {
+            try {
+                LocalTime.parse(weekInitialTimeOperation);
+            } catch (Exception e) {
+                throw new Exception("Horário final de funcionamento durante o final de semana passado inválido. Favor passar no seguinte formato: 'HH:MM'.");
+            }
+        }
 
         if (Objects.isNull(categories))
             throw new Exception("Categoria passada inválida(vazia ou nula).");

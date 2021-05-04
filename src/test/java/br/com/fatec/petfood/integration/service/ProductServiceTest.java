@@ -10,6 +10,7 @@ import br.com.fatec.petfood.service.ProductService;
 import br.com.fatec.petfood.service.SellerService;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,13 +33,23 @@ public class ProductServiceTest extends IntegrationTest {
     private final ProductUpdateDTO productUpdateDTO = EnhancedRandom.random(ProductUpdateDTO.class);
     private final ProductDTO productDTOWithoutSellerName = EnhancedRandom.random(ProductDTO.class, "sellerName");
 
-    @Test
-    public void shouldCreateProductWithSuccess() {
+    @BeforeEach
+    public void setup() {
         productDTO.setStock(5);
         productDTO.setPrice(9.99);
         productDTO.setPricePromotion(9.99);
         productDTO.setSellerName(sellerDTO.getName());
+        productUpdateDTO.setStock(10);
+        productUpdateDTO.setPrice(99.99);
+        productUpdateDTO.setPricePromotion(99.99);
+        sellerDTO.setWeekInitialTimeOperation("08:00");
+        sellerDTO.setWeekFinalTimeOperation("18:00");
+        sellerDTO.setWeekendInitialTimeOperation("10:00");
+        sellerDTO.setWeekendFinalTimeOperation("16:00");
+    }
 
+    @Test
+    public void shouldCreateProductWithSuccess() {
         ResponseEntity<?> sellerResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
 
         Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.CREATED);
@@ -68,11 +79,6 @@ public class ProductServiceTest extends IntegrationTest {
 
     @Test
     public void shouldResponseBadRequestWhenCreateProductAlreadyExists() {
-        productDTO.setStock(5);
-        productDTO.setPrice(9.99);
-        productDTO.setPricePromotion(9.99);
-        productDTO.setSellerName(sellerDTO.getName());
-
         ResponseEntity<?> sellerResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
 
         Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.CREATED);
@@ -91,11 +97,6 @@ public class ProductServiceTest extends IntegrationTest {
 
     @Test
     public void shouldFindProductWithSuccess() {
-        productDTO.setStock(5);
-        productDTO.setPrice(9.99);
-        productDTO.setPricePromotion(9.99);
-        productDTO.setSellerName(sellerDTO.getName());
-
         ResponseEntity<?> sellerResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
 
         Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.CREATED);
@@ -121,14 +122,6 @@ public class ProductServiceTest extends IntegrationTest {
 
     @Test
     public void shouldUpdateProductWithSuccess() {
-        productDTO.setStock(5);
-        productDTO.setPrice(9.99);
-        productDTO.setPricePromotion(9.99);
-        productDTO.setSellerName(sellerDTO.getName());
-        productUpdateDTO.setStock(10);
-        productUpdateDTO.setPrice(99.99);
-        productUpdateDTO.setPricePromotion(99.99);
-
         ResponseEntity<?> sellerResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
 
         Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.CREATED);
@@ -157,14 +150,6 @@ public class ProductServiceTest extends IntegrationTest {
 
     @Test
     public void shouldUpdateStockProductWithSuccess() {
-        productDTO.setStock(5);
-        productDTO.setPrice(9.99);
-        productDTO.setPricePromotion(9.99);
-        productDTO.setSellerName(sellerDTO.getName());
-        productUpdateDTO.setStock(10);
-        productUpdateDTO.setPrice(99.99);
-        productUpdateDTO.setPricePromotion(99.99);
-
         ResponseEntity<?> sellerResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
 
         Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.CREATED);
@@ -193,14 +178,6 @@ public class ProductServiceTest extends IntegrationTest {
 
     @Test
     public void shouldUpdateStockProductFromRequestWithSuccess() {
-        productDTO.setStock(5);
-        productDTO.setPrice(9.99);
-        productDTO.setPricePromotion(9.99);
-        productDTO.setSellerName(sellerDTO.getName());
-        productUpdateDTO.setStock(10);
-        productUpdateDTO.setPrice(99.99);
-        productUpdateDTO.setPricePromotion(99.99);
-
         ResponseEntity<?> sellerResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
 
         Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.CREATED);
@@ -225,11 +202,6 @@ public class ProductServiceTest extends IntegrationTest {
 
     @Test
     public void shouldDeleteProductWithSuccess() {
-        productDTO.setStock(5);
-        productDTO.setPrice(9.99);
-        productDTO.setPricePromotion(9.99);
-        productDTO.setSellerName(sellerDTO.getName());
-
         ResponseEntity<?> sellerResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
 
         Assertions.assertEquals(sellerResponse.getStatusCode(), HttpStatus.CREATED);

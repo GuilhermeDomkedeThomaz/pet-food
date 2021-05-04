@@ -16,6 +16,7 @@ import br.com.fatec.petfood.unit.UnitTest;
 import br.com.fatec.petfood.utils.ValidateUtils;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -53,6 +54,14 @@ public class ValidationServiceTest extends UnitTest {
     private final SellerEntity sellerEntity = EnhancedRandom.random(SellerEntity.class);
     private final ProductEntity productEntity = EnhancedRandom.random(ProductEntity.class);
     private final List<Category> categories = Arrays.asList(Category.FOOD, Category.OTHERS);
+
+    @BeforeEach
+    public void setup() {
+        sellerDTO.setWeekInitialTimeOperation("08:00");
+        sellerDTO.setWeekFinalTimeOperation("18:00");
+        sellerDTO.setWeekendInitialTimeOperation("10:00");
+        sellerDTO.setWeekendFinalTimeOperation("16:00");
+    }
 
     @Test
     public void shouldValidateUserDTOWithSuccess() {
@@ -250,6 +259,29 @@ public class ValidationServiceTest extends UnitTest {
             validationServiceImpl.validateSellerDTO(sellerDTO, null, categories);
         } catch (Exception e) {
             Assertions.assertEquals("Zona da cidade passada inválida(vazia ou nula).", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldValidateSellerDTOWithInvalidTimeOperation() {
+        sellerDTO.setWeekInitialTimeOperation("AAAA");
+
+        Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.TRUE);
+        Mockito.when(sellerRepository.findByName(eq(sellerDTO.getName()))).thenReturn(Optional.empty());
+        Mockito.when(sellerRepository.findByEmail(eq(sellerDTO.getEmail()))).thenReturn(Optional.empty());
+
+        try {
+            validationServiceImpl.validateSellerDTO(sellerDTO, CityZone.EAST, categories);
+        } catch (Exception e) {
+            Assertions.assertEquals("Horário inicial de funcionamento durante a semana passado inválido. Favor passar no seguinte formato: 'HH:MM'.", e.getMessage());
+        }
+
+        sellerDTO.setWeekInitialTimeOperation(null);
+
+        try {
+            validationServiceImpl.validateSellerDTO(sellerDTO, CityZone.EAST, categories);
+        } catch (Exception e) {
+            Assertions.assertEquals("Horário inicial de funcionamento durante a semana passado inválido(vazio ou nulo).", e.getMessage());
         }
     }
 

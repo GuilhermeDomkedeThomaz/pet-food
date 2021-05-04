@@ -26,4 +26,14 @@ public class SellerUpdateDTO extends LoginDTO {
     private String city;
 
     private String uf;
+
+    private String imageUrl;
+
+    private String weekInitialTimeOperation;
+
+    private String weekFinalTimeOperation;
+
+    private String weekendInitialTimeOperation;
+
+    private String weekendFinalTimeOperation;
 }

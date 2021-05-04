@@ -8,6 +8,7 @@ import br.com.fatec.petfood.model.enums.CityZone;
 import br.com.fatec.petfood.service.SellerService;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,18 @@ public class SellerServiceTest extends IntegrationTest {
     private final List<Category> categories = Arrays.asList(Category.FOOD, Category.OTHERS);
     private final SellerUpdateDTO sellerUpdateDTO = EnhancedRandom.random(SellerUpdateDTO.class);
     private final SellerDTO sellerDTOWithoutName = EnhancedRandom.random(SellerDTO.class, "name");
+
+    @BeforeEach
+    public void setup() {
+        sellerDTO.setWeekInitialTimeOperation("08:00");
+        sellerDTO.setWeekFinalTimeOperation("18:00");
+        sellerDTO.setWeekendInitialTimeOperation("10:00");
+        sellerDTO.setWeekendFinalTimeOperation("16:00");
+        sellerUpdateDTO.setWeekInitialTimeOperation("08:00");
+        sellerUpdateDTO.setWeekFinalTimeOperation("18:00");
+        sellerUpdateDTO.setWeekendInitialTimeOperation("10:00");
+        sellerUpdateDTO.setWeekendFinalTimeOperation("16:00");
+    }
 
     @Test
     public void shouldCreateSellerWithSuccess() {
@@ -84,6 +97,15 @@ public class SellerServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(secondResponse.getBody(), "Lojista já existe com o CNPJ passado.");
+    }
+
+    @Test
+    public void shouldResponseBadRequestWhenCreateSellerWithInvalidTimeOperation() {
+        sellerDTO.setWeekInitialTimeOperation("AAAA");
+        ResponseEntity<?> response = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
+
+        Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        Assertions.assertEquals(response.getBody(), "Horário inicial de funcionamento durante a semana passado inválido. Favor passar no seguinte formato: 'HH:MM'.");
     }
 
     @Test
@@ -178,6 +200,10 @@ public class SellerServiceTest extends IntegrationTest {
     @Test
     public void shouldResponseBadRequestWhenUpdateSellerAlreadyExistsName() {
         SellerDTO secondSellerDTO = EnhancedRandom.random(SellerDTO.class);
+        secondSellerDTO.setWeekInitialTimeOperation("08:00");
+        secondSellerDTO.setWeekFinalTimeOperation("18:00");
+        secondSellerDTO.setWeekendInitialTimeOperation("10:00");
+        secondSellerDTO.setWeekendFinalTimeOperation("16:00");
 
         ResponseEntity<?> firstResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
 
@@ -201,6 +227,10 @@ public class SellerServiceTest extends IntegrationTest {
     @Test
     public void shouldResponseBadRequestWhenUpdateSellerAlreadyExistsEmail() {
         SellerDTO secondSellerDTO = EnhancedRandom.random(SellerDTO.class);
+        secondSellerDTO.setWeekInitialTimeOperation("08:00");
+        secondSellerDTO.setWeekFinalTimeOperation("18:00");
+        secondSellerDTO.setWeekendInitialTimeOperation("10:00");
+        secondSellerDTO.setWeekendFinalTimeOperation("16:00");
 
         ResponseEntity<?> firstResponse = sellerService.createSeller(sellerDTO, CityZone.EAST, categories);
 

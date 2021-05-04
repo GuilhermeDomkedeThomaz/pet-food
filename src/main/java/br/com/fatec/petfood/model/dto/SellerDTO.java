@@ -17,4 +17,14 @@ public class SellerDTO extends LoginDTO {
     private String name;
 
     private RegistrationInfos registrationInfos;
+
+    private String imageUrl;
+
+    private String weekInitialTimeOperation;
+
+    private String weekFinalTimeOperation;
+
+    private String weekendInitialTimeOperation;
+
+    private String weekendFinalTimeOperation;
 }
