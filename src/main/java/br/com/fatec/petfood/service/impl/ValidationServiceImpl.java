@@ -197,6 +197,28 @@ public class ValidationServiceImpl implements ValidationService {
         this.genericProductStockValidate(stock);
     }
 
+    @Override
+    public void validateSearchSeller(String productTitle, String localTime) throws Exception {
+        if (!validateUtils.isNotNullAndNotEmpty(productTitle))
+            throw new Exception("Nome do produto passado inválido(vazio ou nulo).");
+
+        this.genericLocalTimeValidate(localTime);
+    }
+
+    @Override
+    public void searchSellerProducts(String sellerName) throws Exception {
+        if (!validateUtils.isNotNullAndNotEmpty(sellerName))
+            throw new Exception("Nome do lojista passado inválido(vazio ou nulo).");
+    }
+
+    @Override
+    public void searchSellerByCategory(Category category, String localTime) throws Exception {
+        if (Objects.isNull(category))
+            throw new Exception("Categoria passada inválida(vazia ou nula).");
+
+        this.genericLocalTimeValidate(localTime);
+    }
+
     private void genericValidate(String password, RegistrationInfos registrationInfos, CityZone cityZone) throws Exception {
         if (!validateUtils.isNotNullAndNotEmpty(password))
             throw new Exception("Senha passada inválida(vazia ou nula).");
@@ -320,5 +342,17 @@ public class ValidationServiceImpl implements ValidationService {
             throw new Exception("Estoque passado inválido(vazio ou nulo).");
         else if (stock <= 0)
             throw new Exception("Estoque passado inválido(menor ou igual a 0).");
+    }
+
+    private void genericLocalTimeValidate(String localTime) throws Exception {
+        if (!validateUtils.isNotNullAndNotEmpty(localTime))
+            throw new Exception("Horário passado inválido(vazio ou nulo).");
+        else {
+            try {
+                LocalTime.parse(localTime);
+            } catch (Exception e) {
+                throw new Exception("Horário passado inválido. Favor passar no seguinte formato: 'HH:MM'.");
+            }
+        }
     }
 }

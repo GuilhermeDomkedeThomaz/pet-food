@@ -29,4 +29,10 @@ public interface ValidationService {
     void validateProductUpdateDTO(ProductUpdateDTO productUpdateDTO, Category category) throws Exception;
 
     void validateProductStockUpdate(Integer stock) throws Exception;
+
+    void validateSearchSeller(String productTitle, String localTime) throws Exception;
+
+    void searchSellerProducts(String sellerName) throws Exception;
+
+    void searchSellerByCategory(Category category, String localTime) throws Exception;
 }
