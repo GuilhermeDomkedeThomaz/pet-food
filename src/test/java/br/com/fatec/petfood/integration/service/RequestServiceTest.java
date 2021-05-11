@@ -11,11 +11,13 @@ import br.com.fatec.petfood.model.entity.mongo.UserEntity;
 import br.com.fatec.petfood.model.enums.Status;
 import br.com.fatec.petfood.repository.mongo.ProductRepository;
 import br.com.fatec.petfood.repository.mongo.RequestRepository;
+import br.com.fatec.petfood.repository.mongo.ScheduleRepository;
 import br.com.fatec.petfood.repository.mongo.SellerRepository;
 import br.com.fatec.petfood.repository.mongo.UserRepository;
 import br.com.fatec.petfood.service.RequestService;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,9 @@ public class RequestServiceTest extends IntegrationTest {
 
     @Autowired
     private RequestRepository requestRepository;
+
+    @Autowired
+    private ScheduleRepository scheduleRepository;
 
     @Autowired
     private ProductRepository productRepository;
@@ -793,5 +798,31 @@ public class RequestServiceTest extends IntegrationTest {
 
         Assertions.assertEquals(deleteResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(deleteResponse.getBody(), "Id do pedido passado inválido.");
+    }
+
+    @Test
+    public void shouldCancelRequestScheduleWithSuccess() {
+        RequestEntity requestEntity = EnhancedRandom.random(RequestEntity.class);
+        requestEntity.setStatus(Status.CREATED);
+        requestEntity.setDefaultDateTime(DateTime.now().minusMinutes(40));
+        requestRepository.save(requestEntity);
+        scheduleRepository.deleteAll();
+
+        Assertions.assertDoesNotThrow(() -> requestService.cancelRequestSchedule(15, 0, 100));
+        Assertions.assertEquals(scheduleRepository.findAll().size(), 1);
+
+        Optional<RequestEntity> optionalRequestEntity = requestRepository.findById(requestEntity.getId());
+
+        if (optionalRequestEntity.isPresent()) {
+            RequestEntity requestEntityReturn = optionalRequestEntity.get();
+            Assertions.assertEquals(requestEntityReturn.getStatus(), Status.CANCELED);
+        }
+    }
+
+    @Test
+    public void shouldCancelRequestScheduleWithoutRequests() {
+        requestRepository.deleteAll();
+
+        Assertions.assertDoesNotThrow(() -> requestService.cancelRequestSchedule(15, 0, 100));
     }
 }

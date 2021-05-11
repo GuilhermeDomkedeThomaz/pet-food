@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "schedule.request",
+      "type": "java.lang.String",
+      "description": "Description for schedule.request."
+  }
+] }

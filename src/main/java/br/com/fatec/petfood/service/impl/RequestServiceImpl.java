@@ -4,17 +4,21 @@ import br.com.fatec.petfood.model.dto.RequestDTO;
 import br.com.fatec.petfood.model.dto.RequestReturnDTO;
 import br.com.fatec.petfood.model.dto.RequestUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.RequestEntity;
+import br.com.fatec.petfood.model.entity.mongo.ScheduleEntity;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.entity.mongo.UserEntity;
 import br.com.fatec.petfood.model.enums.Status;
 import br.com.fatec.petfood.model.generic.ProductRequest;
 import br.com.fatec.petfood.model.mapper.RequestMapper;
 import br.com.fatec.petfood.repository.mongo.RequestRepository;
+import br.com.fatec.petfood.repository.mongo.ScheduleRepository;
 import br.com.fatec.petfood.service.ProductService;
 import br.com.fatec.petfood.service.RequestService;
 import br.com.fatec.petfood.service.RequestValidationService;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -30,6 +34,7 @@ public class RequestServiceImpl implements RequestService {
     private final RequestMapper requestMapper;
     private final ProductService productService;
     private final RequestRepository requestRepository;
+    private final ScheduleRepository scheduleRepository;
     private final RequestValidationService requestValidationService;
 
     @Override
@@ -382,6 +387,30 @@ public class RequestServiceImpl implements RequestService {
         } else
             return new ResponseEntity<>("Pedido não encontrado com o id de pedido passado.",
                     HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    public void cancelRequestSchedule(Integer minutesQuery, Integer page, Integer size) throws Exception {
+        Optional<List<RequestEntity>> optionalRequestEntityList = requestRepository.findAllByStatusAndDefaultDateTimeIsBefore(
+                Status.CREATED, DateTime.now().minusMinutes(minutesQuery), PageRequest.of(page, size));
+
+        if (optionalRequestEntityList.isPresent()) {
+            try {
+                List<RequestEntity> requestEntityList = optionalRequestEntityList.get();
+
+                if (!requestEntityList.isEmpty()) {
+                    ScheduleEntity scheduleEntity = new ScheduleEntity(requestEntityList, Status.CREATED, Status.CANCELED);
+                    requestEntityList.forEach(requestEntity -> {
+                        requestEntity.setStatus(Status.CANCELED);
+                        requestEntity.setLastUpdateDateTime(DateTime.now());
+                    });
+                    requestRepository.saveAll(requestEntityList);
+                    scheduleRepository.save(scheduleEntity);
+                }
+            } catch (Exception e) {
+                throw new Exception("Erro ao executar schedule para cancelamento de pedidos: " + e.getMessage() + e.getCause());
+            }
+        }
     }
 
     private void updateStockProduct(String sellerName, List<ProductRequest> products) {

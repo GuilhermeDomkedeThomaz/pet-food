@@ -5,24 +5,28 @@ import br.com.fatec.petfood.model.dto.RequestDTO;
 import br.com.fatec.petfood.model.dto.RequestReturnDTO;
 import br.com.fatec.petfood.model.dto.RequestUpdateDTO;
 import br.com.fatec.petfood.model.entity.mongo.RequestEntity;
+import br.com.fatec.petfood.model.entity.mongo.ScheduleEntity;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.entity.mongo.UserEntity;
 import br.com.fatec.petfood.model.enums.Status;
 import br.com.fatec.petfood.model.generic.ProductRequest;
 import br.com.fatec.petfood.model.mapper.RequestMapper;
 import br.com.fatec.petfood.repository.mongo.RequestRepository;
+import br.com.fatec.petfood.repository.mongo.ScheduleRepository;
 import br.com.fatec.petfood.service.ProductService;
 import br.com.fatec.petfood.service.impl.RequestServiceImpl;
 import br.com.fatec.petfood.service.impl.RequestValidationServiceImpl;
 import br.com.fatec.petfood.unit.UnitTest;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -42,6 +46,9 @@ public class RequestServiceTest extends UnitTest {
 
     @Mock
     private RequestRepository requestRepository;
+
+    @Mock
+    private ScheduleRepository scheduleRepository;
 
     @Mock
     private RequestValidationServiceImpl requestValidationServiceImpl;
@@ -677,5 +684,45 @@ public class RequestServiceTest extends UnitTest {
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Id do pedido passado inválido.");
+    }
+
+    @Test
+    public void shouldCancelRequestScheduleWithSuccess() {
+        requestEntity.setStatus(Status.CREATED);
+        PageRequest pageRequest = PageRequest.of(0, 100);
+        ScheduleEntity scheduleEntity = EnhancedRandom.random(ScheduleEntity.class);
+
+        Mockito.when(requestRepository.findAllByStatusAndDefaultDateTimeIsBefore(eq(Status.CREATED), Mockito.any(DateTime.class), eq(pageRequest)))
+                .thenReturn(Optional.of(List.of(requestEntity)));
+        Mockito.when(requestRepository.saveAll(List.of(requestEntity))).thenReturn(List.of(requestEntity));
+        Mockito.when(scheduleRepository.save(Mockito.any(ScheduleEntity.class))).thenReturn(scheduleEntity);
+
+        Assertions.assertDoesNotThrow(() -> requestServiceImpl.cancelRequestSchedule(15, 0, 100));
+    }
+
+    @Test
+    public void shouldCancelRequestScheduleWithoutRequests() {
+        PageRequest pageRequest = PageRequest.of(0, 100);
+
+        Mockito.when(requestRepository.findAllByStatusAndDefaultDateTimeIsBefore(eq(Status.CREATED), Mockito.any(DateTime.class), eq(pageRequest)))
+                .thenReturn(Optional.empty());
+
+        Assertions.assertDoesNotThrow(() -> requestServiceImpl.cancelRequestSchedule(15, 0, 100));
+    }
+
+    @Test
+    public void shouldCancelRequestScheduleWithErrorOnDataBase() {
+        requestEntity.setStatus(Status.CREATED);
+        PageRequest pageRequest = PageRequest.of(0, 100);
+
+        Mockito.when(requestRepository.findAllByStatusAndDefaultDateTimeIsBefore(eq(Status.CREATED), Mockito.any(DateTime.class), eq(pageRequest)))
+                .thenReturn(Optional.of(List.of(requestEntity)));
+        Mockito.when(requestRepository.saveAll(List.of(requestEntity))).thenThrow(new DataIntegrityViolationException(""));
+
+        try {
+            requestServiceImpl.cancelRequestSchedule(15, 0, 100);
+        } catch (Exception e) {
+            Assertions.assertEquals(e.getMessage(), "Erro ao executar schedule para cancelamento de pedidos: null");
+        }
     }
 }

@@ -24,4 +24,6 @@ public interface RequestService {
     ResponseEntity<?> rateRequest(String id, Integer rate);
 
     ResponseEntity<?> deleteRequest(String id);
+
+    void cancelRequestSchedule(Integer minutesQuery, Integer page, Integer size) throws Exception;
 }
