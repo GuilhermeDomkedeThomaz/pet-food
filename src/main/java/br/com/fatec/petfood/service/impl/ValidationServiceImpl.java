@@ -206,13 +206,13 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     @Override
-    public void searchSellerProducts(String sellerName) throws Exception {
+    public void validateSearchSellerProducts(String sellerName) throws Exception {
         if (!validateUtils.isNotNullAndNotEmpty(sellerName))
             throw new Exception("Nome do lojista passado inválido(vazio ou nulo).");
     }
 
     @Override
-    public void searchSellerByCategory(Category category, String localTime) throws Exception {
+    public void validateSearchSellerByCategory(Category category, String localTime) throws Exception {
         if (Objects.isNull(category))
             throw new Exception("Categoria passada inválida(vazia ou nula).");
 

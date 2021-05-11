@@ -401,4 +401,58 @@ public class ValidationServiceTest extends UnitTest {
             Assertions.assertEquals("Estoque passado inválido(menor ou igual a 0).", e.getMessage());
         }
     }
+
+    @Test
+    public void shouldValidateSearchSellerWithSuccess() {
+        Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.TRUE);
+
+        Assertions.assertDoesNotThrow(() -> validationServiceImpl.validateSearchSeller("Ração", "18:00"));
+    }
+
+    @Test
+    public void shouldValidateSearchSellerWithInvalidLocalTime() {
+        Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.TRUE);
+
+        try {
+            validationServiceImpl.validateSearchSeller("Ração", "AAAAA");
+        } catch (Exception e) {
+            Assertions.assertEquals("Horário passado inválido. Favor passar no seguinte formato: 'HH:MM'.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldValidateSearchSellerProductsWithSuccess() {
+        Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.TRUE);
+
+        Assertions.assertDoesNotThrow(() -> validationServiceImpl.validateSearchSellerProducts("Loja Teste"));
+    }
+
+    @Test
+    public void shouldValidateSearchSellerProductsWithInvalidSellerName() {
+        Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.FALSE);
+
+        try {
+            validationServiceImpl.validateSearchSellerProducts("");
+        } catch (Exception e) {
+            Assertions.assertEquals("Nome do lojista passado inválido(vazio ou nulo).", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldValidateSearchSellerByCategoryWithSuccess() {
+        Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.TRUE);
+
+        Assertions.assertDoesNotThrow(() -> validationServiceImpl.validateSearchSellerByCategory(Category.FOOD, "18:00"));
+    }
+
+    @Test
+    public void shouldValidateSearchSellerByCategoryWithInvalidLocalTime() {
+        Mockito.when(validateUtils.isNotNullAndNotEmpty(Mockito.anyString())).thenReturn(Boolean.TRUE);
+
+        try {
+            validationServiceImpl.validateSearchSellerByCategory(Category.FOOD, "AAAAA");
+        } catch (Exception e) {
+            Assertions.assertEquals("Horário passado inválido. Favor passar no seguinte formato: 'HH:MM'.", e.getMessage());
+        }
+    }
 }

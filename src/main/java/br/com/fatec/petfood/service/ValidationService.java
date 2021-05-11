@@ -32,7 +32,7 @@ public interface ValidationService {
 
     void validateSearchSeller(String productTitle, String localTime) throws Exception;
 
-    void searchSellerProducts(String sellerName) throws Exception;
+    void validateSearchSellerProducts(String sellerName) throws Exception;
 
-    void searchSellerByCategory(Category category, String localTime) throws Exception;
+    void validateSearchSellerByCategory(Category category, String localTime) throws Exception;
 }

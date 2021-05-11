@@ -95,7 +95,7 @@ public class SearchServiceImpl implements SearchService {
         List<ProductReturnDTO> productReturnDTOList = new ArrayList<>();
 
         try {
-            validationService.searchSellerProducts(sellerName);
+            validationService.validateSearchSellerProducts(sellerName);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -144,7 +144,7 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public ResponseEntity<?> searchSellerByCategory(Category category, Boolean isWeek, String localTime) {
         try {
-            validationService.searchSellerByCategory(category, localTime);
+            validationService.validateSearchSellerByCategory(category, localTime);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
