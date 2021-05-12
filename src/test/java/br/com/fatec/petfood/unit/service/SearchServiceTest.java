@@ -52,7 +52,7 @@ public class SearchServiceTest extends UnitTest {
     @InjectMocks
     private SearchServiceImpl searchServiceImpl;
 
-    private final String localTime = "14:00";
+    private String localTime = "14:00";
     private List<SellerEntity> sellerEntityList;
     private final SellerEntity sellerEntity = EnhancedRandom.random(SellerEntity.class);
     private final List<SellerReturnDTO> sellerReturnDTOList = List.of(EnhancedRandom.random(SellerReturnDTO.class));
@@ -78,10 +78,29 @@ public class SearchServiceTest extends UnitTest {
                 .thenReturn(Optional.of(sellerEntityList));
         Mockito.when(sellerMapper.toReturnDTO(eq(sellerEntity))).thenReturn(sellerReturnDTO);
 
-        ResponseEntity<?> response = searchServiceImpl.searchSeller(productEntity.getTitle(), Boolean.TRUE, localTime);
+        ResponseEntity<?> firstResponse = searchServiceImpl.searchSeller(productEntity.getTitle(), Boolean.TRUE, localTime);
 
-        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
-        Assertions.assertEquals(response.getBody(), sellerReturnDTOList);
+        Assertions.assertEquals(firstResponse.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(firstResponse.getBody(), sellerReturnDTOList);
+
+        localTime = "22:00";
+        sellerEntity.setWeekInitialTimeOperation(LocalTime.parse("20:00"));
+        sellerEntity.setWeekFinalTimeOperation(LocalTime.parse("06:00"));
+        sellerEntityList = List.of(sellerEntity);
+        sellerEntity = sellerEntityList.get(0);
+        sellerReturnDTO = sellerReturnDTOList.get(0);
+        productEntity = productEntityList.get(0);
+
+        Mockito.when(productRepository.findByTitleRegex(eq(productEntity.getTitle())))
+                .thenReturn(Optional.of(productEntityList));
+        Mockito.when(sellerRepository.findByNameIn(eq(List.of(productEntity.getSellerName()))))
+                .thenReturn(Optional.of(sellerEntityList));
+        Mockito.when(sellerMapper.toReturnDTO(eq(sellerEntity))).thenReturn(sellerReturnDTO);
+
+        ResponseEntity<?> secondResponse = searchServiceImpl.searchSeller(productEntity.getTitle(), Boolean.TRUE, localTime);
+
+        Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(secondResponse.getBody(), sellerReturnDTOList);
     }
 
     @Test
@@ -263,10 +282,25 @@ public class SearchServiceTest extends UnitTest {
         Mockito.when(sellerRepository.findByCategory(eq(Category.FOOD))).thenReturn(Optional.of(sellerEntityList));
         Mockito.when(sellerMapper.toReturnDTO(eq(sellerEntity))).thenReturn(sellerReturnDTO);
 
-        ResponseEntity<?> response = searchServiceImpl.searchSellerByCategory(Category.FOOD, Boolean.TRUE, localTime);
+        ResponseEntity<?> firstResponse = searchServiceImpl.searchSellerByCategory(Category.FOOD, Boolean.TRUE, localTime);
 
-        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
-        Assertions.assertEquals(response.getBody(), sellerReturnDTOList);
+        Assertions.assertEquals(firstResponse.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(firstResponse.getBody(), sellerReturnDTOList);
+
+        localTime = "22:00";
+        sellerEntity.setWeekInitialTimeOperation(LocalTime.parse("20:00"));
+        sellerEntity.setWeekFinalTimeOperation(LocalTime.parse("06:00"));
+        sellerEntityList = List.of(sellerEntity);
+        sellerEntity = sellerEntityList.get(0);
+        sellerReturnDTO = sellerReturnDTOList.get(0);
+
+        Mockito.when(sellerRepository.findByCategory(eq(Category.FOOD))).thenReturn(Optional.of(sellerEntityList));
+        Mockito.when(sellerMapper.toReturnDTO(eq(sellerEntity))).thenReturn(sellerReturnDTO);
+
+        ResponseEntity<?> secondResponse = searchServiceImpl.searchSellerByCategory(Category.FOOD, Boolean.TRUE, localTime);
+
+        Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(secondResponse.getBody(), sellerReturnDTOList);
     }
 
     @Test

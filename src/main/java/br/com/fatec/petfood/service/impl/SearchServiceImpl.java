@@ -61,14 +61,14 @@ public class SearchServiceImpl implements SearchService {
                         try {
                             if (!isWeek) {
                                 sellerEntityList.forEach(sellerEntity -> {
-                                    if (parsedLocalTime.getHour() >= sellerEntity.getWeekendInitialTimeOperation().getHour() &&
-                                            parsedLocalTime.getHour() < (sellerEntity.getWeekendFinalTimeOperation().getHour()))
+                                    if (this.validateTimeOperation(
+                                            parsedLocalTime, sellerEntity.getWeekendInitialTimeOperation(), sellerEntity.getWeekendFinalTimeOperation()))
                                         sellerReturnDTOList.add(sellerMapper.toReturnDTO(sellerEntity));
                                 });
                             } else {
                                 sellerEntityList.forEach(sellerEntity -> {
-                                    if (parsedLocalTime.getHour() >= sellerEntity.getWeekInitialTimeOperation().getHour() &&
-                                            parsedLocalTime.getHour() < sellerEntity.getWeekFinalTimeOperation().getHour())
+                                    if (this.validateTimeOperation(
+                                            parsedLocalTime, sellerEntity.getWeekInitialTimeOperation(), sellerEntity.getWeekFinalTimeOperation()))
                                         sellerReturnDTOList.add(sellerMapper.toReturnDTO(sellerEntity));
                                 });
                             }
@@ -161,14 +161,14 @@ public class SearchServiceImpl implements SearchService {
                 try {
                     if (!isWeek) {
                         sellerEntityList.forEach(sellerEntity -> {
-                            if (parsedLocalTime.getHour() >= sellerEntity.getWeekendInitialTimeOperation().getHour() &&
-                                    parsedLocalTime.getHour() < (sellerEntity.getWeekendFinalTimeOperation().getHour()))
+                            if (this.validateTimeOperation(
+                                    parsedLocalTime, sellerEntity.getWeekendInitialTimeOperation(), sellerEntity.getWeekendFinalTimeOperation()))
                                 sellerReturnDTOList.add(sellerMapper.toReturnDTO(sellerEntity));
                         });
                     } else {
                         sellerEntityList.forEach(sellerEntity -> {
-                            if (parsedLocalTime.getHour() >= sellerEntity.getWeekInitialTimeOperation().getHour() &&
-                                    parsedLocalTime.getHour() < sellerEntity.getWeekFinalTimeOperation().getHour())
+                            if (this.validateTimeOperation(
+                                    parsedLocalTime, sellerEntity.getWeekInitialTimeOperation(), sellerEntity.getWeekFinalTimeOperation()))
                                 sellerReturnDTOList.add(sellerMapper.toReturnDTO(sellerEntity));
                         });
                     }
@@ -182,5 +182,25 @@ public class SearchServiceImpl implements SearchService {
                 return new ResponseEntity<>("Nenhum lojista encontrado que tenha essa categoria cadastrada.", HttpStatus.BAD_REQUEST);
         } else
             return new ResponseEntity<>("Nenhum lojista encontrado que tenha essa categoria cadastrada.", HttpStatus.BAD_REQUEST);
+    }
+
+    private Boolean validateTimeOperation(LocalTime now, LocalTime initialTimeOperation, LocalTime finalTimeOperation) {
+        int result = finalTimeOperation.getHour() - initialTimeOperation.getHour();
+
+        if (result > 0) {
+            if (now.getHour() >= initialTimeOperation.getHour() && now.getHour() < finalTimeOperation.getHour())
+                return Boolean.TRUE;
+            else
+                return Boolean.FALSE;
+        } else if (result < 0) {
+            if (now.getHour() >= initialTimeOperation.getHour()) {
+                return Boolean.TRUE;
+            } else if (now.getHour() < finalTimeOperation.getHour()) {
+                return Boolean.TRUE;
+            } else {
+                return Boolean.FALSE;
+            }
+        } else
+            return Boolean.TRUE;
     }
 }

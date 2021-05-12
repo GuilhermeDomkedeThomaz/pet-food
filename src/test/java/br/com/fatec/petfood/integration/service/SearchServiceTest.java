@@ -39,7 +39,7 @@ public class SearchServiceTest extends IntegrationTest {
     @Autowired
     private ProductRepository productRepository;
 
-    private final String localTime = "14:00";
+    private String localTime = "14:00";
     private SellerReturnDTO firstSellerReturnDTO;
     private SellerReturnDTO secondSellerReturnDTO;
     private ProductReturnDTO firstProductReturnDTO;
@@ -70,10 +70,34 @@ public class SearchServiceTest extends IntegrationTest {
         secondSellerReturnDTO = sellerMapper.toReturnDTO(secondSellerEntity);
         List<SellerReturnDTO> sellerReturnDTOList = List.of(firstSellerReturnDTO, secondSellerReturnDTO);
 
-        ResponseEntity<?> response = searchService.searchSeller("raç", Boolean.TRUE, localTime);
+        ResponseEntity<?> firstResponse = searchService.searchSeller("raç", Boolean.TRUE, localTime);
 
-        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
-        Assertions.assertEquals(response.getBody(), sellerReturnDTOList);
+        Assertions.assertEquals(firstResponse.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(firstResponse.getBody(), sellerReturnDTOList);
+
+        sellerRepository.deleteAll();
+        productRepository.deleteAll();
+        localTime = "22:00";
+        firstSellerEntity.setWeekInitialTimeOperation(LocalTime.parse("20:00"));
+        firstSellerEntity.setWeekFinalTimeOperation(LocalTime.parse("06:00"));
+        secondSellerEntity.setWeekInitialTimeOperation(LocalTime.parse("20:00"));
+        secondSellerEntity.setWeekFinalTimeOperation(LocalTime.parse("06:00"));
+        firstProductEntity.setSellerName(firstSellerEntity.getName());
+        firstProductEntity.setTitle("Ração1");
+        secondProductEntity.setSellerName(secondSellerEntity.getName());
+        secondProductEntity.setTitle("Ração2");
+        sellerRepository.save(firstSellerEntity);
+        sellerRepository.save(secondSellerEntity);
+        productRepository.save(firstProductEntity);
+        productRepository.save(secondProductEntity);
+        firstSellerReturnDTO = sellerMapper.toReturnDTO(firstSellerEntity);
+        secondSellerReturnDTO = sellerMapper.toReturnDTO(secondSellerEntity);
+        sellerReturnDTOList = List.of(firstSellerReturnDTO, secondSellerReturnDTO);
+
+        ResponseEntity<?> secondResponse = searchService.searchSeller("raç", Boolean.TRUE, localTime);
+
+        Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(secondResponse.getBody(), sellerReturnDTOList);
     }
 
     @Test
@@ -177,10 +201,30 @@ public class SearchServiceTest extends IntegrationTest {
         secondSellerReturnDTO = sellerMapper.toReturnDTO(secondSellerEntity);
         List<SellerReturnDTO> sellerReturnDTOList = List.of(firstSellerReturnDTO, secondSellerReturnDTO);
 
-        ResponseEntity<?> response = searchService.searchSellerByCategory(Category.FOOD, Boolean.TRUE, localTime);
+        ResponseEntity<?> firstResponse = searchService.searchSellerByCategory(Category.FOOD, Boolean.TRUE, localTime);
 
-        Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
-        Assertions.assertEquals(response.getBody(), sellerReturnDTOList);
+        Assertions.assertEquals(firstResponse.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(firstResponse.getBody(), sellerReturnDTOList);
+
+        sellerRepository.deleteAll();
+        productRepository.deleteAll();
+        localTime = "22:00";
+        firstSellerEntity.setWeekInitialTimeOperation(LocalTime.parse("20:00"));
+        firstSellerEntity.setWeekFinalTimeOperation(LocalTime.parse("06:00"));
+        secondSellerEntity.setWeekInitialTimeOperation(LocalTime.parse("20:00"));
+        secondSellerEntity.setWeekFinalTimeOperation(LocalTime.parse("06:00"));
+        firstSellerEntity.setCategories(List.of(Category.FOOD));
+        secondSellerEntity.setCategories(List.of(Category.FOOD));
+        sellerRepository.save(firstSellerEntity);
+        sellerRepository.save(secondSellerEntity);
+        firstSellerReturnDTO = sellerMapper.toReturnDTO(firstSellerEntity);
+        secondSellerReturnDTO = sellerMapper.toReturnDTO(secondSellerEntity);
+        sellerReturnDTOList = List.of(firstSellerReturnDTO, secondSellerReturnDTO);
+
+        ResponseEntity<?> secondResponse = searchService.searchSellerByCategory(Category.FOOD, Boolean.TRUE, localTime);
+
+        Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.OK);
+        Assertions.assertEquals(secondResponse.getBody(), sellerReturnDTOList);
     }
 
     @Test
