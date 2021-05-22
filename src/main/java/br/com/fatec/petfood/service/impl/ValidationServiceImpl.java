@@ -198,25 +198,27 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     @Override
-    public void validateSearchSeller(String productTitle, String localTime) throws Exception {
+    public void validateSearchSeller(String productTitle, CityZone cityZone, String localTime, Integer page, Integer size) throws Exception {
         if (!validateUtils.isNotNullAndNotEmpty(productTitle))
             throw new Exception("Nome do produto passado inválido(vazio ou nulo).");
 
-        this.genericLocalTimeValidate(localTime);
+        this.genericSearchValidate(cityZone, localTime, page, size);
     }
 
     @Override
-    public void validateSearchSellerProducts(String sellerName) throws Exception {
+    public void validateSearchSellerProducts(String sellerName, Integer page, Integer size) throws Exception {
         if (!validateUtils.isNotNullAndNotEmpty(sellerName))
             throw new Exception("Nome do lojista passado inválido(vazio ou nulo).");
+
+        this.genericPageAndSizeValidate(page, size);
     }
 
     @Override
-    public void validateSearchSellerByCategory(Category category, String localTime) throws Exception {
+    public void validateSearchSellerByCategory(Category category, CityZone cityZone, String localTime, Integer page, Integer size) throws Exception {
         if (Objects.isNull(category))
             throw new Exception("Categoria passada inválida(vazia ou nula).");
 
-        this.genericLocalTimeValidate(localTime);
+        this.genericSearchValidate(cityZone, localTime, page, size);
     }
 
     private void genericValidate(String password, RegistrationInfos registrationInfos, CityZone cityZone) throws Exception {
@@ -344,7 +346,10 @@ public class ValidationServiceImpl implements ValidationService {
             throw new Exception("Estoque passado inválido(menor ou igual a 0).");
     }
 
-    private void genericLocalTimeValidate(String localTime) throws Exception {
+    private void genericSearchValidate(CityZone cityZone, String localTime, Integer page, Integer size) throws Exception {
+        if (Objects.isNull(cityZone))
+            throw new Exception("Zona da cidade passada inválida(vazia ou nula).");
+
         if (!validateUtils.isNotNullAndNotEmpty(localTime))
             throw new Exception("Horário passado inválido(vazio ou nulo).");
         else {
@@ -354,5 +359,15 @@ public class ValidationServiceImpl implements ValidationService {
                 throw new Exception("Horário passado inválido. Favor passar no seguinte formato: 'HH:MM'.");
             }
         }
+
+        this.genericPageAndSizeValidate(page, size);
+    }
+
+    private void genericPageAndSizeValidate(Integer page, Integer size) throws Exception {
+        if (Objects.isNull(page))
+            throw new Exception("Página passada inválida(vazia ou nula).");
+
+        if (Objects.isNull(size))
+            throw new Exception("Tamanho da página passado inválido(vazio ou nulo).");
     }
 }

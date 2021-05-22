@@ -342,61 +342,124 @@ public class ValidationServiceTest extends IntegrationTest {
 
     @Test
     public void shouldValidateSearchSellerWithSuccess() {
-        Assertions.assertDoesNotThrow(() -> validationServiceImpl.validateSearchSeller("Ração", "18:00"));
+        Assertions.assertDoesNotThrow(() -> validationServiceImpl.validateSearchSeller("Ração", CityZone.EAST, "18:00", 0, 100));
     }
 
     @Test
     public void shouldValidateSearchSellerWithInvalidLocalTime() {
         try {
-            validationServiceImpl.validateSearchSeller("Ração", null);
+            validationServiceImpl.validateSearchSeller("Ração", CityZone.EAST, null, 0, 100);
         } catch (Exception e) {
             Assertions.assertEquals("Horário passado inválido(vazio ou nulo).", e.getMessage());
         }
 
         try {
-            validationServiceImpl.validateSearchSeller("Ração", "AAAAA");
+            validationServiceImpl.validateSearchSeller("Ração", CityZone.EAST, "AAAAA", 0, 100);
         } catch (Exception e) {
             Assertions.assertEquals("Horário passado inválido. Favor passar no seguinte formato: 'HH:MM'.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldValidateSearchSellerWithInvalidCityZone() {
+        try {
+            validationServiceImpl.validateSearchSeller("Ração", null, "18:00", 0, 100);
+        } catch (Exception e) {
+            Assertions.assertEquals("Zona da cidade passada inválida(vazia ou nula).", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldValidateSearchSellerWithInvalidPageAndSize() {
+        try {
+            validationServiceImpl.validateSearchSeller("Ração", CityZone.EAST, "18:00", null, 100);
+        } catch (Exception e) {
+            Assertions.assertEquals("Página passada inválida(vazia ou nula).", e.getMessage());
+        }
+
+        try {
+            validationServiceImpl.validateSearchSeller("Ração", CityZone.EAST, "18:00", 0, null);
+        } catch (Exception e) {
+            Assertions.assertEquals("Tamanho da página passado inválido(vazio ou nulo).", e.getMessage());
         }
     }
 
     @Test
     public void shouldValidateSearchSellerProductsWithSuccess() {
-        Assertions.assertDoesNotThrow(() -> validationServiceImpl.validateSearchSellerProducts("Loja Teste"));
+        Assertions.assertDoesNotThrow(() -> validationServiceImpl.validateSearchSellerProducts("Loja Teste", 0, 100));
     }
 
     @Test
     public void shouldValidateSearchSellerProductsWithInvalidSellerName() {
         try {
-            validationServiceImpl.validateSearchSellerProducts(null);
+            validationServiceImpl.validateSearchSellerProducts(null, 0, 100);
         } catch (Exception e) {
             Assertions.assertEquals("Nome do lojista passado inválido(vazio ou nulo).", e.getMessage());
         }
 
         try {
-            validationServiceImpl.validateSearchSellerProducts("");
+            validationServiceImpl.validateSearchSellerProducts("", 0, 100);
         } catch (Exception e) {
             Assertions.assertEquals("Nome do lojista passado inválido(vazio ou nulo).", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldValidateSearchSellerProductsWithInvalidPageAndSize() {
+        try {
+            validationServiceImpl.validateSearchSellerProducts("Loja Teste", null, 100);
+        } catch (Exception e) {
+            Assertions.assertEquals("Página passada inválida(vazia ou nula).", e.getMessage());
+        }
+
+        try {
+            validationServiceImpl.validateSearchSellerProducts("Loja Teste", 0, null);
+        } catch (Exception e) {
+            Assertions.assertEquals("Tamanho da página passado inválido(vazio ou nulo).", e.getMessage());
         }
     }
 
     @Test
     public void shouldValidateSearchSellerByCategoryWithSuccess() {
-        Assertions.assertDoesNotThrow(() -> validationServiceImpl.validateSearchSellerByCategory(Category.FOOD, "18:00"));
+        Assertions.assertDoesNotThrow(() -> validationServiceImpl.validateSearchSellerByCategory(Category.FOOD, CityZone.EAST, "18:00", 0, 100));
     }
 
     @Test
     public void shouldValidateSearchSellerByCategoryWithInvalidLocalTime() {
         try {
-            validationServiceImpl.validateSearchSellerByCategory(Category.FOOD, null);
+            validationServiceImpl.validateSearchSellerByCategory(Category.FOOD, CityZone.EAST, null, 0, 100);
         } catch (Exception e) {
             Assertions.assertEquals("Horário passado inválido(vazio ou nulo).", e.getMessage());
         }
 
         try {
-            validationServiceImpl.validateSearchSellerByCategory(Category.FOOD, "AAAAA");
+            validationServiceImpl.validateSearchSellerByCategory(Category.FOOD, CityZone.EAST, "AAAAA", 0, 100);
         } catch (Exception e) {
             Assertions.assertEquals("Horário passado inválido. Favor passar no seguinte formato: 'HH:MM'.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldValidateSearchSellerByCategoryWithInvalidCityZone() {
+        try {
+            validationServiceImpl.validateSearchSellerByCategory(Category.FOOD, null, "18:00", 0, 100);
+        } catch (Exception e) {
+            Assertions.assertEquals("Zona da cidade passada inválida(vazia ou nula).", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldValidateSearchSellerByCategoryWithInvalidPageAndSize() {
+        try {
+            validationServiceImpl.validateSearchSellerByCategory(Category.FOOD, CityZone.EAST, "18:00", null, 100);
+        } catch (Exception e) {
+            Assertions.assertEquals("Página passada inválida(vazia ou nula).", e.getMessage());
+        }
+
+        try {
+            validationServiceImpl.validateSearchSellerByCategory(Category.FOOD, CityZone.EAST, "18:00", 0, null);
+        } catch (Exception e) {
+            Assertions.assertEquals("Tamanho da página passado inválido(vazio ou nulo).", e.getMessage());
         }
     }
 }

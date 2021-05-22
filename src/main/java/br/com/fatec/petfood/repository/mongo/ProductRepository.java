@@ -1,6 +1,7 @@
 package br.com.fatec.petfood.repository.mongo;
 
 import br.com.fatec.petfood.model.entity.mongo.ProductEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -15,9 +16,11 @@ public interface ProductRepository extends MongoRepository<ProductEntity, String
 
     Optional<List<ProductEntity>> findBySellerName(String sellerName);
 
+    Optional<List<ProductEntity>> findAllBySellerName(String sellerName, Pageable page);
+
     @Query("{'title':{$regex:?0, $options:'i'}}")
-    Optional<List<ProductEntity>> findByTitleRegex(String title);
+    Optional<List<ProductEntity>> findAllByTitleRegex(String title);
 
     @Query("{'sellerName':?0, 'title':{$regex:?1, $options:'i'}}")
-    Optional<List<ProductEntity>> findBySellerNameAndTitleRegex(String sellerName, String title);
+    Optional<List<ProductEntity>> findAllBySellerNameAndTitleRegex(String sellerName, String title, Pageable page);
 }

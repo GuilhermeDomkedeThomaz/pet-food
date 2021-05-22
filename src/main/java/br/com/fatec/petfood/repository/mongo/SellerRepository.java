@@ -2,6 +2,8 @@ package br.com.fatec.petfood.repository.mongo;
 
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.enums.Category;
+import br.com.fatec.petfood.model.enums.CityZone;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -19,8 +21,8 @@ public interface SellerRepository extends MongoRepository<SellerEntity, String> 
     @Query("{'registrationInfos.document':?0}")
     Optional<SellerEntity> findByDocument(String document);
 
-    Optional<List<SellerEntity>> findByNameIn(List<String> sellerNames);
+    Optional<List<SellerEntity>> findAllByNameInAndCityZone(List<String> sellerNames, CityZone cityZone, Pageable page);
 
-    @Query("{'categories':?0}")
-    Optional<List<SellerEntity>> findByCategory(Category category);
+    @Query("{'categories':?0, 'cityZone':?1}")
+    Optional<List<SellerEntity>> findAllByCategoryAndCityZone(Category category, CityZone cityZone, Pageable page);
 }

@@ -5,6 +5,7 @@ import br.com.fatec.petfood.model.dto.SellerReturnDTO;
 import br.com.fatec.petfood.model.entity.mongo.ProductEntity;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.enums.Category;
+import br.com.fatec.petfood.model.enums.CityZone;
 import br.com.fatec.petfood.model.mapper.ProductMapper;
 import br.com.fatec.petfood.model.mapper.SellerMapper;
 import br.com.fatec.petfood.repository.mongo.ProductRepository;
@@ -13,6 +14,7 @@ import br.com.fatec.petfood.service.SearchService;
 import br.com.fatec.petfood.service.ValidationService;
 import br.com.fatec.petfood.utils.ValidateUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -34,15 +36,15 @@ public class SearchServiceImpl implements SearchService {
     private final ValidationService validationService;
 
     @Override
-    public ResponseEntity<?> searchSeller(String productTitle, Boolean isWeek, String localTime) {
+    public ResponseEntity<?> searchSeller(String productTitle, CityZone cityZone, Boolean isWeek, String localTime, Integer page, Integer size) {
         try {
-            validationService.validateSearchSeller(productTitle, localTime);
+            validationService.validateSearchSeller(productTitle, cityZone, localTime, page, size);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
         LocalTime parsedLocalTime = LocalTime.parse(localTime);
-        Optional<List<ProductEntity>> optionalProductEntityList = productRepository.findByTitleRegex(productTitle);
+        Optional<List<ProductEntity>> optionalProductEntityList = productRepository.findAllByTitleRegex(productTitle);
 
         if (optionalProductEntityList.isPresent()) {
             List<ProductEntity> productEntityList = optionalProductEntityList.get();
@@ -50,7 +52,7 @@ public class SearchServiceImpl implements SearchService {
             if (!productEntityList.isEmpty()) {
                 List<String> sellerNames = new ArrayList<>();
                 productEntityList.forEach(productEntity -> sellerNames.add(productEntity.getSellerName()));
-                Optional<List<SellerEntity>> optionalSellerEntityList = sellerRepository.findByNameIn(sellerNames);
+                Optional<List<SellerEntity>> optionalSellerEntityList = sellerRepository.findAllByNameInAndCityZone(sellerNames, cityZone, PageRequest.of(page, size));
 
                 if (optionalSellerEntityList.isPresent()) {
                     List<SellerEntity> sellerEntityList = optionalSellerEntityList.get();
@@ -89,19 +91,19 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public ResponseEntity<?> searchSellerProducts(String sellerName, String productTitle) {
+    public ResponseEntity<?> searchSellerProducts(String sellerName, String productTitle, Integer page, Integer size) {
         List<ProductEntity> productEntityList;
         Optional<List<ProductEntity>> optionalProductEntityList;
         List<ProductReturnDTO> productReturnDTOList = new ArrayList<>();
 
         try {
-            validationService.validateSearchSellerProducts(sellerName);
+            validationService.validateSearchSellerProducts(sellerName, page, size);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
         if (!validateUtils.isNotNullAndNotEmpty(productTitle)) {
-            optionalProductEntityList = productRepository.findBySellerName(sellerName);
+            optionalProductEntityList = productRepository.findAllBySellerName(sellerName, PageRequest.of(page, size));
 
             if (optionalProductEntityList.isPresent()) {
                 productEntityList = optionalProductEntityList.get();
@@ -119,7 +121,7 @@ public class SearchServiceImpl implements SearchService {
             } else
                 return new ResponseEntity<>("Nenhum produto cadastrado para o lojista passado.", HttpStatus.BAD_REQUEST);
         } else {
-            optionalProductEntityList = productRepository.findBySellerNameAndTitleRegex(sellerName, productTitle);
+            optionalProductEntityList = productRepository.findAllBySellerNameAndTitleRegex(sellerName, productTitle, PageRequest.of(page, size));
 
             if (optionalProductEntityList.isPresent()) {
                 productEntityList = optionalProductEntityList.get();
@@ -142,15 +144,15 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public ResponseEntity<?> searchSellerByCategory(Category category, Boolean isWeek, String localTime) {
+    public ResponseEntity<?> searchSellerByCategory(Category category, CityZone cityZone, Boolean isWeek, String localTime, Integer page, Integer size) {
         try {
-            validationService.validateSearchSellerByCategory(category, localTime);
+            validationService.validateSearchSellerByCategory(category, cityZone, localTime, page, size);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
         LocalTime parsedLocalTime = LocalTime.parse(localTime);
-        Optional<List<SellerEntity>> optionalSellerEntityList = sellerRepository.findByCategory(category);
+        Optional<List<SellerEntity>> optionalSellerEntityList = sellerRepository.findAllByCategoryAndCityZone(category, cityZone, PageRequest.of(page, size));
 
         if (optionalSellerEntityList.isPresent()) {
             List<SellerEntity> sellerEntityList = optionalSellerEntityList.get();

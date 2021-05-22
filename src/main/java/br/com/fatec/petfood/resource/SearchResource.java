@@ -1,6 +1,7 @@
 package br.com.fatec.petfood.resource;
 
 import br.com.fatec.petfood.model.enums.Category;
+import br.com.fatec.petfood.model.enums.CityZone;
 import br.com.fatec.petfood.service.SearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,10 +28,13 @@ public class SearchResource {
     @GetMapping(value = "/seller", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> searchSeller(
             @RequestParam(value = "productTitle") String productTitle,
+            @RequestParam(value = "cityZone") CityZone cityZone,
             @RequestParam(value = "isWeek") Boolean isWeek,
-            @RequestParam(value = "localTime") String localTime
+            @RequestParam(value = "localTime") String localTime,
+            @RequestParam(value = "page") Integer page,
+            @RequestParam(value = "size") Integer size
     ) {
-        return searchService.searchSeller(productTitle, isWeek, localTime);
+        return searchService.searchSeller(productTitle, cityZone, isWeek, localTime, page, size);
     }
 
     @ResponseBody
@@ -39,9 +43,11 @@ public class SearchResource {
     @GetMapping(value = "/seller/products", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> searchSellerProducts(
             @RequestParam(value = "sellerName") String sellerName,
-            @RequestParam(value = "productTitle", required = false) String productTitle
+            @RequestParam(value = "productTitle", required = false) String productTitle,
+            @RequestParam(value = "page") Integer page,
+            @RequestParam(value = "size") Integer size
     ) {
-        return searchService.searchSellerProducts(sellerName, productTitle);
+        return searchService.searchSellerProducts(sellerName, productTitle, page, size);
     }
 
     @ResponseBody
@@ -50,9 +56,12 @@ public class SearchResource {
     @GetMapping(value = "/seller/category", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> searchSellerByCategory(
             @RequestParam(value = "category") Category category,
+            @RequestParam(value = "cityZone") CityZone cityZone,
             @RequestParam(value = "isWeek") Boolean isWeek,
-            @RequestParam(value = "localTime") String localTime
+            @RequestParam(value = "localTime") String localTime,
+            @RequestParam(value = "page") Integer page,
+            @RequestParam(value = "size") Integer size
     ) {
-        return searchService.searchSellerByCategory(category, isWeek, localTime);
+        return searchService.searchSellerByCategory(category, cityZone, isWeek, localTime, page, size);
     }
 }

@@ -30,9 +30,9 @@ public interface ValidationService {
 
     void validateProductStockUpdate(Integer stock) throws Exception;
 
-    void validateSearchSeller(String productTitle, String localTime) throws Exception;
+    void validateSearchSeller(String productTitle, CityZone cityZone, String localTime, Integer page, Integer size) throws Exception;
 
-    void validateSearchSellerProducts(String sellerName) throws Exception;
+    void validateSearchSellerProducts(String sellerName, Integer page, Integer size) throws Exception;
 
-    void validateSearchSellerByCategory(Category category, String localTime) throws Exception;
+    void validateSearchSellerByCategory(Category category, CityZone cityZone, String localTime, Integer page, Integer size) throws Exception;
 }

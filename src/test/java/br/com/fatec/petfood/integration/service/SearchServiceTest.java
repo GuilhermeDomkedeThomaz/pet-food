@@ -6,6 +6,7 @@ import br.com.fatec.petfood.model.dto.SellerReturnDTO;
 import br.com.fatec.petfood.model.entity.mongo.ProductEntity;
 import br.com.fatec.petfood.model.entity.mongo.SellerEntity;
 import br.com.fatec.petfood.model.enums.Category;
+import br.com.fatec.petfood.model.enums.CityZone;
 import br.com.fatec.petfood.model.mapper.ProductMapper;
 import br.com.fatec.petfood.model.mapper.SellerMapper;
 import br.com.fatec.petfood.repository.mongo.ProductRepository;
@@ -52,8 +53,10 @@ public class SearchServiceTest extends IntegrationTest {
     public void setup() {
         firstSellerEntity.setWeekInitialTimeOperation(LocalTime.parse("10:00"));
         firstSellerEntity.setWeekFinalTimeOperation(LocalTime.parse("16:00"));
+        firstSellerEntity.setCityZone(CityZone.EAST);
         secondSellerEntity.setWeekInitialTimeOperation(LocalTime.parse("10:00"));
         secondSellerEntity.setWeekFinalTimeOperation(LocalTime.parse("16:00"));
+        secondSellerEntity.setCityZone(CityZone.EAST);
     }
 
     @Test
@@ -70,7 +73,7 @@ public class SearchServiceTest extends IntegrationTest {
         secondSellerReturnDTO = sellerMapper.toReturnDTO(secondSellerEntity);
         List<SellerReturnDTO> sellerReturnDTOList = List.of(firstSellerReturnDTO, secondSellerReturnDTO);
 
-        ResponseEntity<?> firstResponse = searchService.searchSeller("raç", Boolean.TRUE, localTime);
+        ResponseEntity<?> firstResponse = searchService.searchSeller("raç", CityZone.EAST, Boolean.TRUE, localTime, 0, 100);
 
         Assertions.assertEquals(firstResponse.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(firstResponse.getBody(), sellerReturnDTOList);
@@ -94,7 +97,7 @@ public class SearchServiceTest extends IntegrationTest {
         secondSellerReturnDTO = sellerMapper.toReturnDTO(secondSellerEntity);
         sellerReturnDTOList = List.of(firstSellerReturnDTO, secondSellerReturnDTO);
 
-        ResponseEntity<?> secondResponse = searchService.searchSeller("raç", Boolean.TRUE, localTime);
+        ResponseEntity<?> secondResponse = searchService.searchSeller("raç", CityZone.EAST, Boolean.TRUE, localTime, 0, 100);
 
         Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(secondResponse.getBody(), sellerReturnDTOList);
@@ -102,12 +105,12 @@ public class SearchServiceTest extends IntegrationTest {
 
     @Test
     public void shouldResponseBadRequestOnSearchSellerWithInvalidParams() {
-        ResponseEntity<?> firstResponse = searchService.searchSeller("", Boolean.TRUE, localTime);
+        ResponseEntity<?> firstResponse = searchService.searchSeller("", CityZone.EAST, Boolean.TRUE, localTime, 0, 100);
 
         Assertions.assertEquals(firstResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(firstResponse.getBody(), "Nome do produto passado inválido(vazio ou nulo).");
 
-        ResponseEntity<?> secondResponse = searchService.searchSeller("raç", Boolean.TRUE, "AAAAA");
+        ResponseEntity<?> secondResponse = searchService.searchSeller("raç", CityZone.EAST, Boolean.TRUE, "AAAAA", 0, 100);
 
         Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(secondResponse.getBody(), "Horário passado inválido. Favor passar no seguinte formato: 'HH:MM'.");
@@ -117,7 +120,7 @@ public class SearchServiceTest extends IntegrationTest {
     public void shouldNotFindInSearchSeller() {
         sellerRepository.deleteAll();
         productRepository.deleteAll();
-        ResponseEntity<?> response = searchService.searchSeller("raç", Boolean.TRUE, localTime);
+        ResponseEntity<?> response = searchService.searchSeller("raç", CityZone.EAST, Boolean.TRUE, localTime, 0, 100);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Nenhum lojista encontrado que tenha essa produto no catálogo.");
@@ -134,7 +137,7 @@ public class SearchServiceTest extends IntegrationTest {
         firstProductReturnDTO = productMapper.toReturnDTO(firstProductEntity);
         List<ProductReturnDTO> productReturnDTOList = List.of(firstProductReturnDTO);
 
-        ResponseEntity<?> response = searchService.searchSellerProducts(firstSellerEntity.getName(), "raç");
+        ResponseEntity<?> response = searchService.searchSellerProducts(firstSellerEntity.getName(), "raç", 0, 100);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(response.getBody(), productReturnDTOList);
@@ -151,7 +154,7 @@ public class SearchServiceTest extends IntegrationTest {
         productRepository.save(secondProductEntity);
         firstProductReturnDTO = productMapper.toReturnDTO(firstProductEntity);
 
-        ResponseEntity<?> response = searchService.searchSellerProducts(firstSellerEntity.getName(), "AAAAA");
+        ResponseEntity<?> response = searchService.searchSellerProducts(firstSellerEntity.getName(), "AAAAA", 0, 100);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Nenhum produto encontrado com título passado, cadastrado para o lojista passado.");
@@ -168,7 +171,7 @@ public class SearchServiceTest extends IntegrationTest {
         ProductReturnDTO secondProductReturnDTO = productMapper.toReturnDTO(secondProductEntity);
         List<ProductReturnDTO> productReturnDTOList = List.of(firstProductReturnDTO, secondProductReturnDTO);
 
-        ResponseEntity<?> response = searchService.searchSellerProducts(firstSellerEntity.getName(), null);
+        ResponseEntity<?> response = searchService.searchSellerProducts(firstSellerEntity.getName(), null, 0, 100);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(response.getBody(), productReturnDTOList);
@@ -177,7 +180,7 @@ public class SearchServiceTest extends IntegrationTest {
     @Test
     public void shouldNotFindSearchSellerProductsWithoutProductTitle() {
         sellerRepository.deleteAll();
-        ResponseEntity<?> response = searchService.searchSellerProducts(firstSellerEntity.getName(), null);
+        ResponseEntity<?> response = searchService.searchSellerProducts(firstSellerEntity.getName(), null, 0, 100);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Nenhum produto cadastrado para o lojista passado.");
@@ -185,7 +188,7 @@ public class SearchServiceTest extends IntegrationTest {
 
     @Test
     public void shouldResponseBadRequestOnSearchSellerProductsWithInvalidParams() {
-        ResponseEntity<?> secondResponse = searchService.searchSellerProducts(null, null);
+        ResponseEntity<?> secondResponse = searchService.searchSellerProducts(null, null, 0, 100);
 
         Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(secondResponse.getBody(), "Nome do lojista passado inválido(vazio ou nulo).");
@@ -201,7 +204,7 @@ public class SearchServiceTest extends IntegrationTest {
         secondSellerReturnDTO = sellerMapper.toReturnDTO(secondSellerEntity);
         List<SellerReturnDTO> sellerReturnDTOList = List.of(firstSellerReturnDTO, secondSellerReturnDTO);
 
-        ResponseEntity<?> firstResponse = searchService.searchSellerByCategory(Category.FOOD, Boolean.TRUE, localTime);
+        ResponseEntity<?> firstResponse = searchService.searchSellerByCategory(Category.FOOD, CityZone.EAST, Boolean.TRUE, localTime, 0, 100);
 
         Assertions.assertEquals(firstResponse.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(firstResponse.getBody(), sellerReturnDTOList);
@@ -221,7 +224,7 @@ public class SearchServiceTest extends IntegrationTest {
         secondSellerReturnDTO = sellerMapper.toReturnDTO(secondSellerEntity);
         sellerReturnDTOList = List.of(firstSellerReturnDTO, secondSellerReturnDTO);
 
-        ResponseEntity<?> secondResponse = searchService.searchSellerByCategory(Category.FOOD, Boolean.TRUE, localTime);
+        ResponseEntity<?> secondResponse = searchService.searchSellerByCategory(Category.FOOD, CityZone.EAST, Boolean.TRUE, localTime, 0, 100);
 
         Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.OK);
         Assertions.assertEquals(secondResponse.getBody(), sellerReturnDTOList);
@@ -229,12 +232,12 @@ public class SearchServiceTest extends IntegrationTest {
 
     @Test
     public void shouldResponseBadRequestOnSearchSellerByCategoryWithInvalidParams() {
-        ResponseEntity<?> firstResponse = searchService.searchSellerByCategory(null, Boolean.TRUE, localTime);
+        ResponseEntity<?> firstResponse = searchService.searchSellerByCategory(null, CityZone.EAST, Boolean.TRUE, localTime, 0, 100);
 
         Assertions.assertEquals(firstResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(firstResponse.getBody(), "Categoria passada inválida(vazia ou nula).");
 
-        ResponseEntity<?> secondResponse = searchService.searchSellerByCategory(Category.FOOD, Boolean.TRUE, "AAAAA");
+        ResponseEntity<?> secondResponse = searchService.searchSellerByCategory(Category.FOOD, CityZone.EAST, Boolean.TRUE, "AAAAA", 0, 100);
 
         Assertions.assertEquals(secondResponse.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(secondResponse.getBody(), "Horário passado inválido. Favor passar no seguinte formato: 'HH:MM'.");
@@ -243,7 +246,7 @@ public class SearchServiceTest extends IntegrationTest {
     @Test
     public void shouldNotFindSearchSellerByCategory() {
         sellerRepository.deleteAll();
-        ResponseEntity<?> response = searchService.searchSellerByCategory(Category.FOOD, Boolean.TRUE, localTime);
+        ResponseEntity<?> response = searchService.searchSellerByCategory(Category.FOOD, CityZone.EAST, Boolean.TRUE, localTime, 0, 100);
 
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
         Assertions.assertEquals(response.getBody(), "Nenhum lojista encontrado que tenha essa categoria cadastrada.");
